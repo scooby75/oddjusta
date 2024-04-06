@@ -116,23 +116,22 @@ def mostrar_resultados(time, odds_group):
     # Calcular médias
     media_gols_casa = team_df['Gols_Home'].mean()
     media_gols_tomados = team_df['Gols_Away'].mean()
-    media_gols_visitante = team_df['Gols_Away'].mean()
     media_golsht_casa = team_df['Gols_HT_Home'].mean()
     media_golsht_tomados = team_df['Gols_HT_Away'].mean()
     media_chutes_a_gol_home = team_df['Chutes_a_Gol_Home'].mean()
     media_chutes_a_gol_away = team_df['Chutes_a_Gol_Away'].mean()
 
-    # Exibir resultados
-    st.write(team_df)
-    st.write(f"\033[1mNa faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%) com lucro/prejuízo total de {lucro_prejuizo_total:.2f}.")
-    st.write(f"A soma dos coeficientes de eficiência da equipe '{time}' é de: {soma_coeficientes:.2f}")
-    st.write(f"A média de gols marcado time da casa é de {media_gols_casa:.2f} por jogo.")
-    st.write(f"A média de gols sofrido time visitante é de {media_gols_tomados:.2f} por jogo.\033[0m")
-    st.write(f"A média de gols marcado time visitante é de {media_gols_visitante:.2f} por jogo.")
-    st.write(f"A média de gols HT marcado time da casa é de {media_golsht_casa:.2f} por jogo.")
-    st.write(f"A média de gols HT sofrido time visitante é de {media_golsht_tomados:.2f} por jogo.\033[0m")
-    st.write(f"A média de chutes a gol time da casa é de {media_chutes_a_gol_home:.2f} por jogo.")
-    st.write(f"A média de chutes a gol time visitante é de {media_chutes_a_gol_away:.2f} por jogo.")
+    # Destacar resultados importantes usando markdown
+    st.write("### Resumo:")
+    st.markdown(f"- Na faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
+    st.markdown(f"- Soma dos coeficientes de eficiência da equipe '{time}': {soma_coeficientes:.2f}")
+    st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
+    st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
+    st.markdown(f"- Média de gols HT marcados pelo time da casa: {media_golsht_casa:.2f}.")
+    st.markdown(f"- Média de gols HT sofridos pelo time visitante: {media_golsht_tomados:.2f}.")
+    st.markdown(f"- Média de chutes a gol pelo time da casa: {media_chutes_a_gol_home:.2f}.")
+    st.markdown(f"- Média de chutes a gol pelo time visitante: {media_chutes_a_gol_away:.2f}.")
 
 if __name__ == "__main__":
     main()
