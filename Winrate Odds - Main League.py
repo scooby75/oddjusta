@@ -84,60 +84,19 @@ def mostrar_resultados(time, odds_group):
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
-    # Calcular lucro/prejuízo
-    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row['Odd_Home'] - 1 if row['Resultado'] == 'W' else -1, axis=1)
-    lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
-
-    # Calcular a média de gols marcados pelo time da casa
-    media_gols_casa = team_df['Gols_Home'].mean()
-
-    # Calcular a média de gols HT marcado pelo time da casa
-    media_golsht_casa = team_df['Gols_HT_Home'].mean()
-
-    # Calcular a média de gols HT sofrido pelo time da casa
-    media_golsht_tomados = team_df['Gols_HT_Away'].mean()
-
-    # Calcular a média de chutes a gol do time da casa
-    media_chutes_a_gol_home = team_df['Chutes_a_Gol_Home'].mean()
-
-    # Calcular a média de chutes a gol do time visitante
-    media_chutes_a_gol_away = team_df['Chutes_a_Gol_Away'].mean()
-
-    # Calcular a média de gols tomados pelo time da casa
-    media_gols_tomados = team_df['Gols_Away'].mean()
-
-    # Adicionar coluna de coeficiente de eficiência
-    team_df['Coeficiente_Eficiencia_Home'] = team_df.apply(coeficiente_eficiencia, axis=1)
-
-    # Calcular a soma total dos coeficientes de eficiência
-    soma_coeficientes = team_df['Coeficiente_Eficiencia_Home'].sum()
-
     # Exibir resultados
     st.write(team_df)
-    st.write(f"\033[1mNa faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%) com lucro/prejuízo total de {lucro_prejuizo_total:.2f}.")
-    st.write(f"A soma dos coeficientes de eficiência da equipe '{time}' é de: {soma_coeficientes:.2f}")
-    st.write(f"A média de gols marcado time da casa é de {media_gols_casa:.2f} por jogo.")
-    st.write(f"A média de gols marcado time da casa é de {media_gols_casa:.2f} por jogo.")
-    st.write(f"A média de gols sofrido time visitante é de {media_gols_tomados:.2f} por jogo.\033[0m")
-    st.write(f"A média de gols HT marcado time da casa é de {media_golsht_casa:.2f} por jogo.")
-    st.write(f"A média de gols HT sofrido time visitante é de {media_golsht_tomados:.2f} por jogo.\033[0m")
-    st.write(f"A média de chutes a gol time da casa é de {media_chutes_a_gol_home:.2f} por jogo.")
-    st.write(f"A média de chutes a gol time visitante é de {media_chutes_a_gol_away:.2f} por jogo.")
-    download_dataframe(team_df)  # Adiciona a opção de baixar o DataFrame
-
-# Função para baixar o DataFrame como um arquivo CSV
-def download_dataframe(df):
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    csv_str = csv_buffer.getvalue()
-    csv_buffer.close()
-    
-    # Exibindo o link para download
-    st.write(HTML(f'<a href="data:text/csv;charset=utf-8,{csv_str}" download="resultado_pesquisa.csv">Baixar Resultados</a>'))
+    st.write(f"\033[1mNa faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
+    st.write(f"Outros cálculos aqui...")
+    # Adicione outros cálculos conforme necessário
 
 # Interface do Streamlit
-st.title("Análise de Resultados de Futebol")
-st.sidebar.header("Filtros")
-time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
-odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-mostrar_resultados(time, odds_group)
+def main():
+    st.title("Análise de Resultados de Futebol")
+    st.sidebar.header("Filtros")
+    time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
+    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
+    mostrar_resultados(time, odds_group)
+
+if __name__ == "__main__":
+    main()
