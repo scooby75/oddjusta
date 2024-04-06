@@ -112,7 +112,8 @@ def mostrar_resultados(time, odds_group):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
     # Calcular lucro/prejuízo total
-    lucro_prejuizo_total = team_df['Odd_Home'].sum() - total_matches
+    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row['Odd_Home'] - 1 if row['Resultado'] == 'W' else -1, axis=1)
+    lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
 
     # Calcular soma dos coeficientes de eficiência
     soma_coeficientes = team_df.apply(coeficiente_eficiencia, axis=1).sum()
