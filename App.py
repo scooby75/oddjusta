@@ -92,7 +92,7 @@ def coeficiente_eficiencia(row):
 
 # Interface do Streamlit
 def main():
-    st.title("Análise de Resultados de Futebol")
+    st.title("Winrate Odds")
     st.sidebar.header("Filtros")
     time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
     odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
@@ -103,7 +103,7 @@ def mostrar_resultados(time, odds_group):
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_HT_Home', 'Gols_HT_Away', 'Gols_Home', 'Gols_Away', 'Chutes_a_Gol_Home', 'Chutes_a_Gol_Away', 'Resultado']]
 
     # Exibir resultados em uma tabela
-    st.write("### Resultados:")
+    st.write("### Partidas:")
     st.dataframe(team_df)
 
     # Calcular quantas vezes o time da casa ganhou
