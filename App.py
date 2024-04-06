@@ -102,9 +102,15 @@ def mostrar_resultados(time, odds_group):
 
     # Exibir resultados
     st.write(team_df)
-    st.write(f"\033[1mNa faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
-    st.write(f"Outros cálculos aqui...")
-    # Adicione outros cálculos conforme necessário
+    st.write(f"\033[1mNa faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%) com lucro/prejuízo total de {lucro_prejuizo_total:.2f}.")
+    st.write(f"A soma dos coeficientes de eficiência da equipe '{time}' é de: {soma_coeficientes:.2f}")
+    st.write(f"A média de gols marcado time da casa é de {media_gols_casa:.2f} por jogo.")
+    st.write(f"A média de gols marcado time da casa é de {media_gols_casa:.2f} por jogo.")
+    st.write(f"A média de gols sofrido time visitante é de {media_gols_tomados:.2f} por jogo.\033[0m")
+    st.write(f"A média de gols HT marcado time da casa é de {media_golsht_casa:.2f} por jogo.")
+    st.write(f"A média de gols HT sofrido time visitante é de {media_golsht_tomados:.2f} por jogo.\033[0m")
+    st.write(f"A média de chutes a gol time da casa é de {media_chutes_a_gol_home:.2f} por jogo.")
+    st.write(f"A média de chutes a gol time visitante é de {media_chutes_a_gol_away:.2f} por jogo.")
 
 # Interface do Streamlit
 def main():
