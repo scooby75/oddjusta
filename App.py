@@ -90,7 +90,14 @@ def coeficiente_eficiencia(row):
 
     return coeficiente
 
-# Função para mostrar os resultados ao selecionar um time e uma faixa de odds
+# Interface do Streamlit
+def main():
+    st.title("Análise de Resultados de Futebol")
+    st.sidebar.header("Filtros")
+    time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
+    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
+    mostrar_resultados(time, odds_group)
+
 def mostrar_resultados(time, odds_group):
     team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_HT_Home', 'Gols_HT_Away', 'Gols_Home', 'Gols_Away', 'Chutes_a_Gol_Home', 'Chutes_a_Gol_Away', 'Resultado']]
@@ -99,6 +106,20 @@ def mostrar_resultados(time, odds_group):
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+
+    # Calcular lucro/prejuízo total
+    lucro_prejuizo_total = team_df['Odd_Home'].sum() - total_matches
+
+    # Calcular soma dos coeficientes de eficiência
+    soma_coeficientes = team_df.apply(coeficiente_eficiencia, axis=1).sum()
+
+    # Calcular médias
+    media_gols_casa = team_df['Gols_Home'].mean()
+    media_gols_tomados = team_df['Gols_Away'].mean()
+    media_golsht_casa = team_df['Gols_HT_Home'].mean()
+    media_golsht_tomados = team_df['Gols_HT_Away'].mean()
+    media_chutes_a_gol_home = team_df['Chutes_a_Gol_Home'].mean()
+    media_chutes_a_gol_away = team_df['Chutes_a_Gol_Away'].mean()
 
     # Exibir resultados
     st.write(team_df)
@@ -111,14 +132,6 @@ def mostrar_resultados(time, odds_group):
     st.write(f"A média de gols HT sofrido time visitante é de {media_golsht_tomados:.2f} por jogo.\033[0m")
     st.write(f"A média de chutes a gol time da casa é de {media_chutes_a_gol_home:.2f} por jogo.")
     st.write(f"A média de chutes a gol time visitante é de {media_chutes_a_gol_away:.2f} por jogo.")
-
-# Interface do Streamlit
-def main():
-    st.title("Análise de Resultados de Futebol")
-    st.sidebar.header("Filtros")
-    time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
-    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-    mostrar_resultados(time, odds_group)
 
 if __name__ == "__main__":
     main()
