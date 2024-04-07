@@ -2,8 +2,8 @@ import pandas as pd
 import streamlit as st
 import io
 
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
-def classificar_resultado(row):
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes para a liga específica
+def classificar_resultado_liga_especifica(row):
     if row['FTHG'] > row['FTAG']:
         return 'W'
     elif row['FTHG'] < row['FTAG']:
@@ -11,8 +11,8 @@ def classificar_resultado(row):
     else:
         return 'D'
 
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes outras ligas
-def classificar_resultado(row):
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes para outras ligas
+def classificar_resultado_outras_ligas(row):
     if row['HG'] > row['AG']:
         return 'W'
     elif row['HG'] < row['AG']:
@@ -44,7 +44,7 @@ for file_path in file_paths:
 df = pd.concat(dfs)
 
 # Adicionar coluna de resultado
-df['Resultado_FT'] = df.apply(classificar_resultado, axis=1)
+df['Resultado_FT'] = df.apply(classificar_resultado_liga_especifica, axis=1)
 
 # Adicionar coluna de agrupamento de odds
 df['Odd_Group'] = df['PSH'].apply(agrupar_odd)
