@@ -107,7 +107,10 @@ file_paths = [
     
     "https://www.football-data.co.uk/new/ARG.csv",
     "https://www.football-data.co.uk/new/AUT.csv",
-    "https://www.football-data.co.uk/new/BRA.csv"
+    "https://www.football-data.co.uk/new/BRA.csv",
+    "https://www.football-data.co.uk/new/CHN.csv",
+    "https://www.football-data.co.uk/new/DNK.csv"  
+    
 ]
 
 dfs = []
