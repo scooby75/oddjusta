@@ -176,7 +176,7 @@ def mostrar_resultados(time, odds_group):
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
-    st.markdown(f"- Com as caracteristicas do jogo de hoje, o {time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
