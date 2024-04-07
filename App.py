@@ -181,7 +181,7 @@ def mostrar_resultados(time, odds_group):
 
     # Format 'Data' column for display
     team_df['Data'] = pd.to_datetime(team_df['Data'])
-    team_df['Data'] = team_df['Data'].dt.strftime('%Y-%m-%d')
+    team_df['Data'] = team_df['Data'].dt.strftime('%d-%m-%Y')
 
     # Exibir resultados em uma tabela
     st.write("### Partidas:")
