@@ -91,7 +91,7 @@ df = pd.concat(dfs)
 all_teams_home = set(df['Home'])
 
 # Ordenar os times em ordem alfabética
-times = sorted(all_teams_home)
+times = sorted(filter(None, all_teams_home))  # Filtrar valores nulos
 
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
