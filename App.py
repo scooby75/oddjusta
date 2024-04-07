@@ -149,8 +149,8 @@ def mostrar_resultados(tipo_time, time, faixa_odds):
         team_column = 'Away'
 
     if faixa_odds == "Outros":
-        odds_filtradas = df[df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < 1.0]
-        odds_filtradas = pd.concat([odds_filtradas, df[df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > 6.0]])
+        odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < 1.0) | 
+                            (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > 6.0)]
     else:
         odds_filtradas = df[df['Odd_Group'] == faixa_odds]
 
