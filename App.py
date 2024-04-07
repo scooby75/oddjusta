@@ -15,7 +15,14 @@ def classificar_resultado(row):
 
 def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
-    return diferenca_gols
+    
+    if diferenca_gols <= 1:
+        return 'Baixo'
+    elif 1.01 <= diferenca_gols <= 2.5:
+        return 'Médio'
+    else:
+        return 'Alto'
+
 
 def agrupar_odd(odd):
     for i in range(1, 60):
@@ -275,6 +282,7 @@ for file_path in file_paths:
     
     # Calcular coeficiente de eficiência da equipe da casa
     df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
+
 
     # Adicionar coluna de agrupamento de odds
     if 'Odd_Home' in df:
