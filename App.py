@@ -110,7 +110,7 @@ for file_path in file_paths:
 
     # Adicionar coluna de agrupamento de odds
     if 'Odd_Home' in df:
-        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd, faixa_selecionada=faixa_odds_selecionada)
     
     dfs.append(df)
 
@@ -137,8 +137,8 @@ def main():
         time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
     else:
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-    odds_faixa_selecionada = st.sidebar.select_slider("Selecione a Faixa de Odds:", options=odds_faixas, value=(1, 20))
-    mostrar_resultados(team_type, time, odds_faixa_selecionada)
+    faixa_odds_selecionada = st.sidebar.select_slider("Selecione a Faixa de Odds:", options=odds_faixas, value=(1, 20))
+    mostrar_resultados(team_type, time, faixa_odds_selecionada)
 
 def mostrar_resultados(tipo_time, time, faixa_odds_selecionada):
     if tipo_time == "Casa":
