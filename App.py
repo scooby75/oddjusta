@@ -179,10 +179,8 @@ def mostrar_resultados(time, odds_group):
     # Drop duplicate rows
     team_df = team_df.drop_duplicates()
 
-    # Convert 'Data' column to datetime format
-    team_df['Data'] = pd.to_datetime(team_df['Data'])
-
     # Format 'Data' column for display
+    team_df['Data'] = pd.to_datetime(team_df['Data'])
     team_df['Data'] = team_df['Data'].dt.strftime('%Y-%m-%d')
 
     # Exibir resultados em uma tabela
