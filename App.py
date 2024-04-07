@@ -176,6 +176,9 @@ def mostrar_resultados(time, odds_group):
     team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
+    # Drop duplicate rows
+    team_df = team_df.drop_duplicates()
+
     # Exibir resultados em uma tabela
     st.write("### Partidas:")
     st.dataframe(team_df)
@@ -208,7 +211,6 @@ def mostrar_resultados(time, odds_group):
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
-    
 
 if __name__ == "__main__":
     main()
