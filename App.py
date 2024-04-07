@@ -3,20 +3,12 @@ import streamlit as st
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row):
-    if 'FTHG' in row:  # Verifica se a coluna FTHG está presente
-        if row['FTHG'] > row['FTAG']:
-            return 'W'
-        elif row['FTHG'] < row['FTAG']:
-            return 'L'
-        else:
-            return 'D'
-    elif 'HG' in row:  # Verifica se a coluna HG está presente
-        if row['HG'] > row['AG']:
-            return 'W'
-        elif row['HG'] < row['AG']:
-            return 'L'
-        else:
-            return 'D'
+    if row['Gols_Home'] > row['Gols_Away']:
+        return 'W'
+    elif row['Gols_Home'] < row['Gols_Away']:
+        return 'L'
+    else:
+        return 'D'
 
 def agrupar_odd(odd):
     for i in range(1, 60):
