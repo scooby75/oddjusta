@@ -116,10 +116,14 @@ def mostrar_resultados(time, odds_group):
     # Calcular coeficiente de eficiência médio ajustado
     coeficiente_eficiencia_total = team_df['Coeficiente_Eficiencia'].sum()
     coeficiente_eficiencia_medio = coeficiente_eficiencia_total / total_matches if total_matches > 0 else 0
+
+    # Calcular odd justa
+    odd_justa = 100 / win_percentage if win_percentage > 0 else 0
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
     st.markdown(f"- O'{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência médio: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
