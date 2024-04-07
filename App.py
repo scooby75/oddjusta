@@ -142,7 +142,8 @@ def main():
 
 def mostrar_resultados(tipo_time, time, faixa_odds):
     if faixa_odds == "Outros":
-        odds_filtradas = df[(df['Odd_Group'] < 1.0) | (df['Odd_Group'] > 6.0)]
+        odds_filtradas = df[df['Odd_Group'].apply(lambda x: float(x.split()[0])) < 1.0]
+        odds_filtradas = pd.concat([odds_filtradas, df[df['Odd_Group'].apply(lambda x: float(x.split()[-1])) > 6.0]])
     else:
         odds_filtradas = df[df['Odd_Group'] == faixa_odds]
 
