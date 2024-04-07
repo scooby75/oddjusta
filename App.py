@@ -105,9 +105,9 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1516/D2.csv",
     "https://www.football-data.co.uk/mmz4281/1415/D2.csv",
     
-    "https://www.football-data.co.uk/new/ARG.csv"
-  
-    
+    "https://www.football-data.co.uk/new/ARG.csv",
+    "https://www.football-data.co.uk/new/AUT.csv",
+    "https://www.football-data.co.uk/new/BRA.csv"
 ]
 
 dfs = []
