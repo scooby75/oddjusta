@@ -11,6 +11,15 @@ def classificar_resultado(row):
     else:
         return 'D'
 
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes outras ligas
+def classificar_resultado(row):
+    if row['HG'] > row['AG']:
+        return 'W'
+    elif row['HG'] < row['AG']:
+        return 'L'
+    else:
+        return 'D'
+
 def agrupar_odd(odd):
     for i in range(1, 60):
         lower = 1 + (i - 1) * 0.10
@@ -45,15 +54,18 @@ df.rename(columns={
     'Date': 'Data',
     'HomeTeam': 'Home',
     'AwayTeam': 'Away',
+    'Home' : 'Home',
+    'Away' : 'Away',
     'PSCH': 'Odd_Home',
     'PSCD': 'Odd_Empate',
     'PSCA': 'Odd_Away',
-    'HTHG': 'Gols_HT_Home',
-    'HTAG': 'Gols_HT_Away',
+    'PH' : 'Odd_Home',
+    'PD' : 'Odd_Empate',
+    'PA' : 'Odd_Away',
+    'HG' : 'Gols_Home',
+    'AG' : 'Gols_Away',
     'FTHG': 'Gols_Home',
     'FTAG': 'Gols_Away',
-    'HST': 'Chutes_a_Gol_Home',
-    'AST': 'Chutes_a_Gol_Away',
     'Resultado_FT': 'Resultado'
 }, inplace=True)
 
@@ -84,7 +96,7 @@ def main():
 
 def mostrar_resultados(time, odds_group):
     team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
-    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_HT_Home', 'Gols_HT_Away', 'Gols_Home', 'Gols_Away', 'Chutes_a_Gol_Home', 'Chutes_a_Gol_Away', 'Resultado']]
+    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado']]
 
     # Exibir resultados em uma tabela
     st.write("### Partidas:")
@@ -105,11 +117,7 @@ def mostrar_resultados(time, odds_group):
     # Calcular médias
     media_gols_casa = team_df['Gols_Home'].mean()
     media_gols_tomados = team_df['Gols_Away'].mean()
-    media_golsht_casa = team_df['Gols_HT_Home'].mean()
-    media_golsht_tomados = team_df['Gols_HT_Away'].mean()
-    media_chutes_a_gol_home = team_df['Chutes_a_Gol_Home'].mean()
-    media_chutes_a_gol_away = team_df['Chutes_a_Gol_Away'].mean()
-
+    
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
     st.markdown(f"- Na faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
@@ -117,10 +125,6 @@ def mostrar_resultados(time, odds_group):
     st.markdown(f"- Coeficiente de eficiência da equipe '{time}': {soma_coeficientes:.2f}")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
-    st.markdown(f"- Média de gols HT marcados pelo time da casa: {media_golsht_casa:.2f}.")
-    st.markdown(f"- Média de gols HT sofridos pelo time visitante: {media_golsht_tomados:.2f}.")
-    st.markdown(f"- Média de chutes a gol pelo time da casa: {media_chutes_a_gol_home:.2f}.")
-    st.markdown(f"- Média de chutes a gol pelo time visitante: {media_chutes_a_gol_away:.2f}.")
-
+    
 if __name__ == "__main__":
     main()
