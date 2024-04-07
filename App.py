@@ -169,8 +169,16 @@ file_paths = [
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/mexico-liga-mx-matches-2023-to-2024-stats.csv",
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2021-to-2021-stats.csv",
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2022-to-2022-stats.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2023-to-2023-stats.csv"
-    
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2023-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/romania-liga-i-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/romania-liga-i-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/romania-liga-i-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/south-korea-k-league-1-matches-2021-to-2021-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/south-korea-k-league-1-matches-2022-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/south-korea-k-league-1-matches-2023-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/south-korea-k-league-2-matches-2021-to-2021-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/south-korea-k-league-2-matches-2022-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/south-korea-k-league-2-matches-2023-to-2023-stats.csv"
 
     
     
@@ -298,7 +306,7 @@ def mostrar_resultados(time, odds_group):
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
-    st.markdown(f"- O'{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    st.markdown(f"- Com as caracteristicas do jogo de hoje, o {time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência médio: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
