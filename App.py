@@ -141,16 +141,20 @@ def main():
     mostrar_resultados(team_type, time, odds_group)
 
 def mostrar_resultados(tipo_time, time, faixa_odds):
+    if tipo_time == "Casa":
+        odds_column = 'Odd_Home'
+        team_column = 'Home'
+    else:
+        odds_column = 'Odd_Away'
+        team_column = 'Away'
+
     if faixa_odds == "Outros":
-        odds_filtradas = df[df['Odd_Group'].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < 1.0]
-        odds_filtradas = pd.concat([odds_filtradas, df[df['Odd_Group'].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > 6.0]])
+        odds_filtradas = df[df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < 1.0]
+        odds_filtradas = pd.concat([odds_filtradas, df[df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > 6.0]])
     else:
         odds_filtradas = df[df['Odd_Group'] == faixa_odds]
 
-    if tipo_time == "Casa":
-        df_time = odds_filtradas[odds_filtradas['Home'] == time]
-    else:
-        df_time = odds_filtradas[odds_filtradas['Away'] == time]
+    df_time = odds_filtradas[odds_filtradas[team_column] == time]
 
     df_time = df_time[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
@@ -176,7 +180,7 @@ def mostrar_resultados(tipo_time, time, faixa_odds):
     porcentagem_vitorias = (num_vitorias / total_partidas) * 100 if total_partidas > 0 else 0
 
     # Calcular lucro/prejuízo total
-    df_time['Lucro_Prejuizo'] = df_time.apply(lambda row: row['Odd_Home'] - 1 if row['Resultado'] == 'V' else -1, axis=1)
+    df_time['Lucro_Prejuizo'] = df_time.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'V' else -1, axis=1)
     lucro_prejuizo_total = df_time['Lucro_Prejuizo'].sum()
 
     # Calcular médias
