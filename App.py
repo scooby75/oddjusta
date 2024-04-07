@@ -113,44 +113,13 @@ file_paths = [
 dfs = []
 for file_path in file_paths:
     cached_file = download_and_cache(file_path)
-    df = pd.read_csv(cached_file)
+    try:
+        df = pd.read_csv(cached_file, delimiter=',', encoding='utf-8')
+    except pd.errors.ParserError as e:
+        st.error(f"Erro ao processar o arquivo: {e}")
+        continue
     
-    # Verificar o formato do arquivo e ajustar as colunas conforme necessário
-    if 'FTHG' in df.columns:
-        # Formato do primeiro arquivo
-        df.rename(columns={
-            'HomeTeam': 'Home',
-            'AwayTeam': 'Away',
-            'FTHG': 'Gols_Home',
-            'FTAG': 'Gols_Away',
-            'FTR': 'Resultado',
-            'PSCH': 'Odd_Home',
-            'PSCD': 'Odd_Empate',
-            'PSCA': 'Odd_Away'
-        }, inplace=True)
-    elif 'Country' in df.columns:
-        # Formato do segundo arquivo
-        df.rename(columns={
-            'Date': 'Data',
-            'Home': 'Home',
-            'Away': 'Away',
-            'HG': 'Gols_Home',
-            'AG': 'Gols_Away',
-            'Res': 'Resultado',
-            'PH': 'Odd_Home',
-            'PD': 'Odd_Empate',
-            'PA': 'Odd_Away'
-        }, inplace=True)
-    
-    # Adicionar coluna de resultado
-    df['Resultado'] = df.apply(classificar_resultado, axis=1)
-    
-    # Calcular coeficiente de eficiência da equipe da casa
-    df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
-
-    # Adicionar coluna de agrupamento de odds
-    if 'Odd_Home' in df:
-        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+    # Restante do código para processar os dados
     
     dfs.append(df)
 
