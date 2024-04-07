@@ -93,6 +93,8 @@ all_teams_home = set(df['Home'])
 # Ordenar os times em ordem alfabética
 times = sorted(filter(None, all_teams_home))  # Filtrar valores nulos
 
+print(times)  # Imprimir os times para depuração
+
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
 
