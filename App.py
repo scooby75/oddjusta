@@ -130,7 +130,15 @@ file_paths = [
     "https://www.football-data.co.uk/new/SWZ.csv",
     "https://www.football-data.co.uk/new/USA.csv",
 
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/albania-first-division-matches-2022-to-2023-stats.csv"
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/albania-first-division-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/albania-superliga-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/australia-a-league-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/australia-a-league-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/australia-a-league-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/azerbaijan-first-division-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/azerbaijan-first-division-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/azerbaijan-first-division-matches-2023-to-2024-stats.csv"
+
     
     
 ]
