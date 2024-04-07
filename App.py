@@ -32,6 +32,7 @@ def agrupar_odd(odd):
 file_paths = [
     "https://www.football-data.co.uk/mmz4281/2324/D1.csv",
     "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
+    "https://www.football-data.co.uk/new/BRA.csv"
    
 ]
 
