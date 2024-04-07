@@ -151,8 +151,8 @@ def mostrar_resultados(tipo_time, time, faixa_odds_selecionada):
         team_column = 'Away'
         odd_group_column = 'Odd_Group_Away'
 
-    odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < faixa_odds_selecionada[0]) | 
-                        (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > faixa_odds_selecionada[1])]
+    odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) >= faixa_odds_selecionada[0]) | 
+                        (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) <= faixa_odds_selecionada[1])]
 
     df_time = odds_filtradas[odds_filtradas[team_column] == time]
 
