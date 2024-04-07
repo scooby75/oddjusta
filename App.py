@@ -69,6 +69,8 @@ for file_path in file_paths:
             'PD': 'Odd_Empate',
             'PA': 'Odd_Away'
         }, inplace=True)
+        # Convertendo a coluna 'Data' para o formato de data
+        df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y')
     
     # Adicionar coluna de resultado
     df['Resultado'] = df.apply(classificar_resultado, axis=1)
@@ -89,7 +91,7 @@ df = pd.concat(dfs)
 all_teams_home = set(df['Home'])
 
 # Ordenar os times em ordem alfabética
-times = sorted(str(team) for team in all_teams_home)
+times = sorted(all_teams_home)
 
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
