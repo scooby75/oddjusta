@@ -110,9 +110,7 @@ file_paths = [
     "https://www.football-data.co.uk/new/BRA.csv",
     "https://www.football-data.co.uk/new/CHN.csv",
     "https://www.football-data.co.uk/new/DNK.csv",
-     "https://www.football-data.co.uk/new/FIN.csv",
-    "https://www.football-data.co.uk/new/IRL.csv"
-       
+     "https://www.football-data.co.uk/new/FIN.csv"       
     
 ]
 
