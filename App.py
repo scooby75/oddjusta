@@ -43,9 +43,9 @@ for file_path in file_paths:
             'FTHG': 'Gols_Home',
             'FTAG': 'Gols_Away',
             'FTR': 'Resultado',
-            'PSH': 'Odd_Home',
-            'PSD': 'Odd_Empate',
-            'PSA': 'Odd_Away'
+            'PSCH': 'Odd_Home',
+            'PSCD': 'Odd_Empate',
+            'PSCA': 'Odd_Away'
         }, inplace=True)
     elif 'Country' in df.columns:
         # Formato do segundo arquivo
@@ -56,9 +56,9 @@ for file_path in file_paths:
             'HG': 'Gols_Home',
             'AG': 'Gols_Away',
             'Res': 'Resultado',
-            'PSCH': 'Odd_Home',
-            'PSCD': 'Odd_Empate',
-            'PSCA': 'Odd_Away'
+            'PH': 'Odd_Home',
+            'PD': 'Odd_Empate',
+            'PA': 'Odd_Away'
         }, inplace=True)
     
     # Adicionar coluna de resultado
