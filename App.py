@@ -117,6 +117,7 @@ for file_path in file_paths:
     if 'FTHG' in df.columns:
         # Formato do primeiro arquivo
         df.rename(columns={
+            'Date': "Data",
             'HomeTeam': 'Home',
             'AwayTeam': 'Away',
             'FTHG': 'Gols_Home',
