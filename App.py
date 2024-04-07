@@ -53,6 +53,8 @@ df.rename(columns={
     'Date': 'Data',
     'HomeTeam': 'Home',
     'AwayTeam': 'Away',
+    'Home': 'Home',
+    'Away': 'Away',
     'HG': 'Gols_Home',
     'AG': 'Gols_Away',
     'FTHG': 'Gols_Home',  # Considerando ambos os formatos de cabeçalho
