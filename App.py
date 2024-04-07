@@ -18,12 +18,12 @@ def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
     return diferenca_gols
 
-# Atualizar função de agrupamento de odds para permitir seleção de faixa de odds
-def agrupar_odd(odd, faixa_selecionada):
-    lower = 1 + (faixa_selecionada[0] - 1) * 0.10
-    upper = 1 + faixa_selecionada[1] * 0.10
-    if lower <= odd <= upper:
-        return f"{lower:.2f} - {upper:.2f}"
+def agrupar_odd(odd):
+    for i in range(1, 60):
+        lower = 1 + (i - 1) * 0.10
+        upper = 1 + i * 0.10
+        if lower <= odd <= upper:
+            return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
 
 # Função para fazer o download de um arquivo e armazená-lo em cache
@@ -108,10 +108,9 @@ for file_path in file_paths:
     # Calcular coeficiente de eficiência da equipe da casa
     df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
 
-    # Adicionar coluna de agrupamento de odds para as equipes da casa e visitantes
+    # Adicionar coluna de agrupamento de odds
     if 'Odd_Home' in df:
-        df['Odd_Group_Home'] = df['Odd_Home'].apply(agrupar_odd, faixa_selecionada=faixa_odds_selecionada)
-        df['Odd_Group_Away'] = df['Odd_Away'].apply(agrupar_odd, faixa_selecionada=faixa_odds_selecionada)
+        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
     
     dfs.append(df)
 
@@ -126,8 +125,8 @@ all_teams_away = set(df['Away'])
 times_home = sorted(str(team) for team in all_teams_home)
 times_away = sorted(str(team) for team in all_teams_away)
 
-# Atualizar a lista de opções para faixa de odds
-odds_faixas = list(range(1, 21))
+# Ordenar as faixas de odds
+odds_groups = sorted(df['Odd_Group'].unique())
 
 # Interface do Streamlit
 def main():
@@ -138,73 +137,63 @@ def main():
         time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
     else:
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-    faixa_odds_selecionada = st.sidebar.select_slider("Selecione a Faixa de Odds:", options=odds_faixas, value=(1, 20))
-    mostrar_resultados(team_type, time, faixa_odds_selecionada)
+    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
+    mostrar_resultados(team_type, time, odds_group)
 
-def mostrar_resultados(tipo_time, time, faixa_odds_selecionada):
-    if tipo_time == "Home":
-        odds_column = 'Odd_Home'
-        team_column = 'Home'
-        odd_group_column = 'Odd_Group_Home'
+def mostrar_resultados(team_type, time, odds_group):
+    if team_type == "Home":
+        team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
     else:
-        odds_column = 'Odd_Away'
-        team_column = 'Away'
-        odd_group_column = 'Odd_Group_Away'
+        team_df = df[(df['Away'] == time) & (df['Odd_Group'] == odds_group)]
+    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
-    odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) >= faixa_odds_selecionada[0]) | 
-                        (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) <= faixa_odds_selecionada[1])]
+    # Drop duplicate rows
+    team_df = team_df.drop_duplicates()
 
-    df_time = odds_filtradas[odds_filtradas[team_column] == time]
+    # Convert 'Data' column to datetime format with error handling
+    team_df['Data'] = pd.to_datetime(team_df['Data'], errors='coerce')
 
-    df_time = df_time[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', odd_group_column]]
+    # Remove rows with invalid dates (NaT)
+    team_df = team_df.dropna(subset=['Data'])
 
-    # Remover linhas duplicadas
-    df_time = df_time.drop_duplicates()
-
-    # Converter coluna 'Data' para o formato datetime com tratamento de erro
-    df_time['Data'] = pd.to_datetime(df_time['Data'], errors='coerce')
-
-    # Remover linhas com datas inválidas (NaT)
-    df_time = df_time.dropna(subset=['Data'])
-
-    # Formatar coluna 'Data' para exibição
-    df_time['Data'] = df_time['Data'].dt.strftime('%d-%m-%Y')
+    # Format 'Data' column for display
+    team_df['Data'] = team_df['Data'].dt.strftime('%d-%m-%Y')
 
     # Exibir resultados em uma tabela
     st.write("### Partidas:")
-    st.dataframe(df_time)
+    st.dataframe(team_df)
 
     # Calcular quantas vezes o time da casa ganhou
-    num_vitorias = df_time[df_time['Resultado'] == 'W'].shape[0]
-    total_partidas = df_time.shape[0]
-    porcentagem_vitorias = (num_vitorias / total_partidas) * 100 if total_partidas > 0 else 0
+    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
+    total_matches = team_df.shape[0]
+    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
     # Calcular lucro/prejuízo total
-    df_time['Lucro_Prejuizo'] = df_time.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
-    lucro_prejuizo_total = df_time['Lucro_Prejuizo'].sum()
+    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row['Odd_Home'] - 1 if row['Resultado'] == 'W' else -1, axis=1)
+    lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
 
     # Calcular médias
-    media_gols_casa = df_time['Gols_Home'].mean()
-    media_gols_sofridos = df_time['Gols_Away'].mean()
+    media_gols_casa = team_df['Gols_Home'].mean()
+    media_gols_tomados = team_df['Gols_Away'].mean()
     
     # Calcular coeficiente de eficiência médio ajustado
-    coeficiente_eficiencia_total = df_time['Coeficiente_Eficiencia'].sum()
-    coeficiente_eficiencia_medio = coeficiente_eficiencia_total / total_partidas if total_partidas > 0 else 0
+    coeficiente_eficiencia_total = team_df['Coeficiente_Eficiencia'].sum()
+    coeficiente_eficiencia_medio = coeficiente_eficiencia_total / total_matches if total_matches > 0 else 0
 
     # Calcular odd justa
-    odd_justa = 100 / porcentagem_vitorias if porcentagem_vitorias > 0 else 0
+    odd_justa = 100 / win_percentage if win_percentage > 0 else 0
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
-    if tipo_time == "Home":
-        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_vitorias} vez(es) em {total_partidas} partida(s), aproveitamento de ({porcentagem_vitorias:.2f}%).")
+    if team_type == "Home":
+        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
-        st.markdown(f"- Com as características do jogo de hoje, o time visitante {time} ganhou {num_vitorias} vez(es) em {total_partidas} partida(s), aproveitamento de ({porcentagem_vitorias:.2f}%).")
+        st.markdown(f"- Com as características do jogo de hoje, o time visitante {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
-    st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_sofridos:.2f}.")
+    st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
 
 if __name__ == "__main__":
     main()
