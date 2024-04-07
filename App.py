@@ -21,25 +21,9 @@ def agrupar_odd(odd):
 
 # Carregar os arquivos CSV
 file_paths = [
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Italy%20Serie%20A%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Italy%20Serie%20B%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/England%20%20Premier%20League%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/England%20Championship%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/England%20League%201%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/England%20League%202%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Scotland%20Premier%20League%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Scotland%20Division%201%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Scotland%20Division%202%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Germany%20Bundesliga%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Germany%20Bundesliga%202%20Geral.csv",    
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Spain%20La%20Liga%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Spain%20La%20Liga%202%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Netherlands%20Eredivisie%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Belgium%20Jupiler%20League%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Portugal%20Liga%20I%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/Turkey%20Futbol%20Ligi%201%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/France%20Division%202%20Geral.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/France%20Le%20Championnat%20Geral.csv"
+    "https://www.football-data.co.uk/mmz4281/2324/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
+   
 ]
 
 dfs = []
