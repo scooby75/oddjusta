@@ -18,12 +18,12 @@ def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
     return diferenca_gols
 
-def agrupar_odd(odd):
-    for i in range(1, 100):
-        lower = 1 + (i - 1) * 0.10
-        upper = 1 + i * 0.10
-        if lower <= odd <= upper:
-            return f"{lower:.2f} - {upper:.2f}"
+# Atualizar função de agrupamento de odds para permitir seleção de faixa de odds
+def agrupar_odd(odd, faixa_selecionada):
+    lower = 1 + (faixa_selecionada - 1) * 0.10
+    upper = 1 + faixa_selecionada * 0.10
+    if lower <= odd <= upper:
+        return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
 
 # Função para fazer o download de um arquivo e armazená-lo em cache
@@ -125,8 +125,8 @@ all_teams_away = set(df['Away'])
 times_home = sorted(str(team) for team in all_teams_home)
 times_away = sorted(str(team) for team in all_teams_away)
 
-# Ordenar as faixas de odds
-odds_groups = sorted(df['Odd_Group'].unique())
+# Atualizar a lista de opções para faixa de odds
+odds_faixas = list(range(1, 21))
 
 # Interface do Streamlit
 def main():
@@ -137,10 +137,10 @@ def main():
         time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
     else:
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-    mostrar_resultados(team_type, time, odds_group)
+    odds_faixa_selecionada = st.sidebar.select_slider("Selecione a Faixa de Odds:", options=odds_faixas, value=(1, 20))
+    mostrar_resultados(team_type, time, odds_faixa_selecionada)
 
-def mostrar_resultados(tipo_time, time, faixa_odds):
+def mostrar_resultados(tipo_time, time, faixa_odds_selecionada):
     if tipo_time == "Casa":
         odds_column = 'Odd_Home'
         team_column = 'Home'
@@ -148,11 +148,8 @@ def mostrar_resultados(tipo_time, time, faixa_odds):
         odds_column = 'Odd_Away'
         team_column = 'Away'
 
-    if faixa_odds == "Outros":
-        odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < 1.0) | 
-                            (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > 6.0)]
-    else:
-        odds_filtradas = df[df['Odd_Group'] == faixa_odds]
+    odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < faixa_odds_selecionada[0]) | 
+                        (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > faixa_odds_selecionada[1])]
 
     df_time = odds_filtradas[odds_filtradas[team_column] == time]
 
@@ -175,12 +172,12 @@ def mostrar_resultados(tipo_time, time, faixa_odds):
     st.dataframe(df_time)
 
     # Calcular quantas vezes o time da casa ganhou
-    num_vitorias = df_time[df_time['Resultado'] == 'V'].shape[0]
+    num_vitorias = df_time[df_time['Resultado'] == 'W'].shape[0]
     total_partidas = df_time.shape[0]
     porcentagem_vitorias = (num_vitorias / total_partidas) * 100 if total_partidas > 0 else 0
 
     # Calcular lucro/prejuízo total
-    df_time['Lucro_Prejuizo'] = df_time.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'V' else -1, axis=1)
+    df_time['Lucro_Prejuizo'] = df_time.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
     lucro_prejuizo_total = df_time['Lucro_Prejuizo'].sum()
 
     # Calcular médias
@@ -196,7 +193,7 @@ def mostrar_resultados(tipo_time, time, faixa_odds):
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
-    if tipo_time == "Casa":
+    if tipo_time == "Home":
         st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_vitorias} vez(es) em {total_partidas} partida(s), aproveitamento de ({porcentagem_vitorias:.2f}%).")
     else:
         st.markdown(f"- Com as características do jogo de hoje, o time visitante {time} ganhou {num_vitorias} vez(es) em {total_partidas} partida(s), aproveitamento de ({porcentagem_vitorias:.2f}%).")
