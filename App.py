@@ -65,8 +65,8 @@ df.rename(columns={
     'PA': 'Odd_Away'
 }, inplace=True)
 
-# Obter todas as equipes envolvidas nos jogos
-all_teams_home = set(df['Home'])
+# Obter todas as equipes envolvidas nos jogos (colunas Home e HomeTeam)
+all_teams_home = pd.concat([df['Home'], df['HomeTeam']]).unique()
 
 # Ordenar os times em ordem alfabética
 times = sorted(all_teams_home)
@@ -100,7 +100,7 @@ def mostrar_resultados(time, odds_group):
     lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
 
     # Calcular soma dos coeficientes de eficiência
-    soma_coeficientes = team_df['Odd_Home'].sum()
+    soma_coeficientes = team_df.apply(coeficiente_eficiencia, axis=1).sum()
 
     # Calcular médias
     media_gols_casa = team_df['Gols_Home'].mean()
@@ -110,7 +110,7 @@ def mostrar_resultados(time, odds_group):
     st.write("### Resumo:")
     st.markdown(f"- Na faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    st.markdown(f"- Soma dos coeficientes de eficiência da equipe '{time}': {soma_coeficientes:.2f}")
+    st.markdown(f"- Coeficiente de eficiência da equipe '{time}': {soma_coeficientes:.2f}")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
     
