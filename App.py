@@ -188,8 +188,13 @@ def mostrar_resultados(time, odds_group):
     # Drop duplicate rows
     team_df = team_df.drop_duplicates()
 
+    # Convert 'Data' column to datetime format with error handling
+    team_df['Data'] = pd.to_datetime(team_df['Data'], errors='coerce')
+
+    # Remove rows with invalid dates (NaT)
+    team_df = team_df.dropna(subset=['Data'])
+
     # Format 'Data' column for display
-    team_df['Data'] = pd.to_datetime(team_df['Data'])
     team_df['Data'] = team_df['Data'].dt.strftime('%d-%m-%Y')
 
     # Exibir resultados em uma tabela
