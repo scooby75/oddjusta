@@ -66,7 +66,11 @@ df.rename(columns={
 }, inplace=True)
 
 # Obter todas as equipes envolvidas nos jogos (colunas Home e HomeTeam)
-all_teams_home = pd.concat([df['Home'], df['HomeTeam']]).unique()
+all_teams_home = set(df.columns) & {'Home', 'HomeTeam'}
+if all_teams_home:
+    all_teams_home = pd.concat([df['Home'], df['HomeTeam']]).unique()
+else:
+    all_teams_home = []
 
 # Ordenar os times em ordem alfabética
 times = sorted(all_teams_home)
