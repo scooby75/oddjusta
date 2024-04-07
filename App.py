@@ -128,7 +128,9 @@ file_paths = [
     "https://www.football-data.co.uk/new/RUS.csv",
     "https://www.football-data.co.uk/new/SWE.csv",
     "https://www.football-data.co.uk/new/SWZ.csv",
-    "https://www.football-data.co.uk/new/USA.csv"
+    "https://www.football-data.co.uk/new/USA.csv",
+
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/albania-first-division-matches-2022-to-2023-stats.csv"
     
     
 ]
