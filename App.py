@@ -34,6 +34,7 @@ file_paths = [
     "https://www.football-data.co.uk/new/BRA.csv"
    
 ]
+print(df.head())
 
 dfs = []
 for file_path in file_paths:
