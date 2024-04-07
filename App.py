@@ -112,7 +112,15 @@ file_paths = [
     "https://www.football-data.co.uk/new/DNK.csv",
     "https://www.football-data.co.uk/new/FIN.csv",
     "https://www.football-data.co.uk/new/IRL.csv",
-    "https://www.football-data.co.uk/new/JPN.csv"
+    "https://www.football-data.co.uk/new/JPN.csv",
+    "https://www.football-data.co.uk/new/MEX.csv",
+    "https://www.football-data.co.uk/new/NOR.csv",
+    "https://www.football-data.co.uk/new/POL.csv",
+    "https://www.football-data.co.uk/new/ROU.csv",
+    "https://www.football-data.co.uk/new/RUS.csv",
+    "https://www.football-data.co.uk/new/SWE.csv",
+    "https://www.football-data.co.uk/new/SWZ.csv",
+    "https://www.football-data.co.uk/new/USA.csv"
     
     
 ]
