@@ -154,7 +154,23 @@ file_paths = [
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/greece-super-league-matches-2022-to-2023-stats.csv",
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/greece-super-league-matches-2023-to-2024-stats.csv",
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/hong-kong-hong-kong-premier-league-matches-2022-to-2023-stats.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hong-kong-hong-kong-premier-league-matches-2023-to-2024-stats.csv"
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hong-kong-hong-kong-premier-league-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hungary-nb-ii-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hungary-nb-ii-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hungary-nb-ii-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hungary-nb-i-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hungary-nb-i-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/hungary-nb-i-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/indonesia-liga-1-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/indonesia-liga-1-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/indonesia-liga-1-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/mexico-liga-mx-matches-2021-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/mexico-liga-mx-matches-2022-to-2023-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/mexico-liga-mx-matches-2023-to-2024-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2021-to-2021-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2022-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/peru-primera-division-matches-2023-to-2023-stats.csv"
+    
 
     
     
