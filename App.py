@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 import streamlit as st
 import os
 import requests
@@ -38,6 +39,13 @@ def download_and_cache(url):
             f.write(response.content)
     
     return cache_file
+
+# Função para converter a data do formato "Sep 03 2022 - 1:00pm" para "dd/mm/yyyy"
+def converter_data_gmt(date_str):
+    # Analisar a string de data no formato fornecido
+    date_obj = datetime.strptime(date_str, '%b %d %Y - %I:%M%p')
+    # Converter para o formato "dd/mm/yyyy" e retornar como string
+    return date_obj.strftime('%d-%m-%Y')
 
 # Carregar os arquivos CSV
 file_paths = [
@@ -130,11 +138,11 @@ for file_path in file_paths:
     cached_file = download_and_cache(file_path)
     df = pd.read_csv(cached_file)
     
-    # Verificar o formato do arquivo e ajustar as colunas conforme necessário
+    # Verificar e ajustar o formato do arquivo conforme necessário
     if 'FTHG' in df.columns:
         # Formato do primeiro arquivo
         df.rename(columns={
-            'Date': "Data",
+            'Date': 'Data',
             'HomeTeam': 'Home',
             'AwayTeam': 'Away',
             'FTHG': 'Gols_Home',
@@ -144,7 +152,22 @@ for file_path in file_paths:
             'PSCD': 'Odd_Empate',
             'PSCA': 'Odd_Away'
         }, inplace=True)
-    elif 'Country' in df.columns:
+    elif 'home_team_name' in df.columns:
+        # Formato do terceiro arquivo
+        df.rename(columns={
+            'date_GMT': 'Data',
+            'home_team_name': 'Home',
+            'away_team_name': 'Away',
+            'home_team_goal_count': 'Gols_Home',
+            'away_team_goal_count': 'Gols_Away',
+            'Res': 'Resultado',
+            'odds_ft_home_team_win': 'Odd_Home',
+            'odds_ft_draw': 'Odd_Empate',
+            'odds_ft_away_team_win': 'Odd_Away'
+        }, inplace=True)
+        # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
+        df['Data'] = df['Data'].apply(converter_data_gmt)
+    else:
         # Formato do segundo arquivo
         df.rename(columns={
             'Date': 'Data',
@@ -157,7 +180,7 @@ for file_path in file_paths:
             'PD': 'Odd_Empate',
             'PA': 'Odd_Away'
         }, inplace=True)
-    
+
     # Adicionar coluna de resultado
     df['Resultado'] = df.apply(classificar_resultado, axis=1)
     
