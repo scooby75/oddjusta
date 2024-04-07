@@ -42,39 +42,35 @@ def download_and_cache(url):
 # Carregar os arquivos CSV
 file_paths = [
     "https://www.football-data.co.uk/mmz4281/2324/E0.csv", #England Premier League
-    "https://www.football-data.co.uk/mmz4281/2223/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/2122/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/2021/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1920/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1819/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1718/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1617/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1516/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1415/E0.csv",    
-    
+    "https://www.football-data.co.uk/mmz4281/2223/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/2122/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/2021/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1920/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1819/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1718/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1617/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1516/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1415/E0.csv", #England Premier League
     "https://www.football-data.co.uk/mmz4281/2324/E1.csv", #England Championship 
-    "https://www.football-data.co.uk/mmz4281/2223/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/2122/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/2021/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1920/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1819/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1718/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1617/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1516/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1415/E1.csv",    
-    
+    "https://www.football-data.co.uk/mmz4281/2223/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/2122/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/2021/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/1920/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/1819/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/1718/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/1617/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/1516/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/1415/E1.csv", #England Championship 
     "https://www.football-data.co.uk/mmz4281/2324/E2.csv", #England League 1
-    "https://www.football-data.co.uk/mmz4281/2223/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/2122/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/2021/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1920/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1819/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1718/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1617/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1516/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1415/E2.csv",
-    
-    
+    "https://www.football-data.co.uk/mmz4281/2223/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/2122/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/2021/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1920/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1819/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1718/E2.csv", #England League 1 
+    "https://www.football-data.co.uk/mmz4281/1617/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1516/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1415/E2.csv", #England League 1
     
     "https://www.football-data.co.uk/mmz4281/2324/D1.csv", #Germany Bundesliga
     "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
@@ -104,13 +100,44 @@ file_paths = [
 dfs = []
 for file_path in file_paths:
     cached_file = download_and_cache(file_path)
-    try:
-        df = pd.read_csv(cached_file, delimiter=',', encoding='utf-8')
-    except pd.errors.ParserError as e:
-        st.error(f"Erro ao processar o arquivo: {e}")
-        continue
+    df = pd.read_csv(cached_file)
     
-    # Restante do código para processar os dados
+    # Verificar o formato do arquivo e ajustar as colunas conforme necessário
+    if 'FTHG' in df.columns:
+        # Formato do primeiro arquivo
+        df.rename(columns={
+            'HomeTeam': 'Home',
+            'AwayTeam': 'Away',
+            'FTHG': 'Gols_Home',
+            'FTAG': 'Gols_Away',
+            'FTR': 'Resultado',
+            'PSCH': 'Odd_Home',
+            'PSCD': 'Odd_Empate',
+            'PSCA': 'Odd_Away'
+        }, inplace=True)
+    elif 'Country' in df.columns:
+        # Formato do segundo arquivo
+        df.rename(columns={
+            'Date': 'Data',
+            'Home': 'Home',
+            'Away': 'Away',
+            'HG': 'Gols_Home',
+            'AG': 'Gols_Away',
+            'Res': 'Resultado',
+            'PH': 'Odd_Home',
+            'PD': 'Odd_Empate',
+            'PA': 'Odd_Away'
+        }, inplace=True)
+    
+    # Adicionar coluna de resultado
+    df['Resultado'] = df.apply(classificar_resultado, axis=1)
+    
+    # Calcular coeficiente de eficiência da equipe da casa
+    df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
+
+    # Adicionar coluna de agrupamento de odds
+    if 'Odd_Home' in df:
+        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
     
     dfs.append(df)
 
