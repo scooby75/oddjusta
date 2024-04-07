@@ -53,8 +53,6 @@ df.rename(columns={
     'Date': 'Data',
     'HomeTeam': 'Home',
     'AwayTeam': 'Away',
-    'Home': 'Home',
-    'Away': 'Away',
     'HG': 'Gols_Home',
     'AG': 'Gols_Away',
     'FTHG': 'Gols_Home',  # Considerando ambos os formatos de cabeçalho
@@ -65,8 +63,11 @@ df.rename(columns={
     'PA': 'Odd_Away'
 }, inplace=True)
 
+# Combina as colunas Home e Away para obter todas as equipes envolvidas nos jogos
+all_teams = pd.concat([df['Home'], df['Away']]).unique()
+
 # Ordenar os times em ordem alfabética
-times = sorted(df['Home'].unique())
+times = sorted(all_teams)
 
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
@@ -78,7 +79,6 @@ def main():
     time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
     odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
     mostrar_resultados(time, odds_group)
-    print(df.head())  # Imprime as primeiras linhas do DataFrame
 
 def mostrar_resultados(time, odds_group):
     team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
@@ -111,6 +111,6 @@ def mostrar_resultados(time, odds_group):
     st.markdown(f"- Coeficiente de eficiência da equipe '{time}': {soma_coeficientes:.2f}")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
-    
+
 if __name__ == "__main__":
     main()
