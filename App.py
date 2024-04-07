@@ -2,23 +2,22 @@ import pandas as pd
 import streamlit as st
 import io
 
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes para a liga específica
-def classificar_resultado_liga_especifica(row):
-    if row['FTHG'] > row['FTAG']:
-        return 'W'
-    elif row['FTHG'] < row['FTAG']:
-        return 'L'
-    else:
-        return 'D'
-
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes para outras ligas
-def classificar_resultado_outras_ligas(row):
-    if row['HG'] > row['AG']:
-        return 'W'
-    elif row['HG'] < row['AG']:
-        return 'L'
-    else:
-        return 'D'
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
+def classificar_resultado(row):
+    if 'FTHG' in row:  # Verifica se a coluna FTHG está presente
+        if row['FTHG'] > row['FTAG']:
+            return 'W'
+        elif row['FTHG'] < row['FTAG']:
+            return 'L'
+        else:
+            return 'D'
+    elif 'HG' in row:  # Verifica se a coluna HG está presente
+        if row['HG'] > row['AG']:
+            return 'W'
+        elif row['HG'] < row['AG']:
+            return 'L'
+        else:
+            return 'D'
 
 def agrupar_odd(odd):
     for i in range(1, 60):
@@ -45,7 +44,7 @@ for file_path in file_paths:
 df = pd.concat(dfs)
 
 # Adicionar coluna de resultado
-df['Resultado_FT'] = df.apply(classificar_resultado_liga_especifica, axis=1)
+df['Resultado'] = df.apply(classificar_resultado, axis=1)
 
 # Adicionar coluna de agrupamento de odds
 df['Odd_Group'] = df['PSH'].apply(agrupar_odd)
@@ -55,19 +54,14 @@ df.rename(columns={
     'Date': 'Data',
     'HomeTeam': 'Home',
     'AwayTeam': 'Away',
-    'Home' : 'Home',
-    'Away' : 'Away',
-    'PSCH': 'Odd_Home',
-    'PSCD': 'Odd_Empate',
-    'PSCA': 'Odd_Away',
-    'PH' : 'Odd_Home',
-    'PD' : 'Odd_Empate',
-    'PA' : 'Odd_Away',
-    'HG' : 'Gols_Home',
-    'AG' : 'Gols_Away',
-    'FTHG': 'Gols_Home',
-    'FTAG': 'Gols_Away',
-    'Resultado_FT': 'Resultado'
+    'HG': 'Gols_Home',
+    'AG': 'Gols_Away',
+    'FTHG': 'Gols_Home',  # Considerando ambos os formatos de cabeçalho
+    'FTAG': 'Gols_Away',  # Considerando ambos os formatos de cabeçalho
+    'FTR': 'Resultado',
+    'PH': 'Odd_Home',
+    'PD': 'Odd_Empate',
+    'PA': 'Odd_Away'
 }, inplace=True)
 
 # Ordenar os times em ordem alfabética
@@ -75,17 +69,6 @@ times = sorted(df['Home'].unique())
 
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
-
-# Função para calcular o coeficiente de eficiência da equipe Home
-def coeficiente_eficiencia(row):
-    gols_marcados = row['Gols_Home']
-    gols_sofridos = row['Gols_Away']
-
-    diferenca_gols = gols_marcados - gols_sofridos
-
-    coeficiente = diferenca_gols * 0.25
-
-    return coeficiente
 
 # Interface do Streamlit
 def main():
