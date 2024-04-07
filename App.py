@@ -1,6 +1,5 @@
 import pandas as pd
 import streamlit as st
-import io
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row):
@@ -46,7 +45,10 @@ df = pd.concat(dfs)
 df['Resultado'] = df.apply(classificar_resultado, axis=1)
 
 # Adicionar coluna de agrupamento de odds
-df['Odd_Group'] = df['PSH'].apply(agrupar_odd)
+if 'B365H' in df:  # Verifica se o formato é do primeiro tipo
+    df['Odd_Group'] = df['PSH'].apply(agrupar_odd)
+elif 'PH' in df:  # Verifica se o formato é do segundo tipo
+    df['Odd_Group'] = df['PH'].apply(agrupar_odd)
 
 # Renomear as colunas
 df.rename(columns={
