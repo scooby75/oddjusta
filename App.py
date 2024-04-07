@@ -26,6 +26,17 @@ def agrupar_odd(odd):
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
 
+# Função para calcular o coeficiente de eficiência da equipe Home
+def coeficiente_eficiencia(row):
+    gols_marcados = row['Gols_Home']
+    gols_sofridos = row['Gols_Away']
+
+    diferenca_gols = gols_marcados - gols_sofridos
+
+    coeficiente = diferenca_gols * 0.25
+
+    return coeficiente
+
 # Carregar os arquivos CSV
 file_paths = [
     "https://www.football-data.co.uk/mmz4281/2324/D1.csv",
@@ -36,45 +47,34 @@ file_paths = [
 dfs = []
 for file_path in file_paths:
     df = pd.read_csv(file_path)
-    
-    # Verificar o formato do arquivo e ajustar as colunas conforme necessário
-    if 'FTHG' in df.columns:
-        # Formato do primeiro arquivo
-        df.rename(columns={
-            'HomeTeam': 'Home',
-            'AwayTeam': 'Away',
-            'FTHG': 'Gols_Home',
-            'FTAG': 'Gols_Away',
-            'FTR': 'Resultado',
-            'B365H': 'Odd_Home',
-            'B365D': 'Odd_Empate',
-            'B365A': 'Odd_Away'
-        }, inplace=True)
-    elif 'Country' in df.columns:
-        # Formato do segundo arquivo
-        df.rename(columns={
-            'Date': 'Data',
-            'Home': 'Home',
-            'Away': 'Away',
-            'HG': 'Gols_Home',
-            'AG': 'Gols_Away',
-            'Res': 'Resultado',
-            'PH': 'Odd_Home',
-            'PD': 'Odd_Empate',
-            'PA': 'Odd_Away'
-        }, inplace=True)
-    
-    # Adicionar coluna de resultado
-    df['Resultado'] = df.apply(classificar_resultado, axis=1)
-
-    # Adicionar coluna de agrupamento de odds
-    if 'Odd_Home' in df:
-        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
-    
     dfs.append(df)
 
 # Concatenar todos os dataframes
 df = pd.concat(dfs)
+
+# Adicionar coluna de resultado
+df['Resultado'] = df.apply(classificar_resultado, axis=1)
+
+# Adicionar coluna de agrupamento de odds
+if 'B365H' in df:  # Verifica se o formato é do primeiro tipo
+    df['Odd_Group'] = df['PSH'].apply(agrupar_odd)
+elif 'PH' in df:  # Verifica se o formato é do segundo tipo
+    df['Odd_Group'] = df['PH'].apply(agrupar_odd)
+
+# Renomear as colunas
+df.rename(columns={
+    'Date': 'Data',
+    'HomeTeam': 'Home',
+    'AwayTeam': 'Away',
+    'HG': 'Gols_Home',
+    'AG': 'Gols_Away',
+    'FTHG': 'Gols_Home',  # Considerando ambos os formatos de cabeçalho
+    'FTAG': 'Gols_Away',  # Considerando ambos os formatos de cabeçalho
+    'FTR': 'Resultado',
+    'PH': 'Odd_Home',
+    'PD': 'Odd_Empate',
+    'PA': 'Odd_Away'
+}, inplace=True)
 
 # Obter todas as equipes envolvidas nos jogos
 all_teams_home = set(df['Home'])
