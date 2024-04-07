@@ -120,6 +120,28 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1617/I2.csv",
     "https://www.football-data.co.uk/mmz4281/1516/I2.csv",
     "https://www.football-data.co.uk/mmz4281/1415/I2.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/SP1.csv", #Spain La Liga
+    "https://www.football-data.co.uk/mmz4281/2223/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/SP1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/SP1.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/SP2.csv", #Spain La Liga 2
+    "https://www.football-data.co.uk/mmz4281/2223/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/SP2.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/SP2.csv",
     
     
     "https://www.football-data.co.uk/new/ARG.csv",
