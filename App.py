@@ -19,7 +19,7 @@ def calcular_coeficiente(row):
     return diferenca_gols
 
 def agrupar_odd(odd):
-    for i in range(1, 60):
+    for i in range(1, 100):
         lower = 1 + (i - 1) * 0.10
         upper = 1 + i * 0.10
         if lower <= odd <= upper:
