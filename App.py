@@ -20,8 +20,8 @@ def calcular_coeficiente(row):
 
 # Atualizar função de agrupamento de odds para permitir seleção de faixa de odds
 def agrupar_odd(odd, faixa_selecionada):
-    lower = 1 + (faixa_selecionada - 1) * 0.10
-    upper = 1 + faixa_selecionada * 0.10
+    lower = 1 + (faixa_selecionada[0] - 1) * 0.10
+    upper = 1 + faixa_selecionada[1] * 0.10
     if lower <= odd <= upper:
         return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
@@ -108,9 +108,10 @@ for file_path in file_paths:
     # Calcular coeficiente de eficiência da equipe da casa
     df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
 
-    # Adicionar coluna de agrupamento de odds
+    # Adicionar coluna de agrupamento de odds para as equipes da casa e visitantes
     if 'Odd_Home' in df:
-        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd, faixa_selecionada=faixa_odds_selecionada)
+        df['Odd_Group_Home'] = df['Odd_Home'].apply(agrupar_odd, faixa_selecionada=faixa_odds_selecionada)
+        df['Odd_Group_Away'] = df['Odd_Away'].apply(agrupar_odd, faixa_selecionada=faixa_odds_selecionada)
     
     dfs.append(df)
 
@@ -141,19 +142,21 @@ def main():
     mostrar_resultados(team_type, time, faixa_odds_selecionada)
 
 def mostrar_resultados(tipo_time, time, faixa_odds_selecionada):
-    if tipo_time == "Casa":
+    if tipo_time == "Home":
         odds_column = 'Odd_Home'
         team_column = 'Home'
+        odd_group_column = 'Odd_Group_Home'
     else:
         odds_column = 'Odd_Away'
         team_column = 'Away'
+        odd_group_column = 'Odd_Group_Away'
 
     odds_filtradas = df[(df[odds_column].apply(lambda x: float(x.split()[0]) if ' ' in x else -1) < faixa_odds_selecionada[0]) | 
                         (df[odds_column].apply(lambda x: float(x.split()[-1]) if ' ' in x else -1) > faixa_odds_selecionada[1])]
 
     df_time = odds_filtradas[odds_filtradas[team_column] == time]
 
-    df_time = df_time[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
+    df_time = df_time[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', odd_group_column]]
 
     # Remover linhas duplicadas
     df_time = df_time.drop_duplicates()
