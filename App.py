@@ -24,6 +24,16 @@ def agrupar_odd(odd):
 
 # Carregar os arquivos CSV
 file_paths = [
+    "https://www.football-data.co.uk/mmz4281/2324/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/2223/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/2122/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/2021/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1920/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1819/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1718/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1617/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1516/E0.csv", #England Premier League
+    "https://www.football-data.co.uk/mmz4281/1415/E0.csv", #England Premier League
     "https://www.football-data.co.uk/mmz4281/2324/D1.csv",
     "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
     "https://www.football-data.co.uk/new/BRA.csv"
