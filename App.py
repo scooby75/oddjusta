@@ -32,9 +32,7 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/2324/D1.csv",
     "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
     "https://www.football-data.co.uk/new/BRA.csv"
-   
 ]
-print(df.head())
 
 dfs = []
 for file_path in file_paths:
@@ -78,6 +76,7 @@ def main():
     time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
     odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
     mostrar_resultados(time, odds_group)
+    print(df.head())  # Imprime as primeiras linhas do DataFrame
 
 def mostrar_resultados(time, odds_group):
     team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
