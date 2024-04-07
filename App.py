@@ -12,8 +12,7 @@ def classificar_resultado(row):
 
 def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
-    coeficiente = diferenca_gols * 0.25
-    return coeficiente
+    return diferenca_gols
 
 def agrupar_odd(odd):
     for i in range(1, 60):
@@ -115,15 +114,16 @@ def mostrar_resultados(time, odds_group):
     media_gols_tomados = team_df['Gols_Away'].mean()
     
     # Calcular coeficiente de eficiência médio
-    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
+    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].sum()
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
-    st.markdown(f"- Na faixa de odd {odds_group}, o '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
+    st.markdown(f"- O '{time}' ganhou {num_wins} vez(es) em {total_matches} jogo(s) ({win_percentage:.2f}%).")
+    st.markdown(f"- Coeficiente de eficiência médio: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
-    st.markdown(f"- Coeficiente de eficiência médio: {coeficiente_eficiencia_medio:.2f}.")
+    
     
 if __name__ == "__main__":
     main()
