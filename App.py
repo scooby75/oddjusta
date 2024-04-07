@@ -66,10 +66,12 @@ df.rename(columns={
 }, inplace=True)
 
 # Obter todas as equipes envolvidas nos jogos
-all_teams_home = df['Home'].unique()
+all_teams_home = set(df['Home'])
+all_teams_away = set(df['Away'])
+all_teams = all_teams_home.union(all_teams_away)
 
 # Ordenar os times em ordem alfabética
-times = sorted(all_teams_home)
+times = sorted(all_teams)
 
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
