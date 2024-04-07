@@ -63,8 +63,8 @@ df.rename(columns={
     'PA': 'Odd_Away'
 }, inplace=True)
 
-# Combina as colunas Home e Away para obter todas as equipes envolvidas nos jogos
-all_teams = pd.concat([df['Home'], df['Away']]).unique()
+# Obter todas as equipes envolvidas nos jogos
+all_teams = df['Home'].unique()
 
 # Ordenar os times em ordem alfabética
 times = sorted(all_teams)
@@ -111,6 +111,6 @@ def mostrar_resultados(time, odds_group):
     st.markdown(f"- Coeficiente de eficiência da equipe '{time}': {soma_coeficientes:.2f}")
     st.markdown(f"- Média de gols marcados pelo time da casa: {media_gols_casa:.2f}.")
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
-
+    
 if __name__ == "__main__":
     main()
