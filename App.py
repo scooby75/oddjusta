@@ -139,8 +139,8 @@ file_paths = [
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/azerbaijan-first-division-matches-2022-to-2023-stats.csv",
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/azerbaijan-first-division-matches-2023-to-2024-stats.csv",
     "https://raw.githubusercontent.com/scooby75/bdfootball/main/cambodia-cambodian-league-matches-2021-to-2021-stats.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/cambodia-cambodian-league-matches-2022-to-2023-stats.csv",
-    "https://raw.githubusercontent.com/scooby75/bdfootball/main/cambodia-cambodian-league-matches-2023-to-2024-stats.csv"
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/cambodia-cambodian-league-matches-2022-to-2022-stats.csv",
+    "https://raw.githubusercontent.com/scooby75/bdfootball/main/cambodia-cambodian-league-matches-2023-to-2023-stats.csv"
 
     
     
