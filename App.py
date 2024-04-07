@@ -71,6 +71,17 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1617/E2.csv", #England League 1
     "https://www.football-data.co.uk/mmz4281/1516/E2.csv", #England League 1
     "https://www.football-data.co.uk/mmz4281/1415/E2.csv", #England League 1
+
+    "https://www.football-data.co.uk/mmz4281/2324/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/2223/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/2122/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/2021/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/1920/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/1819/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/1718/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/1617/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/1516/SC0.csv", #Scotland Premier League
+    "https://www.football-data.co.uk/mmz4281/1415/SC0.csv", #Scotland Premier League
     
     "https://www.football-data.co.uk/mmz4281/2324/D1.csv", #Germany Bundesliga
     "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
