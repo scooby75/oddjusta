@@ -44,9 +44,39 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1617/E1.csv", #England Championship 
     "https://www.football-data.co.uk/mmz4281/1516/E1.csv", #England Championship 
     "https://www.football-data.co.uk/mmz4281/1415/E1.csv", #England Championship 
+    "https://www.football-data.co.uk/mmz4281/2324/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/2223/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/2122/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/2021/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1920/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1819/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1718/E2.csv", #England League 1 
+    "https://www.football-data.co.uk/mmz4281/1617/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1516/E2.csv", #England League 1
+    "https://www.football-data.co.uk/mmz4281/1415/E2.csv", #England League 1
     
-    "https://www.football-data.co.uk/mmz4281/2324/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/2324/D1.csv", #Germany Bundesliga
     "https://www.football-data.co.uk/mmz4281/2223/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/D1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/D1.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/D2.csv", #Germany Bundesliga 2
+    "https://www.football-data.co.uk/mmz4281/2223/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/D2.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/D2.csv",
+    
     "https://www.football-data.co.uk/new/BRA.csv"
 ]
 
