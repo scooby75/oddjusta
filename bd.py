@@ -142,7 +142,72 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1617/SP2.csv",
     "https://www.football-data.co.uk/mmz4281/1516/SP2.csv",
     "https://www.football-data.co.uk/mmz4281/1415/SP2.csv",
-    
+
+    "https://www.football-data.co.uk/mmz4281/2324/F1.csv", #France Le Championnat
+    "https://www.football-data.co.uk/mmz4281/2223/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/F1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/F1.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/F2.csv", #France Division 2
+    "https://www.football-data.co.uk/mmz4281/2223/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/F2.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/F2.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/N1.csv", #Netherlands Eredivisie
+    "https://www.football-data.co.uk/mmz4281/2223/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/N1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/N1.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/B1.csv", #Belgium Jupiler League
+    "https://www.football-data.co.uk/mmz4281/2223/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/B1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/B1.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/P1.csv", #Portugal Liga 1
+    "https://www.football-data.co.uk/mmz4281/2223/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/P1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/P1.csv",
+
+    "https://www.football-data.co.uk/mmz4281/2324/T1.csv", #Turkey N1
+    "https://www.football-data.co.uk/mmz4281/2223/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/2122/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/2021/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/1920/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/1819/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/1718/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/1617/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/1516/T1.csv",
+    "https://www.football-data.co.uk/mmz4281/1415/T1.csv",
     
     "https://www.football-data.co.uk/new/ARG.csv",
     "https://www.football-data.co.uk/new/AUT.csv",
