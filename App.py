@@ -50,7 +50,7 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1718/E0.csv", 
     "https://www.football-data.co.uk/mmz4281/1617/E0.csv", 
     "https://www.football-data.co.uk/mmz4281/1516/E0.csv", 
-    "https://www.football-data.co.uk/mmz4281/1415/E0.csv", 
+    "https://www.football-data.co.uk/mmz4281/1415/E0.csv",    
     
     "https://www.football-data.co.uk/mmz4281/2324/E1.csv", #England Championship 
     "https://www.football-data.co.uk/mmz4281/2223/E1.csv", 
@@ -61,7 +61,7 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1718/E1.csv", 
     "https://www.football-data.co.uk/mmz4281/1617/E1.csv", 
     "https://www.football-data.co.uk/mmz4281/1516/E1.csv", 
-    "https://www.football-data.co.uk/mmz4281/1415/E1.csv", 
+    "https://www.football-data.co.uk/mmz4281/1415/E1.csv",    
     
     "https://www.football-data.co.uk/mmz4281/2324/E2.csv", #England League 1
     "https://www.football-data.co.uk/mmz4281/2223/E2.csv", 
@@ -72,9 +72,9 @@ file_paths = [
     "https://www.football-data.co.uk/mmz4281/1718/E2.csv", 
     "https://www.football-data.co.uk/mmz4281/1617/E2.csv", 
     "https://www.football-data.co.uk/mmz4281/1516/E2.csv", 
-    "https://www.football-data.co.uk/mmz4281/1415/E2.csv", 
-
-    "https://www.football-data.co.uk/mmz4281/2324/E3.csv" #England League 2
+    "https://www.football-data.co.uk/mmz4281/1415/E2.csv",
+    
+    "https://www.football-data.co.uk/mmz4281/2324/E3.csv", #England League 2
     "https://www.football-data.co.uk/mmz4281/2223/E3.csv", 
     "https://www.football-data.co.uk/mmz4281/2122/E3.csv", 
     "https://www.football-data.co.uk/mmz4281/2021/E3.csv", 
