@@ -1,5 +1,7 @@
 import pandas as pd
 import streamlit as st
+import os
+import requests
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row):
@@ -21,6 +23,21 @@ def agrupar_odd(odd):
         if lower <= odd <= upper:
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
+
+# Função para fazer o download de um arquivo e armazená-lo em cache
+def download_and_cache(url):
+    cache_folder = "cache"
+    cache_file = os.path.join(cache_folder, os.path.basename(url))
+    
+    if not os.path.exists(cache_folder):
+        os.makedirs(cache_folder)
+    
+    if not os.path.exists(cache_file):
+        response = requests.get(url)
+        with open(cache_file, 'wb') as f:
+            f.write(response.content)
+    
+    return cache_file
 
 # Carregar os arquivos CSV
 file_paths = [
@@ -82,7 +99,8 @@ file_paths = [
 
 dfs = []
 for file_path in file_paths:
-    df = pd.read_csv(file_path)
+    cached_file = download_and_cache(file_path)
+    df = pd.read_csv(cached_file)
     
     # Verificar o formato do arquivo e ajustar as colunas conforme necessário
     if 'FTHG' in df.columns:
