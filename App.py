@@ -119,9 +119,11 @@ df = pd.concat(dfs)
 
 # Obter todas as equipes envolvidas nos jogos
 all_teams_home = set(df['Home'])
+all_teams_away = set(df['Away'])
 
 # Ordenar os times em ordem alfabética
-times = sorted(str(team) for team in all_teams_home)
+times_home = sorted(str(team) for team in all_teams_home)
+times_away = sorted(str(team) for team in all_teams_away)
 
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
@@ -130,12 +132,19 @@ odds_groups = sorted(df['Odd_Group'].unique())
 def main():
     st.title("Winrate Odds")
     st.sidebar.header("Filtros")
-    time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times)
+    team_type = st.sidebar.selectbox("Selecione o Tipo de Time:", options=["Home", "Away"])
+    if team_type == "Home":
+        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+    else:
+        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
     odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-    mostrar_resultados(time, odds_group)
+    mostrar_resultados(team_type, time, odds_group)
 
-def mostrar_resultados(time, odds_group):
-    team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
+def mostrar_resultados(team_type, time, odds_group):
+    if team_type == "Home":
+        team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
+    else:
+        team_df = df[(df['Away'] == time) & (df['Odd_Group'] == odds_group)]
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
     # Drop duplicate rows
@@ -176,7 +185,10 @@ def mostrar_resultados(time, odds_group):
     
     # Destacar resultados importantes usando markdown
     st.write("### Resumo:")
-    st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    if team_type == "Home":
+        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    else:
+        st.markdown(f"- Com as características do jogo de hoje, o time visitante {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
