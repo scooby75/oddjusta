@@ -199,5 +199,6 @@ def mostrar_resultados(team_type, time, odds_group):
     st.markdown(f"- Média de gols sofridos pelo time visitante: {media_gols_tomados:.2f}.")
 
 
+
 if __name__ == "__main__":
     main()
