@@ -143,8 +143,11 @@ def main():
 def mostrar_resultados(team_type, time, odds_group):
     if team_type == "Home":
         team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
+        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
     else:
         team_df = df[(df['Away'] == time) & (df['Odd_Group'] == odds_group)]
+        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+        
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
     # Drop duplicate rows
@@ -169,7 +172,7 @@ def mostrar_resultados(team_type, time, odds_group):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
     # Calcular lucro/prejuízo total
-    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row['Odd_Home'] - 1 if row['Resultado'] == 'W' else -1, axis=1)
+    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
     lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
 
     # Calcular médias
