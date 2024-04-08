@@ -135,20 +135,21 @@ def main():
     team_type = st.sidebar.selectbox("Selecione o Tipo de Time:", options=["Home", "Away"])
     if team_type == "Home":
         time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-    else:
-        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-    mostrar_resultados(team_type, time, odds_group)
-
-def mostrar_resultados(team_type, time, odds_group):
-    if team_type == "Home":
-        team_df = df[df['Home'] == time]
         odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
     else:
-        team_df = df[df['Away'] == time]
+        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
         odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
+    odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
+    mostrar_resultados(team_type, time, odds_column, odds_group_values)
+
+def mostrar_resultados(team_type, time, odds_column, odds_group):
+    if team_type == "Home":
+        team_df = df[df['Home'] == time]
+    else:
+        team_df = df[df['Away'] == time]
     
-    team_df = team_df[(team_df['Odd_Home'] >= odds_group[0]) & (team_df['Odd_Home'] <= odds_group[1])]
+    team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]
     
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
