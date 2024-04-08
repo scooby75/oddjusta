@@ -148,7 +148,7 @@ def mostrar_resultados(team_type, time, odds_group):
         team_df = df[df['Away'] == time]
         odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
     
-    team_df = team_df[team_df['Odd_Group'] == odds_group]
+    team_df = team_df[(team_df['Odd_Home'] >= odds_group[0]) & (team_df['Odd_Home'] <= odds_group[1])]
     
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
