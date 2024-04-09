@@ -5,24 +5,14 @@ import os
 import requests
 from bd import file_paths  # Importing file_paths from bd.py
 
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes (home)
-def classificar_resultado_home(row):
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
+def classificar_resultado(row):
     if row['Gols_Home'] > row['Gols_Away']:
         return 'W'
     elif row['Gols_Home'] < row['Gols_Away']:
         return 'L'
     else:
         return 'D'
-
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes (away)
-def classificar_resultado_away(row):
-    if row['Gols_Away'] > row['Gols_Home']:
-        return 'W'
-    elif row['Gols_Away'] < row['Gols_Home']:
-        return 'L'
-    else:
-        return 'D'
-
 
 def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
