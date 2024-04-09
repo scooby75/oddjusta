@@ -5,11 +5,20 @@ import os
 import requests
 from bd import file_paths  # Importing file_paths from bd.py
 
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
-def classificar_resultado(row):
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes (home)
+def classificar_resultado_home(row):
     if row['Gols_Home'] > row['Gols_Away']:
         return 'W'
     elif row['Gols_Home'] < row['Gols_Away']:
+        return 'L'
+    else:
+        return 'D'
+
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes (away)
+def classificar_resultado_away(row):
+    if row['Gols_Away'] > row['Gols_Home']:
+        return 'W'
+    elif row['Gols_Away'] < row['Gols_Home']:
         return 'L'
     else:
         return 'D'
@@ -103,7 +112,10 @@ for file_path in file_paths:
         }, inplace=True)
 
     # Adicionar coluna de resultado
-    df['Resultado'] = df.apply(classificar_resultado, axis=1)
+    if 'Gols_Home' in df.columns:
+        df['Resultado'] = df.apply(classificar_resultado_home, axis=1)
+    else:
+        df['Resultado'] = df.apply(classificar_resultado_away, axis=1)
     
     # Calcular coeficiente de eficiência da equipe da casa
     df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
@@ -135,21 +147,16 @@ def main():
     team_type = st.sidebar.selectbox("Selecione o Tipo de Time:", options=["Home", "Away"])
     if team_type == "Home":
         time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
     else:
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
     odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-    odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
-    mostrar_resultados(team_type, time, odds_column, odds_group_values)
+    mostrar_resultados(team_type, time, odds_group)
 
-def mostrar_resultados(team_type, time, odds_column, odds_group):
+def mostrar_resultados(team_type, time, odds_group):
     if team_type == "Home":
-        team_df = df[df['Home'] == time]
+        team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
     else:
-        team_df = df[df['Away'] == time]
-    
-    team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]
+        team_df = df[(df['Away'] == time) & (df['Odd_Group'] == odds_group)]
     
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
@@ -175,7 +182,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
     # Calcular lucro/prejuízo total
-    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
+    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row['Odd_Home'] - 1 if row['Resultado'] == 'W' else -1, axis=1)
     lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
 
     # Calcular médias
