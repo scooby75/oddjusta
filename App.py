@@ -20,8 +20,8 @@ def calcular_coeficiente(row):
 
 def agrupar_odd(odd):
     for i in range(1, 60):
-        lower = 1 + (i - 1) * 0.10
-        upper = 1 + i * 0.10
+        lower = 1 + (i - 1) * 0.20
+        upper = 1 + i * 0.20
         if lower <= odd <= upper:
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
@@ -130,9 +130,9 @@ odds_groups = sorted(df['Odd_Group'].unique())
 
 # Interface do Streamlit
 def main():
-    st.title("Winrate Odds")
+    st.title("Odd Justa")
     st.sidebar.header("Filtros")
-    team_type = st.sidebar.selectbox("Selecione o Tipo de Time:", options=["Home", "Away"])
+    team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
     if team_type == "Home":
         time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
         odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
@@ -190,7 +190,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     odd_justa = 100 / win_percentage if win_percentage > 0 else 0
     
     # Destacar resultados importantes usando markdown
-    st.write("### Resumo:")
+    st.write("### Analise:")
     if team_type == "Home":
         st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
