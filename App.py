@@ -118,7 +118,11 @@ for file_path in file_paths:
 
     # Adicionar coluna de agrupamento de odds
     if 'Odd_Home' in df:
-        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+        if team_type == "Home":
+            df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+    elif 'Odd_Away' in df:
+        if team_type == "Away":
+            df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
     
     dfs.append(df)
 
