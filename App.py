@@ -49,6 +49,12 @@ def download_and_cache(url):
     
     return cache_file
 
+# Função para converter a data do formato "Sep 03 2022 - 1:00pm" para "dd/mm/yyyy"
+def converter_data_gmt(date_str):
+    # Analisar a string de data no formato fornecido
+    date_obj = datetime.strptime(date_str, '%b %d %Y - %I:%M%p')
+    # Converter para o formato "dd/mm/yyyy" e retornar como string
+    return date_obj.strftime('%d-%m-%Y')
 
 # Carregar os arquivos CSV
 dfs = []
