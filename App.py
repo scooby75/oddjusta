@@ -26,6 +26,7 @@ def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
     return diferenca_gols
 
+
 def agrupar_odd(odd):
     for i in range(1, 60):
         lower = 1 + (i - 1) * 0.10
