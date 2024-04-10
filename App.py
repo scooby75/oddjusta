@@ -3,7 +3,7 @@ from datetime import datetime
 import streamlit as st
 import os
 import requests
-from bd import file_paths  # Importando file_paths de bd.py
+from bd import file_paths  # Importing file_paths from bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -22,55 +22,127 @@ def classificar_resultado(row, team_type):
         else:
             return 'D'
 
+def calcular_coeficiente(row):
+    diferenca_gols = row['Gols_Home'] - row['Gols_Away']
+    return diferenca_gols
+
+def agrupar_odd(odd):
+    for i in range(1, 60):
+        lower = 1 + (i - 1) * 0.10
+        upper = 1 + i * 0.10
+        if lower <= odd <= upper:
+            return f"{lower:.2f} - {upper:.2f}"
+    return 'Outros'
+
 # Função para fazer o download de um arquivo e armazená-lo em cache
-def download_and_cache(url, cache_folder="cache"):
+def download_and_cache(url):
+    cache_folder = "cache"
+    cache_file = os.path.join(cache_folder, os.path.basename(url))
+    
     if not os.path.exists(cache_folder):
         os.makedirs(cache_folder)
     
-    cache_file = os.path.join(cache_folder, os.path.basename(url))
-    
     if not os.path.exists(cache_file):
         response = requests.get(url)
-        if response.status_code == 200:
-            with open(cache_file, 'wb') as f:
-                f.write(response.content)
-        else:
-            raise ValueError(f"Failed to download file from {url}")
+        with open(cache_file, 'wb') as f:
+            f.write(response.content)
     
     return cache_file
 
+
 # Carregar os arquivos CSV
-def load_dataframes(file_paths):
-    dfs = []
-    for file_path in file_paths:
-        try:
-            cached_file = download_and_cache(file_path)
-            df = pd.read_csv(cached_file)
-            dfs.append(df)
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}") 
+dfs = []
+for file_path in file_paths:
+    try:
+        cached_file = download_and_cache(file_path)
+        df = pd.read_csv(cached_file)
+        dfs.append(df)
+    except Exception as e:
+        print(f"Error processing file {file_path}: {e}")
 
-    return pd.concat(dfs, ignore_index=True)
+    
+    # Verificar e ajustar o formato do arquivo conforme necessário
+    if 'FTHG' in df.columns:
+        # Formato do primeiro arquivo
+        df.rename(columns={
+            'Date': 'Data',
+            'HomeTeam': 'Home',
+            'AwayTeam': 'Away',
+            'FTHG': 'Gols_Home',
+            'FTAG': 'Gols_Away',
+            'FTR': 'Resultado',
+            'PSCH': 'Odd_Home',
+            'PSCD': 'Odd_Empate',
+            'PSCA': 'Odd_Away'
+        }, inplace=True)
+    elif 'home_team_name' in df.columns:
+        # Formato do terceiro arquivo
+        df.rename(columns={
+            'date_GMT': 'Data',
+            'home_team_name': 'Home',
+            'away_team_name': 'Away',
+            'home_team_goal_count': 'Gols_Home',
+            'away_team_goal_count': 'Gols_Away',
+            'Res': 'Resultado',
+            'odds_ft_home_team_win': 'Odd_Home',
+            'odds_ft_draw': 'Odd_Empate',
+            'odds_ft_away_team_win': 'Odd_Away'
+        }, inplace=True)
+        # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
+        df['Data'] = df['Data'].apply(converter_data_gmt)
+    else:
+        # Formato do segundo arquivo
+        df.rename(columns={
+            'Date': 'Data',
+            'Home': 'Home',
+            'Away': 'Away',
+            'HG': 'Gols_Home',
+            'AG': 'Gols_Away',
+            'Res': 'Resultado',
+            'PH': 'Odd_Home',
+            'PD': 'Odd_Empate',
+            'PA': 'Odd_Away'
+        }, inplace=True)
 
+    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
+    df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
+    
+    # Calcular coeficiente de eficiência da equipe da casa
+    df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
+
+    # Adicionar coluna de agrupamento de odds
+    if 'Odd_Home' in df:
+        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+    elif 'Odd_Away' in df:
+        df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
+    
+    dfs.append(df)
+
+# Concatenar todos os dataframes
+df = pd.concat(dfs)
+
+# Obter todas as equipes envolvidas nos jogos
+all_teams_home = set(df['Home'])
+all_teams_away = set(df['Away'])
+
+# Ordenar os times em ordem alfabética
+times_home = sorted(str(team) for team in all_teams_home)
+times_away = sorted(str(team) for team in all_teams_away)
+
+# Ordenar as faixas de odds
+odds_groups = sorted(df['Odd_Group'].unique())
+
+# Interface do Streamlit
 def main():
-    df = load_dataframes(file_paths)
-
-    # Obter todas as equipes envolvidas nos jogos
-    all_teams_home = set(df['Home'])
-    all_teams_away = set(df['Away'])
-
-    # Ordenar os times em ordem alfabética
-    times_home = sorted(str(team) for team in all_teams_home)
-    times_away = sorted(str(team) for team in all_teams_away)
-
-    # Ordenar as faixas de odds
-    odds_groups = sorted(df['Odd_Group'].unique())
-
     st.title("Odd Justa")
     st.sidebar.header("Filtros")
     team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
-    time = st.sidebar.selectbox(f"Selecione o Time {'da Casa' if team_type == 'Home' else 'Visitante'}:", options=times_home if team_type == "Home" else times_away)
-    odds_column = 'Odd_Home' if team_type == "Home" else 'Odd_Away'
+    if team_type == "Home":
+        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
+    else:
+        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
     
     # Selectbox para selecionar o intervalo de odds
     st.sidebar.subheader("Faixa de Odds")
@@ -78,18 +150,30 @@ def main():
 
     # Extrair os limites inferior e superior do intervalo selecionado
     if selected_odds_range == "Outros":
-        min_odds, max_odds = -float('inf'), float('inf')  # Para o caso "Outros", significa que não há intervalo específico
+        min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
     else:
         min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
-    mostrar_resultados(df, team_type, time, odds_column, (min_odds, max_odds))
+    mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
-def mostrar_resultados(df, team_type, time, odds_column, odds_group):
-    team_df = df[df['Home'] == time] if team_type == "Home" else df[df['Away'] == time]
-    odds_col = 'Odd_Home' if team_type == "Home" else 'Odd_Away'
+def mostrar_resultados(team_type, time, odds_column, odds_group):
+    if team_type == "Home":
+        team_df = df[df['Home'] == time]
+        odds_col = 'Odd_Home'
+        team_name_col = 'Home'
+        opponent_name_col = 'Away'
+    else:
+        team_df = df[df['Away'] == time]
+        odds_col = 'Odd_Away'
+        team_name_col = 'Away'
+        opponent_name_col = 'Home'
     
     # Aplicar o filtro de odds
-    team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
+    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
+        # Selecionar jogos em que as odds não estejam dentro do range selecionado
+        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+    else:
+        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
 
     # Reindexar o DataFrame para garantir que os índices estejam corretos após o filtro
     team_df.reset_index(drop=True, inplace=True)
@@ -106,6 +190,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
 
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
+
 
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular estatísticas
