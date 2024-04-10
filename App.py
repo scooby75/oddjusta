@@ -152,13 +152,16 @@ def main():
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
+    # Salvar uma cópia dos dados originais
+    original_df = df.copy()
+
     if team_type == "Home":
-        team_df = df[df['Home'] == time]
+        team_df = original_df[original_df['Home'] == time]
         odds_col = 'Odd_Home'
         team_name_col = 'Home'
         opponent_name_col = 'Away'
     else:
-        team_df = df[df['Away'] == time]
+        team_df = original_df[original_df['Away'] == time]
         odds_col = 'Odd_Away'
         team_name_col = 'Away'
         opponent_name_col = 'Home'
@@ -218,6 +221,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+
 
 if __name__ == "__main__":
     main()
