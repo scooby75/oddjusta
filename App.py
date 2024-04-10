@@ -211,6 +211,18 @@ def create_consolidated_df():
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
 
+    # Adicionar as colunas ausentes, se necessário
+    missing_columns = ['Odd_Home', 'Odd_Empate', 'Odd_Away']
+    for column in missing_columns:
+        if column not in consolidated_df.columns:
+            consolidated_df[column] = None
+
+    # Selecionar apenas as colunas relevantes
+    consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
+
+    return consolidated_df
+
+
     # Selecionar apenas as colunas relevantes
     consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
 
