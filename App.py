@@ -171,11 +171,15 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         team_name_col = 'Away'
         opponent_name_col = 'Home'
     
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+    if odds_group == "Todos":  # Se a opção for "Todos"
+        # Não aplicamos nenhum filtro às odds
+        pass
     else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
+        if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
+            # Selecionar jogos em que as odds não estejam dentro do range selecionado
+            team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+        else:
+            team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
     
     # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
