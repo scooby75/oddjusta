@@ -1,7 +1,9 @@
 import pandas as pd
 from datetime import datetime
-import os
 import streamlit as st
+import os
+import requests
+from bd import file_paths  # Importing file_paths from bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -32,38 +34,98 @@ def agrupar_odd(odd):
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
 
-# Pasta onde os arquivos CSV estão localizados
-csv_folder = "bd"
+# Função para fazer o download de um arquivo e armazená-lo em cache
+def download_and_cache(url):
+    cache_folder = "cache"
+    cache_file = os.path.join(cache_folder, os.path.basename(url))
+    
+    if not os.path.exists(cache_folder):
+        os.makedirs(cache_folder)
+    
+    if not os.path.exists(cache_file):
+        response = requests.get(url)
+        with open(cache_file, 'wb') as f:
+            f.write(response.content)
+    
+    return cache_file
 
-# Lista para armazenar os dataframes
+# Função para converter a data do formato "Sep 03 2022 - 1:00pm" para "dd/mm/yyyy"
+def converter_data_gmt(date_str):
+    # Analisar a string de data no formato fornecido
+    date_obj = datetime.strptime(date_str, '%b %d %Y - %I:%M%p')
+    # Converter para o formato "dd/mm/yyyy" e retornar como string
+    return date_obj.strftime('%d-%m-%Y')
+
+# Carregar os arquivos CSV
 dfs = []
+for file_path in file_paths:
+    try:
+        cached_file = download_and_cache(file_path)
+        df = pd.read_csv(cached_file)
+        dfs.append(df)
+    except Exception as e:
+        print(f"Error processing file {file_path}: {e}")
 
-# Percorrer os arquivos na pasta "bd"
-for file_name in os.listdir(csv_folder):
-    if file_name.endswith('.csv'):
-        file_path = os.path.join(csv_folder, file_name)
-        try:
-            # Formatos de data nos arquivos CSV
-            date_format_1 = '%b %d %Y - %I:%M%p'
-            date_format_2 = '%d/%m/%Y'
-            
-            # Tenta ler com o primeiro formato
-            try:
-                df = pd.read_csv(file_path, parse_dates=['Data'], date_parser=lambda x: datetime.strptime(x, date_format_1))
-            except ValueError:
-                # Se falhar, tenta ler com o segundo formato
-                df = pd.read_csv(file_path, parse_dates=['Data'], date_parser=lambda x: datetime.strptime(x, date_format_2))
+    
+    # Verificar e ajustar o formato do arquivo conforme necessário
+    if 'FTHG' in df.columns:
+        # Formato do primeiro arquivo
+        df.rename(columns={
+            'Date': 'Data',
+            'HomeTeam': 'Home',
+            'AwayTeam': 'Away',
+            'FTHG': 'Gols_Home',
+            'FTAG': 'Gols_Away',
+            'FTR': 'Resultado',
+            'PSCH': 'Odd_Home',
+            'PSCD': 'Odd_Empate',
+            'PSCA': 'Odd_Away'
+        }, inplace=True)
+    elif 'home_team_name' in df.columns:
+        # Formato do terceiro arquivo
+        df.rename(columns={
+            'date_GMT': 'Data',
+            'home_team_name': 'Home',
+            'away_team_name': 'Away',
+            'home_team_goal_count': 'Gols_Home',
+            'away_team_goal_count': 'Gols_Away',
+            'Res': 'Resultado',
+            'odds_ft_home_team_win': 'Odd_Home',
+            'odds_ft_draw': 'Odd_Empate',
+            'odds_ft_away_team_win': 'Odd_Away'
+        }, inplace=True)
+        # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
+        df['Data'] = df['Data'].apply(converter_data_gmt)
+    else:
+        # Formato do segundo arquivo
+        df.rename(columns={
+            'Date': 'Data',
+            'Home': 'Home',
+            'Away': 'Away',
+            'HG': 'Gols_Home',
+            'AG': 'Gols_Away',
+            'Res': 'Resultado',
+            'PH': 'Odd_Home',
+            'PD': 'Odd_Empate',
+            'PA': 'Odd_Away'
+        }, inplace=True)
 
-            dfs.append(df)
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
+    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
+    df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
+    
+    # Calcular coeficiente de eficiência da equipe da casa
+    df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
 
-# Verificar se pelo menos um dataframe foi carregado
-if dfs:
-    # Concatenar todos os dataframes
-    df = pd.concat(dfs)
-else:
-    print("No dataframes were loaded successfully. Check the error messages above for details.")
+    # Adicionar coluna de agrupamento de odds
+    if 'Odd_Home' in df:
+        df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+    elif 'Odd_Away' in df:
+        df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
+    
+    dfs.append(df)
+
+# Concatenar todos os dataframes
+df = pd.concat(dfs)
 
 # Obter todas as equipes envolvidas nos jogos
 all_teams_home = set(df['Home'])
