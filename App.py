@@ -152,71 +152,13 @@ def main():
     # Criar uma nova base de dados consolidada
     consolidated_df = create_consolidated_df()
 
+    # Calcular odd justa
+    odd_justa = calcular_odd_justa()
+
     # Aplicar os filtros e lógica subsequente
-    mostrar_resultados(consolidated_df, team_type, time, odds_column, (min_odds, max_odds))
+    mostrar_resultados(consolidated_df, team_type, time, odds_column, (min_odds, max_odds), odd_justa)
 
-def create_consolidated_df():
-    original_df = pd.DataFrame()  # DataFrame vazio para armazenar todos os dados
-
-    # Carregar os arquivos CSV
-    for file_path in file_paths:
-        try:
-            cached_file = download_and_cache(file_path)
-            df = pd.read_csv(cached_file)
-            
-            # Ajustar o dataframe antes de concatená-lo
-            if 'FTHG' in df.columns:
-                # Formato do primeiro arquivo
-                df.rename(columns={
-                    'Date': 'Data',
-                    'HomeTeam': 'Home',
-                    'AwayTeam': 'Away',
-                    'FTHG': 'Gols_Home',
-                    'FTAG': 'Gols_Away',
-                    'FTR': 'Resultado',
-                    'PSCH': 'Odd_Home',
-                    'PSCD': 'Odd_Empate',
-                    'PSCA': 'Odd_Away'
-                }, inplace=True)
-            elif 'home_team_name' in df.columns:
-                # Formato do terceiro arquivo
-                df.rename(columns={
-                    'date_GMT': 'Data',
-                    'home_team_name': 'Home',
-                    'away_team_name': 'Away',
-                    'home_team_goal_count': 'Gols_Home',
-                    'away_team_goal_count': 'Gols_Away',
-                    'Res': 'Resultado',
-                    'odds_ft_home_team_win': 'Odd_Home',
-                    'odds_ft_draw': 'Odd_Empate',
-                    'odds_ft_away_team_win': 'Odd_Away'
-                }, inplace=True)
-                # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
-                df['Data'] = df['Data'].apply(converter_data_gmt)
-            else:
-                # Formato do segundo arquivo
-                df.rename(columns={
-                    'Date': 'Data',
-                    'Home': 'Home',
-                    'Away': 'Away',
-                    'HG': 'Gols_Home',
-                    'AG': 'Gols_Away',
-                    'Res': 'Resultado',
-                    'PH': 'Odd_Home',
-                    'PD': 'Odd_Empate',
-                    'PA': 'Odd_Away'
-                }, inplace=True)
-
-            original_df = pd.concat([original_df, df])  # Concatenar o DataFrame atual com os dados anteriores
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
-
-    # Selecionar apenas as colunas relevantes
-    consolidated_df = original_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
-
-    return consolidated_df
-
-def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group):
+def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group, odd_justa):
     # Copiar a base de dados consolidada para não modificar os dados originais
     team_df = consolidated_df.copy()
 
@@ -265,9 +207,6 @@ def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()
