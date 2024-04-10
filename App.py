@@ -217,22 +217,14 @@ def create_consolidated_df():
         if column not in consolidated_df.columns:
             consolidated_df[column] = None
 
-    # Selecionar apenas as colunas relevantes
-    consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
-
-    return consolidated_df
-
+    # Verificar se as colunas foram adicionadas corretamente
+    print(consolidated_df.head())
 
     # Selecionar apenas as colunas relevantes
     consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
 
     return consolidated_df
 
-
-    # Selecionar apenas as colunas relevantes
-    consolidated_df = original_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
-
-    return consolidated_df
 
 def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group):
     # Copiar a base de dados consolidada para não modificar os dados originais
