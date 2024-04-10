@@ -146,10 +146,16 @@ def main():
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
+        odds_col = 'Odd_Home'
     else:
         team_df = df[df['Away'] == time]
+        odds_col = 'Odd_Away'
     
-    team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]
+    if odds_group == -1:  # Se a opção for "Outros"
+        # Selecionar jogos em que as odds não estejam dentro do range selecionado
+        team_df = team_df[(team_df[odds_col] < odds_groups[0]) | (team_df[odds_col] > odds_groups[-1])]
+    else:
+        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
     
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
