@@ -152,16 +152,83 @@ def main():
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
-    # Salvar uma cópia dos dados originais
-    original_df = df.copy()
+    original_df = pd.DataFrame()  # DataFrame vazio para armazenar todos os dados
+
+    # Carregar os arquivos CSV
+    for file_path in file_paths:
+        try:
+            cached_file = download_and_cache(file_path)
+            df = pd.read_csv(cached_file)
+            
+            # Ajustar o dataframe antes de concatená-lo
+            if 'FTHG' in df.columns:
+                # Formato do primeiro arquivo
+                df.rename(columns={
+                    'Date': 'Data',
+                    'HomeTeam': 'Home',
+                    'AwayTeam': 'Away',
+                    'FTHG': 'Gols_Home',
+                    'FTAG': 'Gols_Away',
+                    'FTR': 'Resultado',
+                    'PSCH': 'Odd_Home',
+                    'PSCD': 'Odd_Empate',
+                    'PSCA': 'Odd_Away'
+                }, inplace=True)
+            elif 'home_team_name' in df.columns:
+                # Formato do terceiro arquivo
+                df.rename(columns={
+                    'date_GMT': 'Data',
+                    'home_team_name': 'Home',
+                    'away_team_name': 'Away',
+                    'home_team_goal_count': 'Gols_Home',
+                    'away_team_goal_count': 'Gols_Away',
+                    'Res': 'Resultado',
+                    'odds_ft_home_team_win': 'Odd_Home',
+                    'odds_ft_draw': 'Odd_Empate',
+                    'odds_ft_away_team_win': 'Odd_Away'
+                }, inplace=True)
+                # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
+                df['Data'] = df['Data'].apply(converter_data_gmt)
+            else:
+                # Formato do segundo arquivo
+                df.rename(columns={
+                    'Date': 'Data',
+                    'Home': 'Home',
+                    'Away': 'Away',
+                    'HG': 'Gols_Home',
+                    'AG': 'Gols_Away',
+                    'Res': 'Resultado',
+                    'PH': 'Odd_Home',
+                    'PD': 'Odd_Empate',
+                    'PA': 'Odd_Away'
+                }, inplace=True)
+
+            # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
+            df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
+
+            # Calcular coeficiente de eficiência da equipe da casa
+            df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
+
+            # Adicionar coluna de agrupamento de odds
+            if 'Odd_Home' in df:
+                df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
+            elif 'Odd_Away' in df:
+                df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
+            
+            original_df = pd.concat([original_df, df])  # Concatenar o DataFrame atual com os dados anteriores
+        except Exception as e:
+            print(f"Error processing file {file_path}: {e}")
+
+    # Aplicar filtros ao DataFrame original
+    team_df = original_df.copy()  # Copiar o DataFrame original para não modificar os dados originais
 
     if team_type == "Home":
-        team_df = original_df[original_df['Home'] == time]
+        team_df = team_df[team_df['Home'] == time]
         odds_col = 'Odd_Home'
         team_name_col = 'Home'
         opponent_name_col = 'Away'
     else:
-        team_df = original_df[original_df['Away'] == time]
+        team_df = team_df[team_df['Away'] == time]
         odds_col = 'Odd_Away'
         team_name_col = 'Away'
         opponent_name_col = 'Home'
