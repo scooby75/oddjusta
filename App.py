@@ -161,66 +161,54 @@ def main():
     mostrar_resultados(team_type, time, odds_column, odds_group_values)
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
-    if time == "Todos":  # Se a opção for "Todos"
+    if time == "Todos":  
         if team_type == "Home":
-            team_df = df[df['Home'].isin(times_home)]  # Selecionar todos os jogos de todas as equipes da casa
+            team_df = df[df['Home'].isin(times_home)]  
         else:
-            team_df = df[df['Away'].isin(times_away)]  # Selecionar todos os jogos de todas as equipes visitantes
+            team_df = df[df['Away'].isin(times_away)]  
     else:
         if team_type == "Home":
-            team_df = df[df['Home'] == time]  # Selecionar todos os jogos da equipe selecionada da casa
+            team_df = df[df['Home'] == time]  
         else:
-            team_df = df[df['Away'] == time]  # Selecionar todos os jogos da equipe selecionada visitante
+            team_df = df[df['Away'] == time]  
     
-    if odds_group != "Todos":  # Se a opção não for "Todos"
-        if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-            # Selecionar jogos em que as odds não estejam dentro do range selecionado
-            team_df = team_df[(team_df[odds_column] < odds_group[0]) | (team_df[odds_column] > odds_group[1])]
+    if odds_group != "Todos":  
+        if odds_group[0] == -1 and odds_group[1] == -1:  
+            # No caso de "Todos", não aplicamos nenhum filtro de odds
+            pass
         else:
             team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]    
    
-    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
 
-    # Drop duplicate rows
     team_df = team_df.drop_duplicates()
 
-    # Convert 'Data' column to datetime format with error handling
     team_df['Data'] = pd.to_datetime(team_df['Data'], errors='coerce')
 
-    # Remove rows with invalid dates (NaT)
     team_df = team_df.dropna(subset=['Data'])
 
-    # Format 'Data' column for display
     team_df['Data'] = team_df['Data'].dt.strftime('%d-%m-%Y')
 
-    # Exibir resultados em uma tabela
     st.write("### Partidas:")
     st.dataframe(team_df)
 
-    # Calcular quantas vezes o time ganhou
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
-    # Calcular lucro/prejuízo total
     team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
     lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
 
-    # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
     
-    # Calcular coeficiente de eficiência médio ajustado
     coeficiente_eficiencia_total = team_df['Coeficiente_Eficiencia'].sum()
     coeficiente_eficiencia_medio = coeficiente_eficiencia_total / total_matches if total_matches > 0 else 0
 
-    # Calcular odd justa
     odd_justa = 100 / win_percentage if win_percentage > 0 else 0
     
-    # Destacar resultados importantes usando markdown
     st.write("### Analise:")
     st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
