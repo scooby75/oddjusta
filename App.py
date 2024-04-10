@@ -109,7 +109,7 @@ for file_path in file_paths:
         df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)  # Adiciona a coluna 'Resultado'
 
         # Manter apenas um jogo por data
-        df.drop_duplicates(subset=['Data', 'Home', 'Away'], inplace=True)
+        df = df.groupby(['Data', 'Home', 'Away']).first().reset_index()
 
         dfs.append(df)
     except Exception as e:
@@ -200,17 +200,15 @@ def create_consolidated_df():
                     'PA': 'Odd_Away'
                 }, inplace=True)
 
-            df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)  # Adiciona a coluna 'Resultado'
-
             # Manter apenas um jogo por data
-            df.drop_duplicates(subset=['Data', 'Home', 'Away'], inplace=True)
+            df = df.groupby(['Data', 'Home', 'Away']).first().reset_index()
 
             original_df = pd.concat([original_df, df])  # Concatenar o DataFrame atual com os dados anteriores
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
 
     # Selecionar apenas as colunas relevantes
-    consolidated_df = original_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado']]
+    consolidated_df = original_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
 
     return consolidated_df
 
@@ -255,6 +253,8 @@ def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group
     # Destacar resultados importantes usando markdown
     st.write("### Analise:")
     st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    st.markdown(f"- Odd justa: {odd_justa:.2f}.")
+    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
