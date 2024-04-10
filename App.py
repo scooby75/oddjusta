@@ -149,7 +149,7 @@ def main():
     mostrar_resultados(consolidated_df, team_type, time, odds_column, (min_odds, max_odds))
 
 def create_consolidated_df():
-    original_df = pd.DataFrame()  # DataFrame vazio para armazenar todos os dados
+    consolidated_df = pd.DataFrame()  # DataFrame vazio para armazenar todos os dados consolidados
 
     # Carregar os arquivos CSV
     for file_path in file_paths:
@@ -203,9 +203,19 @@ def create_consolidated_df():
             # Manter apenas um jogo por data
             df = df.groupby(['Data', 'Home', 'Away']).first().reset_index()
 
-            original_df = pd.concat([original_df, df])  # Concatenar o DataFrame atual com os dados anteriores
+            # Verificar se há duplicatas antes de mesclar com a base de dados consolidada
+            merged_df = pd.merge(consolidated_df, df, on=['Data', 'Home', 'Away'], how='outer', indicator=True)
+            df = merged_df[merged_df['_merge'] == 'right_only'].drop(columns='_merge')
+
+            consolidated_df = pd.concat([consolidated_df, df])  # Concatenar o DataFrame atual com os dados anteriores
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
+
+    # Selecionar apenas as colunas relevantes
+    consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
+
+    return consolidated_df
+
 
     # Selecionar apenas as colunas relevantes
     consolidated_df = original_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
