@@ -149,9 +149,13 @@ def main():
     st.sidebar.subheader("Faixa de Odds")
     min_odds, max_odds = st.sidebar.slider("Selecione um intervalo de odds:", min_value=df[odds_column].min(), max_value=df[odds_column].max(), value=(df[odds_column].min(), df[odds_column].max()))
 
-    mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+    # Criar uma nova base de dados consolidada
+    consolidated_df = create_consolidated_df()
 
-def mostrar_resultados(team_type, time, odds_column, odds_group):
+    # Aplicar os filtros e lógica subsequente
+    mostrar_resultados(consolidated_df, team_type, time, odds_column, (min_odds, max_odds))
+
+def create_consolidated_df():
     original_df = pd.DataFrame()  # DataFrame vazio para armazenar todos os dados
 
     # Carregar os arquivos CSV
@@ -203,24 +207,18 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
                     'PA': 'Odd_Away'
                 }, inplace=True)
 
-            # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
-            df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
-
-            # Calcular coeficiente de eficiência da equipe da casa
-            df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
-
-            # Adicionar coluna de agrupamento de odds
-            if 'Odd_Home' in df:
-                df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
-            elif 'Odd_Away' in df:
-                df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
-            
             original_df = pd.concat([original_df, df])  # Concatenar o DataFrame atual com os dados anteriores
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
 
-    # Aplicar filtros ao DataFrame original
-    team_df = original_df.copy()  # Copiar o DataFrame original para não modificar os dados originais
+    # Selecionar apenas as colunas relevantes
+    consolidated_df = original_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
+
+    return consolidated_df
+
+def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group):
+    # Copiar a base de dados consolidada para não modificar os dados originais
+    team_df = consolidated_df.copy()
 
     if team_type == "Home":
         team_df = team_df[team_df['Home'] == time]
@@ -239,23 +237,6 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     else:
         team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
     
-    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
-    team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
-    
-    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
-
-    # Drop duplicate rows
-    team_df = team_df.drop_duplicates()
-
-    # Convert 'Data' column to datetime format with error handling
-    team_df['Data'] = pd.to_datetime(team_df['Data'], errors='coerce')
-
-    # Remove rows with invalid dates (NaT)
-    team_df = team_df.dropna(subset=['Data'])
-
-    # Format 'Data' column for display
-    team_df['Data'] = team_df['Data'].dt.strftime('%d-%m-%Y')
-
     # Exibir resultados em uma tabela
     st.write("### Partidas:")
     st.dataframe(team_df)
@@ -273,13 +254,6 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
     
-    # Calcular coeficiente de eficiência médio ajustado
-    coeficiente_eficiencia_total = team_df['Coeficiente_Eficiencia'].sum()
-    coeficiente_eficiencia_medio = coeficiente_eficiencia_total / total_matches if total_matches > 0 else 0
-
-    # Calcular odd justa
-    odd_justa = 100 / win_percentage if win_percentage > 0 else 0
-    
     # Destacar resultados importantes usando markdown
     st.write("### Analise:")
     st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
@@ -288,7 +262,6 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
-
 
 if __name__ == "__main__":
     main()
