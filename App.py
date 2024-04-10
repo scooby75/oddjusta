@@ -140,7 +140,13 @@ def main():
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
         odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
     odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
-    odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
+    
+    # Verificar se a opção selecionada não é "Outros"
+    if odds_group != "Outros":
+        odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
+    else:
+        odds_group_values = -1  # Define um valor especial para indicar que a opção é "Outros"
+    
     mostrar_resultados(team_type, time, odds_column, odds_group_values)
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
@@ -209,3 +215,4 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
 
 if __name__ == "__main__":
     main()
+
