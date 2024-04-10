@@ -26,6 +26,7 @@ def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
     return diferenca_gols
 
+
 def agrupar_odd(odd):
     for i in range(1, 60):
         lower = 1 + (i - 1) * 0.10
@@ -144,39 +145,40 @@ def main():
     st.sidebar.header("Filtros")
     team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
     if team_type == "Home":
-        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=["Todos"] + times_home)  # Adicionar "Todos" à lista de opções
         odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
     else:
-        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=["Todos"] + times_away)  # Adicionar "Todos" à lista de opções
         odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
-    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
+    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=["Todos"] + odds_groups)  # Adicionar "Todos" à lista de opções
     
-    # Verificar se a opção selecionada não é "Outros"
-    if odds_group != "Outros":
+    # Verificar se a opção selecionada não é "Todos"
+    if odds_group != "Todos":
         odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
     else:
-        odds_group_values = [-1, -1]  # Define um valor especial para indicar que a opção é "Outros"
+        odds_group_values = [-1, -1]  # Define um valor especial para indicar que a opção é "Todos"
     
     mostrar_resultados(team_type, time, odds_column, odds_group_values)
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
-    if team_type == "Home":
-        team_df = df[df['Home'] == time]
-        odds_col = 'Odd_Home'
-        team_name_col = 'Home'
-        opponent_name_col = 'Away'
+    if time == "Todos":  # Se a opção for "Todos"
+        if team_type == "Home":
+            team_df = df[df['Home'].isin(times_home)]  # Selecionar todos os jogos de todas as equipes da casa
+        else:
+            team_df = df[df['Away'].isin(times_away)]  # Selecionar todos os jogos de todas as equipes visitantes
     else:
-        team_df = df[df['Away'] == time]
-        odds_col = 'Odd_Away'
-        team_name_col = 'Away'
-        opponent_name_col = 'Home'
+        if team_type == "Home":
+            team_df = df[df['Home'] == time]  # Selecionar todos os jogos da equipe selecionada da casa
+        else:
+            team_df = df[df['Away'] == time]  # Selecionar todos os jogos da equipe selecionada visitante
     
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
-    else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
-    
+    if odds_group != "Todos":  # Se a opção não for "Todos"
+        if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
+            # Selecionar jogos em que as odds não estejam dentro do range selecionado
+            team_df = team_df[(team_df[odds_column] < odds_group[0]) | (team_df[odds_column] > odds_group[1])]
+        else:
+            team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]    
+   
     # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
