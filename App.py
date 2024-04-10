@@ -237,6 +237,9 @@ def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group
     else:
         team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
     
+    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
+    team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
+
     # Exibir resultados em uma tabela
     st.write("### Partidas:")
     st.dataframe(team_df)
@@ -262,6 +265,9 @@ def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
