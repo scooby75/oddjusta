@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import os
-from bd import file_paths  # Importing file_paths from bd.py
+import streamlit as st
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -32,57 +32,49 @@ def agrupar_odd(odd):
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
 
-# Função para fazer o download de um arquivo e armazená-lo em cache
-def download_and_cache(url):
-    cache_folder = "cache"
-    cache_file = os.path.join(cache_folder, os.path.basename(url))
-    
-    if not os.path.exists(cache_folder):
-        os.makedirs(cache_folder)
-    
-    if not os.path.exists(cache_file):
-        response = requests.get(url)
-        with open(cache_file, 'wb') as f:
-            f.write(response.content)
-    
-    return cache_file
+# Pasta onde os arquivos CSV estão localizados
+csv_folder = "bd"
 
-# Carregar os arquivos CSV
+# Lista para armazenar os dataframes
 dfs = []
-for file_path in file_paths:
-    try:
-        cached_file = download_and_cache(file_path)
-        
-        # Formatos de data nos arquivos CSV
-        date_format_1 = '%b %d %Y - %I:%M%p'
-        date_format_2 = '%d/%m/%Y'
-        
-        # Tenta ler com o primeiro formato
+
+# Percorrer os arquivos na pasta "bd"
+for file_name in os.listdir(csv_folder):
+    if file_name.endswith('.csv'):
+        file_path = os.path.join(csv_folder, file_name)
         try:
-            df = pd.read_csv(cached_file, parse_dates=['Data'], date_parser=lambda x: datetime.strptime(x, date_format_1))
-        except ValueError:
-            # Se falhar, tenta ler com o segundo formato
-            df = pd.read_csv(cached_file, parse_dates=['Data'], date_parser=lambda x: datetime.strptime(x, date_format_2))
+            # Formatos de data nos arquivos CSV
+            date_format_1 = '%b %d %Y - %I:%M%p'
+            date_format_2 = '%d/%m/%Y'
+            
+            # Tenta ler com o primeiro formato
+            try:
+                df = pd.read_csv(file_path, parse_dates=['Data'], date_parser=lambda x: datetime.strptime(x, date_format_1))
+            except ValueError:
+                # Se falhar, tenta ler com o segundo formato
+                df = pd.read_csv(file_path, parse_dates=['Data'], date_parser=lambda x: datetime.strptime(x, date_format_2))
 
-        dfs.append(df)
-    except Exception as e:
-        print(f"Error processing file {file_path}: {e}")
+            dfs.append(df)
+        except Exception as e:
+            print(f"Error processing file {file_path}: {e}")
 
-# Verificar se há dataframes para concatenar
+# Verificar se pelo menos um dataframe foi carregado
 if dfs:
     # Concatenar todos os dataframes
     df = pd.concat(dfs)
-    
-    # Obter todas as equipes envolvidas nos jogos
-    all_teams_home = set(df['Home'])
-    all_teams_away = set(df['Away'])
+else:
+    print("No dataframes were loaded successfully. Check the error messages above for details.")
 
-    # Ordenar os times em ordem alfabética
-    times_home = sorted(str(team) for team in all_teams_home)
-    times_away = sorted(str(team) for team in all_teams_away)
+# Obter todas as equipes envolvidas nos jogos
+all_teams_home = set(df['Home'])
+all_teams_away = set(df['Away'])
 
-    # Ordenar as faixas de odds
-    odds_groups = sorted(df['Odd_Group'].unique())
+# Ordenar os times em ordem alfabética
+times_home = sorted(str(team) for team in all_teams_home)
+times_away = sorted(str(team) for team in all_teams_away)
+
+# Ordenar as faixas de odds
+odds_groups = sorted(df['Odd_Group'].unique())
 
 # Interface do Streamlit
 def main():
