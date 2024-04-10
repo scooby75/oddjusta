@@ -20,8 +20,8 @@ def calcular_coeficiente(row):
 
 def agrupar_odd(odd):
     for i in range(1, 60):
-        lower = 1 + (i - 1) * 0.20
-        upper = 1 + i * 0.20
+        lower = 1 + (i - 1) * 0.10
+        upper = 1 + i * 0.10
         if lower <= odd <= upper:
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
