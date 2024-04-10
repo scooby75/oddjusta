@@ -22,7 +22,6 @@ def classificar_resultado(row, team_type):
         else:
             return 'D'
 
-
 def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
     return diferenca_gols
