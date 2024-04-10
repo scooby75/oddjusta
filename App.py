@@ -1,277 +1,189 @@
-import pandas as pd
-from datetime import datetime
-import streamlit as st
 import os
+from datetime import datetime
+
+import pandas as pd
 import requests
-from bd import file_paths  # Importing file_paths from bd.py
+import streamlit as st
 
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
-def classificar_resultado(row, team_type):
-    if team_type == "Home":
-        if row['Gols_Home'] > row['Gols_Away']:
-            return 'W'
-        elif row['Gols_Home'] < row['Gols_Away']:
-            return 'L'
-        else:
-            return 'D'
-    else:  # Caso seja "Away"
-        if row['Gols_Away'] > row['Gols_Home']:
-            return 'W'
-        elif row['Gols_Away'] < row['Gols_Home']:
-            return 'L'
-        else:
-            return 'D'
+from bd import file_paths  # Importando file_paths do arquivo bd.py
 
-def calcular_coeficiente(row):
-    diferenca_gols = row['Gols_Home'] - row['Gols_Away']
-    return diferenca_gols
-
-def agrupar_odd(odd):
-    for i in range(1, 60):
-        lower = 1 + (i - 1) * 0.10
-        upper = 1 + i * 0.10
-        if lower <= odd <= upper:
-            return f"{lower:.2f} - {upper:.2f}"
-    return 'Outros'
-
-# Função para fazer o download de um arquivo e armazená-lo em cache
-def download_and_cache(url):
-    cache_folder = "cache"
-    cache_file = os.path.join(cache_folder, os.path.basename(url))
+# Função para baixar um arquivo e armazená-lo em cache
+def baixar_e_armazenar(url):
+    pasta_cache = "cache"
+    arquivo_cache = os.path.join(pasta_cache, os.path.basename(url))
     
-    if not os.path.exists(cache_folder):
-        os.makedirs(cache_folder)
+    if not os.path.exists(pasta_cache):
+        os.makedirs(pasta_cache)
     
-    if not os.path.exists(cache_file):
-        response = requests.get(url)
-        with open(cache_file, 'wb') as f:
-            f.write(response.content)
+    if not os.path.exists(arquivo_cache):
+        resposta = requests.get(url)
+        with open(arquivo_cache, 'wb') as f:
+            f.write(resposta.content)
     
-    return cache_file
+    return arquivo_cache
 
 # Função para converter a data do formato "Sep 03 2022 - 1:00pm" para "dd/mm/yyyy"
-def converter_data_gmt(date_str):
-    # Analisar a string de data no formato fornecido
-    date_obj = datetime.strptime(date_str, '%b %d %Y - %I:%M%p')
-    # Converter para o formato "dd/mm/yyyy" e retornar como string
-    return date_obj.strftime('%d-%m-%Y')
+def converter_data_gmt(data_str):
+    data_obj = datetime.strptime(data_str, '%b %d %Y - %I:%M%p')
+    return data_obj.strftime('%d-%m-%Y')
 
-# Carregar os arquivos CSV
-dfs = []
-for file_path in file_paths:
-    try:
-        cached_file = download_and_cache(file_path)
-        df = pd.read_csv(cached_file)
-        
-        # Ajustar o dataframe antes de concatená-lo
-        if 'FTHG' in df.columns:
-            # Formato do primeiro arquivo
-            df.rename(columns={
-                'Date': 'Data',
-                'HomeTeam': 'Home',
-                'AwayTeam': 'Away',
-                'FTHG': 'Gols_Home',
-                'FTAG': 'Gols_Away',
-                'FTR': 'Resultado',
-                'PSCH': 'Odd_Home',
-                'PSCD': 'Odd_Empate',
-                'PSCA': 'Odd_Away'
-            }, inplace=True)
-        elif 'home_team_name' in df.columns:
-            # Formato do terceiro arquivo
-            df.rename(columns={
-                'date_GMT': 'Data',
-                'home_team_name': 'Home',
-                'away_team_name': 'Away',
-                'home_team_goal_count': 'Gols_Home',
-                'away_team_goal_count': 'Gols_Away',
-                'Res': 'Resultado',
-                'odds_ft_home_team_win': 'Odd_Home',
-                'odds_ft_draw': 'Odd_Empate',
-                'odds_ft_away_team_win': 'Odd_Away'
-            }, inplace=True)
-            # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
-            df['Data'] = df['Data'].apply(converter_data_gmt)
+# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
+def classificar_resultado(linha, tipo_time):
+    if tipo_time == "Casa":
+        if linha['Gols_Casa'] > linha['Gols_Visitante']:
+            return 'V'
+        elif linha['Gols_Casa'] < linha['Gols_Visitante']:
+            return 'D'
         else:
-            # Formato do segundo arquivo
-            df.rename(columns={
-                'Date': 'Data',
-                'Home': 'Home',
-                'Away': 'Away',
-                'HG': 'Gols_Home',
-                'AG': 'Gols_Away',
-                'Res': 'Resultado',
-                'PH': 'Odd_Home',
-                'PD': 'Odd_Empate',
-                'PA': 'Odd_Away'
-            }, inplace=True)
+            return 'E'
+    else:  
+        if linha['Gols_Visitante'] > linha['Gols_Casa']:
+            return 'V'
+        elif linha['Gols_Visitante'] < linha['Gols_Casa']:
+            return 'D'
+        else:
+            return 'E'
 
-        df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)  # Adiciona a coluna 'Resultado'
-
-        # Manter apenas um jogo por data
-        df = df.groupby(['Data', 'Home', 'Away']).first().reset_index()
-
-        dfs.append(df)
-    except Exception as e:
-        print(f"Error processing file {file_path}: {e}")
-
-# Concatenar todos os dataframes
-df = pd.concat(dfs)
-
-# Obter todas as equipes envolvidas nos jogos
-all_teams_home = set(df['Home'])
-all_teams_away = set(df['Away'])
-
-# Ordenar os times em ordem alfabética
-times_home = sorted(str(team) for team in all_teams_home)
-times_away = sorted(str(team) for team in all_teams_away)
-
-# Interface do Streamlit
-def main():
+# Função principal para executar a interface Streamlit
+def principal():
     st.title("Odd Justa")
     st.sidebar.header("Filtros")
-    team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
-    if team_type == "Home":
-        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
+    tipo_time = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Casa", "Visitante"])
+    
+    if tipo_time == "Casa":
+        opcoes_time = sorted(str(time) for time in set(df['Casa']))
+        label_time = "Time da Casa"
     else:
-        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+        opcoes_time = sorted(str(time) for time in set(df['Visitante']))
+        label_time = "Time Visitante"
+    
+    time = st.sidebar.selectbox(f"Selecione o {label_time}:", options=opcoes_time)
     
     # Slider para selecionar o intervalo de odds
     st.sidebar.subheader("Faixa de Odds")
     min_odds, max_odds = st.sidebar.slider("Selecione um intervalo de odds:", min_value=df[odds_column].min(), max_value=df[odds_column].max(), value=(df[odds_column].min(), df[odds_column].max()))
+    
+    # Criar um DataFrame consolidado
+    df_consolidado = criar_df_consolidado()
 
-    # Criar uma nova base de dados consolidada
-    consolidated_df = create_consolidated_df()
+    # Aplicar filtros e lógica subsequente
+    mostrar_resultados(df_consolidado, tipo_time, time, odds_column, (min_odds, max_odds))
 
-    # Aplicar os filtros e lógica subsequente
-    mostrar_resultados(consolidated_df, team_type, time, odds_column, (min_odds, max_odds))
-
-def create_consolidated_df():
-    consolidated_df = pd.DataFrame()  # DataFrame vazio para armazenar todos os dados consolidados
-
-    # Carregar os arquivos CSV
-    for file_path in file_paths:
+# Função para criar um DataFrame consolidado
+def criar_df_consolidado():
+    df_consolidado = pd.DataFrame()  
+    
+    for caminho_arquivo in file_paths:
         try:
-            cached_file = download_and_cache(file_path)
-            df = pd.read_csv(cached_file)
+            arquivo_cache = baixar_e_armazenar(caminho_arquivo)
+            df = pd.read_csv(arquivo_cache)
             
-            # Ajustar o dataframe antes de concatená-lo
+            # Ajustar dataframe antes de concatenar
             if 'FTHG' in df.columns:
                 # Formato do primeiro arquivo
-                df.rename(columns={
-                    'Date': 'Data',
-                    'HomeTeam': 'Home',
-                    'AwayTeam': 'Away',
-                    'FTHG': 'Gols_Home',
-                    'FTAG': 'Gols_Away',
-                    'FTR': 'Resultado',
-                    'PSCH': 'Odd_Home',
-                    'PSCD': 'Odd_Empate',
-                    'PSCA': 'Odd_Away'
-                }, inplace=True)
+                df = formatar_primeiro_arquivo(df)
             elif 'home_team_name' in df.columns:
                 # Formato do terceiro arquivo
-                df.rename(columns={
-                    'date_GMT': 'Data',
-                    'home_team_name': 'Home',
-                    'away_team_name': 'Away',
-                    'home_team_goal_count': 'Gols_Home',
-                    'away_team_goal_count': 'Gols_Away',
-                    'Res': 'Resultado',
-                    'odds_ft_home_team_win': 'Odd_Home',
-                    'odds_ft_draw': 'Odd_Empate',
-                    'odds_ft_away_team_win': 'Odd_Away'
-                }, inplace=True)
-                # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
-                df['Data'] = df['Data'].apply(converter_data_gmt)
+                df = formatar_terceiro_arquivo(df)
             else:
                 # Formato do segundo arquivo
-                df.rename(columns={
-                    'Date': 'Data',
-                    'Home': 'Home',
-                    'Away': 'Away',
-                    'HG': 'Gols_Home',
-                    'AG': 'Gols_Away',
-                    'Res': 'Resultado',
-                    'PH': 'Odd_Home',
-                    'PD': 'Odd_Empate',
-                    'PA': 'Odd_Away'
-                }, inplace=True)
+                df = formatar_segundo_arquivo(df)
 
-            # Manter apenas um jogo por data
-            df = df.groupby(['Data', 'Home', 'Away']).first().reset_index()
+            df = df.groupby(['Data', 'Casa', 'Visitante']).first().reset_index()
 
-            # Verificar se há duplicatas antes de mesclar com a base de dados consolidada
-            merged_df = pd.merge(consolidated_df, df, on=['Data', 'Home', 'Away'], how='outer', indicator=True)
-            df = merged_df[merged_df['_merge'] == 'right_only'].drop(columns='_merge')
-
-            consolidated_df = pd.concat([consolidated_df, df])  # Concatenar o DataFrame atual com os dados anteriores
+            # Mesclar com DataFrame consolidado
+            df_consolidado = pd.concat([df_consolidado, df])  
         except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
+            print(f"Erro ao processar arquivo {caminho_arquivo}: {e}")
 
-    # Adicionar as colunas ausentes, se necessário
-    missing_columns = ['Odd_Home', 'Odd_Empate', 'Odd_Away']
-    for column in missing_columns:
-        if column not in consolidated_df.columns:
-            consolidated_df[column] = None
+    df_consolidado = df_consolidado[['Data', 'Casa', 'Visitante', 'Odd_Casa', 'Odd_Empate', 'Odd_Visitante', 'Gols_Casa', 'Gols_Visitante']]
 
-    # Verificar se as colunas foram adicionadas corretamente
-    print("Colunas presentes em consolidated_df:")
-    print(consolidated_df.columns)
+    return df_consolidado
 
-    # Selecionar apenas as colunas relevantes
-    consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
+# Função para formatar o primeiro arquivo
+def formatar_primeiro_arquivo(df):
+    df.rename(columns={
+        'Date': 'Data',
+        'HomeTeam': 'Casa',
+        'AwayTeam': 'Visitante',
+        'FTHG': 'Gols_Casa',
+        'FTAG': 'Gols_Visitante',
+        'FTR': 'Resultado',
+        'PSCH': 'Odd_Casa',
+        'PSCD': 'Odd_Empate',
+        'PSCA': 'Odd_Visitante'
+    }, inplace=True)
+    return df
 
-    return consolidated_df
+# Função para formatar o segundo arquivo
+def formatar_segundo_arquivo(df):
+    df.rename(columns={
+        'Date': 'Data',
+        'Home': 'Casa',
+        'Away': 'Visitante',
+        'HG': 'Gols_Casa',
+        'AG': 'Gols_Visitante',
+        'Res': 'Resultado',
+        'PH': 'Odd_Casa',
+        'PD': 'Odd_Empate',
+        'PA': 'Odd_Visitante'
+    }, inplace=True)
+    return df
 
+# Função para formatar o terceiro arquivo
+def formatar_terceiro_arquivo(df):
+    df.rename(columns={
+        'date_GMT': 'Data',
+        'home_team_name': 'Casa',
+        'away_team_name': 'Visitante',
+        'home_team_goal_count': 'Gols_Casa',
+        'away_team_goal_count': 'Gols_Visitante',
+        'Res': 'Resultado',
+        'odds_ft_home_team_win': 'Odd_Casa',
+        'odds_ft_draw': 'Odd_Empate',
+        'odds_ft_away_team_win': 'Odd_Visitante'
+    }, inplace=True)
+    df['Data'] = df['Data'].apply(converter_data_gmt)
+    return df
 
+# Função para exibir resultados
+def mostrar_resultados(df_consolidado, tipo_time, time, odds_column, odds_group):
+    df_time = df_consolidado.copy()
 
-def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group):
-    # Copiar a base de dados consolidada para não modificar os dados originais
-    team_df = consolidated_df.copy()
-
-    if team_type == "Home":
-        team_df = team_df[team_df['Home'] == time]
-        odds_col = 'Odd_Home'
-        team_name_col = 'Home'
-        opponent_name_col = 'Away'
+    if tipo_time == "Casa":
+        df_time = df_time[df_time['Casa'] == time]
+        odds_col = 'Odd_Casa'
+        nome_time_col = 'Casa'
+        nome_adversario_col = 'Visitante'
     else:
-        team_df = team_df[team_df['Away'] == time]
-        odds_col = 'Odd_Away'
-        team_name_col = 'Away'
-        opponent_name_col = 'Home'
+        df_time = df_time[df_time['Visitante'] == time]
+        odds_col = 'Odd_Visitante'
+        nome_time_col = 'Visitante'
+        nome_adversario_col = 'Casa'
     
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+    if odds_group[0] == -1 and odds_group[1] == -1:
+        df_time = df_time[(df_time[odds_col] < odds_group[0]) | (df_time[odds_col] > odds_group[1])]
     else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
+        df_time = df_time[(df_time[odds_col] >= odds_group[0]) & (df_time[odds_col] <= odds_group[1])]
     
-    # Exibir resultados em uma tabela
     st.write("### Partidas:")
-    st.dataframe(team_df)
+    st.dataframe(df_time)
 
-    # Calcular quantas vezes o time ganhou
-    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
-    total_matches = team_df.shape[0]
-    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+    num_vitorias = df_time[df_time['Resultado'] == 'V'].shape[0]
+    total_jogos = df_time.shape[0]
+    porcentagem_vitorias = (num_vitorias / total_jogos) * 100 if total_jogos > 0 else 0
 
-    # Calcular lucro/prejuízo total
-    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
-    lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
+    df_time['Lucro_Prejuizo'] = df_time.apply(lambda linha: linha[odds_column] - 1 if linha['Resultado'] == 'V' else -1, axis=1)
+    lucro_prejuizo_total = df_time['Lucro_Prejuizo'].sum()
 
-    # Calcular médias
-    media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
-    media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
+    media_gols = df_time['Gols_Casa'].mean() if tipo_time == "Casa" else df_time['Gols_Visitante'].mean()
+    media_gols_sofridos = df_time['Gols_Visitante'].mean() if tipo_time == "Casa" else df_time['Gols_Casa'].mean()
     
-    # Destacar resultados importantes usando markdown
-    st.write("### Analise:")
-    st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    st.write("### Análise:")
+    st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_vitorias} vez(es) em {total_jogos} jogo(s), aproveitamento de ({porcentagem_vitorias:.2f}%).")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
 if __name__ == "__main__":
-    main()
+    principal()
