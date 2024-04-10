@@ -46,6 +46,8 @@ def classificar_resultado(linha, tipo_time):
 
 # Função principal para executar a interface Streamlit
 def principal():
+    df = carregar_dataframe()  # Carrega ou cria o DataFrame df
+
     st.title("Odd Justa")
     st.sidebar.header("Filtros")
     tipo_time = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Casa", "Visitante"])
