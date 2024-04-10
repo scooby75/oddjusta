@@ -152,9 +152,16 @@ def main():
     
     # Slider para selecionar o intervalo de odds
     st.sidebar.subheader("Faixa de Odds")
-    min_odds, max_odds = st.sidebar.slider("Selecione um intervalo de odds:", min_value=df[odds_column].min(), max_value=df[odds_column].max(), value=(df[odds_column].min(), df[odds_column].max()))
+    min_odds, max_odds = st.sidebar.slider(
+        "Selecione um intervalo de odds:",
+        min_value=df[odds_column].min(),
+        max_value=df[odds_column].max(),
+        value=(df[odds_column].min(), df[odds_column].max()),
+        step=0.10  # Intervalo de 0.10 entre os valores
+    )
 
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
