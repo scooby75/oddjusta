@@ -68,19 +68,21 @@ for file_path in file_paths:
     except Exception as e:
         print(f"Error processing file {file_path}: {e}")
 
-# Concatenar todos os dataframes
-df = pd.concat(dfs)
+# Verificar se há dataframes para concatenar
+if dfs:
+    # Concatenar todos os dataframes
+    df = pd.concat(dfs)
+    
+    # Obter todas as equipes envolvidas nos jogos
+    all_teams_home = set(df['Home'])
+    all_teams_away = set(df['Away'])
 
-# Obter todas as equipes envolvidas nos jogos
-all_teams_home = set(df['Home'])
-all_teams_away = set(df['Away'])
+    # Ordenar os times em ordem alfabética
+    times_home = sorted(str(team) for team in all_teams_home)
+    times_away = sorted(str(team) for team in all_teams_away)
 
-# Ordenar os times em ordem alfabética
-times_home = sorted(str(team) for team in all_teams_home)
-times_away = sorted(str(team) for team in all_teams_away)
-
-# Ordenar as faixas de odds
-odds_groups = sorted(df['Odd_Group'].unique())
+    # Ordenar as faixas de odds
+    odds_groups = sorted(df['Odd_Group'].unique())
 
 # Interface do Streamlit
 def main():
