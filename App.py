@@ -150,15 +150,15 @@ def main():
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
         odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
     
-    # Slider para selecionar o intervalo de odds
+    # Selectbox para selecionar o intervalo de odds
     st.sidebar.subheader("Faixa de Odds")
-    min_odds, max_odds = st.sidebar.slider(
-        "Selecione um intervalo de odds:",
-        min_value=df[odds_column].min(),
-        max_value=df[odds_column].max(),
-        value=(df[odds_column].min(), df[odds_column].max()),
-        step=0.10  # Intervalo de 0.10 entre os valores
-    )
+    selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+
+    # Extrair os limites inferior e superior do intervalo selecionado
+    if selected_odds_range == "Outros":
+        min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
+    else:
+        min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
