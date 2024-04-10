@@ -109,7 +109,7 @@ for file_path in file_paths:
         df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)  # Adiciona a coluna 'Resultado'
 
         # Manter apenas um jogo por data
-        df.drop_duplicates(subset=['Data'], inplace=True)
+        df.drop_duplicates(subset=['Data', 'Home', 'Away'], inplace=True)
 
         dfs.append(df)
     except Exception as e:
@@ -203,7 +203,7 @@ def create_consolidated_df():
             df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)  # Adiciona a coluna 'Resultado'
 
             # Manter apenas um jogo por data
-            df.drop_duplicates(subset=['Data'], inplace=True)
+            df.drop_duplicates(subset=['Data', 'Home', 'Away'], inplace=True)
 
             original_df = pd.concat([original_df, df])  # Concatenar o DataFrame atual com os dados anteriores
         except Exception as e:
@@ -244,6 +244,10 @@ def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
+    # Calcular lucro/prejuízo total
+    team_df['Lucro_Prejuizo'] = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1)
+    lucro_prejuizo_total = team_df['Lucro_Prejuizo'].sum()
+
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
@@ -251,6 +255,7 @@ def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group
     # Destacar resultados importantes usando markdown
     st.write("### Analise:")
     st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
