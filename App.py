@@ -6,13 +6,22 @@ import requests
 from bd import file_paths  # Importing file_paths from bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
-def classificar_resultado(row):
-    if row['Gols_Home'] > row['Gols_Away']:
-        return 'W'
-    elif row['Gols_Home'] < row['Gols_Away']:
-        return 'L'
-    else:
-        return 'D'
+def classificar_resultado(row, team_type):
+    if team_type == "Home":
+        if row['Gols_Home'] > row['Gols_Away']:
+            return 'W'
+        elif row['Gols_Home'] < row['Gols_Away']:
+            return 'L'
+        else:
+            return 'D'
+    else:  # Caso seja "Away"
+        if row['Gols_Away'] > row['Gols_Home']:
+            return 'W'
+        elif row['Gols_Away'] < row['Gols_Home']:
+            return 'L'
+        else:
+            return 'D'
+
 
 def calcular_coeficiente(row):
     diferenca_gols = row['Gols_Home'] - row['Gols_Away']
@@ -103,7 +112,7 @@ for file_path in file_paths:
         }, inplace=True)
 
     # Adicionar coluna de resultado
-    df['Resultado'] = df.apply(classificar_resultado, axis=1)
+    df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
     
     # Calcular coeficiente de eficiência da equipe da casa
     df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
