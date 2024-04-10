@@ -218,12 +218,14 @@ def create_consolidated_df():
             consolidated_df[column] = None
 
     # Verificar se as colunas foram adicionadas corretamente
-    print(consolidated_df.head())
+    print("Colunas presentes em consolidated_df:")
+    print(consolidated_df.columns)
 
     # Selecionar apenas as colunas relevantes
     consolidated_df = consolidated_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away']]
 
     return consolidated_df
+
 
 
 def mostrar_resultados(consolidated_df, team_type, time, odds_column, odds_group):
