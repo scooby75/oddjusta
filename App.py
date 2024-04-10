@@ -149,15 +149,12 @@ def main():
     else:
         time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
         odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
-    odds_group = st.sidebar.selectbox("Selecione a Faixa de Odds:", options=odds_groups)
     
-    # Verificar se a opção selecionada não é "Outros"
-    if odds_group != "Outros":
-        odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
-    else:
-        odds_group_values = [-1, -1]  # Define um valor especial para indicar que a opção é "Outros"
-    
-    mostrar_resultados(team_type, time, odds_column, odds_group_values)
+    # Slider para selecionar o intervalo de odds
+    st.sidebar.subheader("Faixa de Odds")
+    min_odds, max_odds = st.sidebar.slider("Selecione um intervalo de odds:", min_value=df[odds_column].min(), max_value=df[odds_column].max(), value=(df[odds_column].min(), df[odds_column].max()))
+
+    mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
