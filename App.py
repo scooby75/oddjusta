@@ -145,7 +145,7 @@ def main():
     if odds_group != "Outros":
         odds_group_values = [float(val) for val in odds_group.split(" - ")]  # Converter string de faixa de odds em lista de valores numéricos
     else:
-        odds_group_values = -1  # Define um valor especial para indicar que a opção é "Outros"
+        odds_group_values = [-1, -1]  # Define um valor especial para indicar que a opção é "Outros"
     
     mostrar_resultados(team_type, time, odds_column, odds_group_values)
 
@@ -157,9 +157,9 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         team_df = df[df['Away'] == time]
         odds_col = 'Odd_Away'
     
-    if odds_group == -1:  # Se a opção for "Outros"
+    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
         # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_groups[0]) | (team_df[odds_col] > odds_groups[-1])]
+        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
     else:
         team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
     
@@ -215,4 +215,3 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
 
 if __name__ == "__main__":
     main()
-
