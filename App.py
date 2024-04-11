@@ -3,7 +3,7 @@ from datetime import datetime
 import streamlit as st
 import os
 import requests
-from bd import file_paths  # Importing file_paths from bd.py
+from bd import file_paths  # Importando file_paths de bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -27,7 +27,7 @@ def calcular_coeficiente(row):
         diferenca_gols = row['Gols_Home'] - row['Gols_Away']
         return diferenca_gols
     except Exception as e:
-        print(f"Error calculating coefficient: {e}")
+        print(f"Erro ao calcular o coeficiente: {e}")
 
 
 def agrupar_odd(odd):
@@ -55,10 +55,10 @@ def download_and_cache(url):
 
 # Carregar o arquivo CSV
 try:
-    cached_file = download_and_cache(file_paths[0])  # Assuming only one file
+    cached_file = download_and_cache(file_paths[0])  # Supondo que haja apenas um arquivo
     df = pd.read_csv(cached_file, encoding='utf-8')  # Especificar a codificação UTF-8
 except Exception as e:
-    st.error(f"Error processing file {file_paths[0]}: {e}")
+    st.error(f"Erro ao processar o arquivo {file_paths[0]}: {e}")
 
 # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
 df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
