@@ -31,7 +31,7 @@ def calcular_coeficiente(row):
 
 
 def agrupar_odd(odd):
-    for i in range(1, 60):
+    for i in range(1, 120):
         lower = 1 + (i - 1) * 0.10
         upper = 1 + i * 0.10
         if lower <= odd <= upper:
@@ -136,7 +136,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
     # Selecionar apenas as colunas relevantes para exibição
-    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
+    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Lucro/prejuízo']]
 
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
