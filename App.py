@@ -67,51 +67,6 @@ try:
 except Exception as e:
     st.error(f"Error processing file {file_paths[0]}: {e}")
 
-print(df.head())
-
-# Verificar e ajustar o formato do arquivo conforme necessário
-if 'FTHG' in df.columns:
-    # Formato do primeiro arquivo
-    df.rename(columns={
-        'Date': 'Data',
-        'HomeTeam': 'Home',
-        'AwayTeam': 'Away',
-        'FTHG': 'Gols_Home',
-        'FTAG': 'Gols_Away',
-        'FTR': 'Resultado',
-        'PSCH': 'Odd_Home',
-        'PSCD': 'Odd_Empate',
-        'PSCA': 'Odd_Away'
-    }, inplace=True)
-elif 'home_team_name' in df.columns:
-    # Formato do terceiro arquivo
-    df.rename(columns={
-        'date_GMT': 'Data',
-        'home_team_name': 'Home',
-        'away_team_name': 'Away',
-        'home_team_goal_count': 'Gols_Home',
-        'away_team_goal_count': 'Gols_Away',
-        'Res': 'Resultado',
-        'odds_ft_home_team_win': 'Odd_Home',
-        'odds_ft_draw': 'Odd_Empate',
-        'odds_ft_away_team_win': 'Odd_Away'
-    }, inplace=True)
-    # Converter a coluna 'Data' para o formato 'dd/mm/yyyy'
-    df['Data'] = df['Data'].apply(converter_data_gmt)
-else:
-    # Formato do segundo arquivo
-    df.rename(columns={
-        'Date': 'Data',
-        'Home': 'Home',
-        'Away': 'Away',
-        'HG': 'Gols_Home',
-        'AG': 'Gols_Away',
-        'Res': 'Resultado',
-        'PH': 'Odd_Home',
-        'PD': 'Odd_Empate',
-        'PA': 'Odd_Away'
-    }, inplace=True)
-
 # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
 df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
 
