@@ -154,13 +154,9 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     
     # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
     if team_type == "Home":
-        lucro_prejuizo_total = ((team_df['Odd_Home'] - 1) * (team_df['Resultado'] == 'W')).sum()
+        lucro_prejuizo_total = ((team_df['Odd_Home'] - 1) * (team_df['Resultado'] == 'W')).sum() - ((team_df['Resultado'] == 'L')).sum()
     else:
-        lucro_prejuizo_total = ((team_df['Odd_Away'] - 1) * (team_df['Resultado'] == 'W')).sum()
-
-    # Se não houver vitórias (W) para a equipe selecionada, definir o lucro/prejuízo total como -1
-    if lucro_prejuizo_total == 0:
-        lucro_prejuizo_total = -1
+        lucro_prejuizo_total = ((team_df['Odd_Away'] - 1) * (team_df['Resultado'] == 'W')).sum() - ((team_df['Resultado'] == 'L')).sum()
 
     # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
     
