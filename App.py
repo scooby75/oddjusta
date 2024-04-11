@@ -162,7 +162,7 @@ def main():
 
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
-def mostrar_resultados(team_type, time, odds_column, odds_group):
+def def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
         odds_col = 'Odd_Home'
@@ -215,7 +215,10 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     
     # Destacar resultados importantes usando markdown
     st.write("### Analise:")
-    st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    if not team_df.empty:
+        st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    else:
+        st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
