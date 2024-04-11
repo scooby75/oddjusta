@@ -152,28 +152,18 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
     
-    # Determinar a coluna de odds correta com base no tipo de equipe selecionada
+    # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
     if team_type == "Home":
-        odds_column_type = 'Odd_Home'
+        lucro_prejuizo_total = (team_df[team_df['Resultado'] == 'W'][odds_column] - 1).sum()
     else:
-        odds_column_type = 'Odd_Away'
-    
-    # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado
-    if team_type == "Home":
-        if 'W' in team_df['Resultado'].values:
-            lucro_prejuizo_total = team_df[odds_column_type] - 1
-        else:
-            lucro_prejuizo_total = -1
+        lucro_prejuizo_total = (team_df[team_df['Resultado'] == 'W'][odds_column] - 1).sum()
+
+    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
+    if isinstance(lucro_prejuizo_total, (int, float)):
+        st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     else:
-        if 'W' in team_df['Resultado'].values:
-            lucro_prejuizo_total = team_df[odds_column_type] - 1
-        else:
-            lucro_prejuizo_total = -1
+        st.write("- Lucro/prejuízo total: N/A")
     
-    # Adicionar a coluna 'Lucro/Prejuízo' ao DataFrame
-    team_df['Lucro/Prejuízo'] = lucro_prejuizo_total
-    
-        
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
@@ -189,11 +179,6 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
-    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
-    if isinstance(lucro_prejuizo_total, (int, float)):
-        st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    else:
-        st.write("- Lucro/prejuízo total: N/A")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
