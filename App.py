@@ -194,6 +194,11 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
+    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
+    if isinstance(lucro_prejuizo_total, (int, float)):
+        st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
+    else:
+        st.write("- Lucro/prejuízo total: N/A")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
