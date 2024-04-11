@@ -164,7 +164,6 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
 
     # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
     
-    
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
