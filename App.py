@@ -151,8 +151,19 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-    lucro_prejuizo_total = team_df[odds_column].sum() - total_matches
-
+    
+    # Determinar a coluna de odds correta com base no tipo de equipe selecionada
+    if team_type == "Home":
+        odds_column_type = 'Odd_Home'
+    else:
+        odds_column_type = 'Odd_Away'
+    
+    # Calcular lucro/prejuízo com base no tipo de equipe selecionada
+    lucro_prejuizo_total = team_df[odds_column_type].sum() - total_matches
+    
+    # Adicionar a coluna 'Lucro/Prejuízo' ao DataFrame
+    team_df['Lucro/Prejuízo'] = lucro_prejuizo_total
+    
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
@@ -173,6 +184,5 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
-    
 if __name__ == "__main__":
     main()
