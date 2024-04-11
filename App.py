@@ -162,7 +162,7 @@ def main():
 
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
-def def mostrar_resultados(team_type, time, odds_column, odds_group):
+def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
         odds_col = 'Odd_Home'
