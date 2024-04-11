@@ -154,15 +154,16 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     
     # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
     if team_type == "Home":
-        lucro_prejuizo_total = (team_df[team_df['Resultado'] == 'W'][odds_column] - 1).sum()
+        lucro_prejuizo_total = ((team_df['Odd_Home'] - 1) * (team_df['Resultado'] == 'W')).sum()
     else:
-        lucro_prejuizo_total = (team_df[team_df['Resultado'] == 'W'][odds_column] - 1).sum()
+        lucro_prejuizo_total = ((team_df['Odd_Away'] - 1) * (team_df['Resultado'] == 'W')).sum()
+
+    # Se não houver vitórias (W) para a equipe selecionada, definir o lucro/prejuízo total como -1
+    if lucro_prejuizo_total == 0:
+        lucro_prejuizo_total = -1
 
     # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
-    if isinstance(lucro_prejuizo_total, (int, float)):
-        st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    else:
-        st.write("- Lucro/prejuízo total: N/A")
+    
     
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
@@ -178,6 +179,10 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
         st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
+    if isinstance(lucro_prejuizo_total, (int, float)):
+        st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
+    else:
+        st.write("- Lucro/prejuízo total: N/A")
     st.markdown(f"- Odd justa: {odd_justa:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
