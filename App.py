@@ -154,9 +154,17 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     
     # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
     if team_type == "Home":
-        lucro_prejuizo_total = ((team_df['Odd_Home'] - 1) * (team_df['Resultado'] == 'W')).sum() - ((team_df['Resultado'] == 'L')).sum()
+        # Calcular lucro/prejuízo para jogos ganhos
+        lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
+        # Calcular lucro/prejuízo para jogos perdidos
+        lucro_prejuizo_losses = ((-1) * (team_df['Resultado'] == 'L')).sum()
+        lucro_prejuizo_total = lucro_prejuizo_wins - lucro_prejuizo_losses
     else:
-        lucro_prejuizo_total = ((team_df['Odd_Away'] - 1) * (team_df['Resultado'] == 'W')).sum() - ((team_df['Resultado'] == 'L')).sum()
+        # Calcular lucro/prejuízo para jogos ganhos
+        lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
+        # Calcular lucro/prejuízo para jogos perdidos
+        lucro_prejuizo_losses = ((-1) * (team_df['Resultado'] == 'L')).sum()
+        lucro_prejuizo_total = lucro_prejuizo_wins - lucro_prejuizo_losses
 
     # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
     
@@ -182,6 +190,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+
 
 if __name__ == "__main__":
     main()
