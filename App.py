@@ -184,6 +184,9 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Reindexar o DataFrame para garantir que os índices estejam corretos após o filtro
     team_df.reset_index(drop=True, inplace=True)
 
+    # Remover duplicatas após aplicar o filtro
+    team_df.drop_duplicates(inplace=True)
+
     # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
