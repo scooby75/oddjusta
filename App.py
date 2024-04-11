@@ -61,7 +61,7 @@ dfs = []
 for file_path in file_paths:
     try:
         cached_file = download_and_cache(file_path)
-        df = pd.read_csv(cached_file)
+        df = pd.read_csv(cached_file, encoding='utf-8')  # Especificar a codificação UTF-8
         dfs.append(df)
     except Exception as e:
         print(f"Error processing file {file_path}: {e}")
