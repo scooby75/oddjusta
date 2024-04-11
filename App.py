@@ -67,6 +67,8 @@ try:
 except Exception as e:
     st.error(f"Error processing file {file_paths[0]}: {e}")
 
+print(df.head())
+
 # Verificar e ajustar o formato do arquivo conforme necessário
 if 'FTHG' in df.columns:
     # Formato do primeiro arquivo
@@ -223,5 +225,6 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
+    
 if __name__ == "__main__":
     main()
