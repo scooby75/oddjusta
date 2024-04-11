@@ -173,12 +173,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Adicionar a coluna 'Lucro/Prejuízo' ao DataFrame
     team_df['Lucro/Prejuízo'] = lucro_prejuizo_total
     
-    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
-    if isinstance(lucro_prejuizo_total, (int, float)):
-        st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    else:
-        st.write("- Lucro/prejuízo total: N/A")
-    
+        
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
     media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
