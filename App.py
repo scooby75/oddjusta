@@ -23,8 +23,11 @@ def classificar_resultado(row, team_type):
             return 'D'
 
 def calcular_coeficiente(row):
-    diferenca_gols = row['Gols_Home'] - row['Gols_Away']
-    return diferenca_gols
+    try:
+        diferenca_gols = row['Gols_Home'] - row['Gols_Away']
+        return diferenca_gols
+    except Exception as e:
+        print(f"Error calculating coefficient: {e}")
 
 
 def agrupar_odd(odd):
