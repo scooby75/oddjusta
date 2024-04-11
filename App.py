@@ -158,8 +158,17 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     else:
         odds_column_type = 'Odd_Away'
     
-    # Calcular lucro/prejuízo com base no tipo de equipe selecionada
-    lucro_prejuizo_total = team_df[odds_column_type].sum() - total_matches
+    # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado
+    if team_type == "Home":
+        if 'W' in team_df['Resultado'].values:
+            lucro_prejuizo_total = team_df[odds_column_type] - 1
+        else:
+            lucro_prejuizo_total = -1
+    else:
+        if 'W' in team_df['Resultado'].values:
+            lucro_prejuizo_total = team_df[odds_column_type] - 1
+        else:
+            lucro_prejuizo_total = -1
     
     # Adicionar a coluna 'Lucro/Prejuízo' ao DataFrame
     team_df['Lucro/Prejuízo'] = lucro_prejuizo_total
