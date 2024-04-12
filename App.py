@@ -72,16 +72,8 @@ if 'Odd_Home' in df:
 elif 'Odd_Away' in df:
     df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
 
-# Obter todas as equipes envolvidas nos jogos
-all_teams_home = set(df['Home'])
-all_teams_away = set(df['Away'])
-
-# Ordenar os times em ordem alfabética
-times_home = sorted(str(team) for team in all_teams_home)
-times_away = sorted(str(team) for team in all_teams_away)
-
-# Ordenar as faixas de odds
-odds_groups = sorted(df['Odd_Group'].unique())
+# Adicionar coluna de placar
+df['Placar'] = df['Gols_Home'].astype(str) + ' vs ' + df['Gols_Away'].astype(str)
 
 # Interface do Streamlit
 def main():
@@ -136,7 +128,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
     # Selecionar apenas as colunas relevantes para exibição
-    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia']]
+    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
 
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
@@ -180,6 +172,9 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular odd justa
     odd_justa = 100 / win_percentage if win_percentage > 0 else 0
     
+    # Contar a ocorrência de cada placar
+    placar_counts = team_df['Placar'].value_counts()
+
     # Destacar resultados importantes usando markdown
     st.write("### Analise:")
     if not team_df.empty:
@@ -191,6 +186,8 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+    st.write("### Contagem de Placares:")
+    st.write(placar_counts)
 
 
 if __name__ == "__main__":
