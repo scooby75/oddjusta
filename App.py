@@ -72,8 +72,8 @@ if 'Odd_Home' in df:
 elif 'Odd_Away' in df:
     df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
 
-# Adicionar coluna de placar
-df['Placar'] = df['Gols_Home'].astype(str) + ' vs ' + df['Gols_Away'].astype(str)
+# Adicionar coluna de placar no formato desejado (por exemplo, "2x0", "1x1", "1x2", etc.)
+df['Placar'] = df['Gols_Home'].astype(str) + 'x' + df['Gols_Away'].astype(str)
 
 # Obter todas as equipes envolvidas nos jogos
 all_teams_home = set(df['Home'])
