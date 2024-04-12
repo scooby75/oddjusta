@@ -75,6 +75,17 @@ elif 'Odd_Away' in df:
 # Adicionar coluna de placar
 df['Placar'] = df['Gols_Home'].astype(str) + ' vs ' + df['Gols_Away'].astype(str)
 
+# Obter todas as equipes envolvidas nos jogos
+all_teams_home = set(df['Home'])
+all_teams_away = set(df['Away'])
+
+# Ordenar os times em ordem alfabética
+times_home = sorted(str(team) for team in all_teams_home)
+times_away = sorted(str(team) for team in all_teams_away)
+
+# Ordenar as faixas de odds
+odds_groups = sorted(df['Odd_Group'].unique())
+
 # Interface do Streamlit
 def main():
     st.title("Odd Justa")
