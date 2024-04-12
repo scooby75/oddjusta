@@ -207,7 +207,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
-    st.write("### Contagem de Placares:")
+    st.write("### Frequência dos Placares:")
     st.write(placar_counts)
 
 
