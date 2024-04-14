@@ -194,6 +194,8 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
 
     # Calcular odd justa para o total de partidas sem derrota
     odd_justa_wins_draws = total_matches / num_wins_draws if num_wins_draws > 0 else 0
+    # Calcular odd justa apenas para as vitórias
+    odd_justa_wins = total_matches / num_wins if num_wins > 0 else 0
     
     # Contar a ocorrência de cada placar
     placar_counts = team_df['Placar'].value_counts()
@@ -206,6 +208,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Odd justa para total de partidas sem derrota: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Odd justa apenas para vitórias: {odd_justa_wins:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
