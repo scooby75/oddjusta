@@ -207,15 +207,15 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    st.markdown(f"- Odd justa para total de partidas sem derrota: {odd_justa_wins_draws:.2f}.")
-    st.markdown(f"- Odd justa apenas para vitórias: {odd_justa_wins:.2f}.")
+    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
+    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
-    st.write("### Análise de vitórias e empates:")
-    st.write(f"Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
+       
 
 if __name__ == "__main__":
     main()
