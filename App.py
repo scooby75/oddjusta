@@ -162,6 +162,8 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
+    num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
+    num_wins_draws = num_wins + num_draws  # Total de partidas sem derrota (W + D)
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
     
@@ -170,13 +172,13 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
         # Calcular lucro/prejuízo para jogos ganhos
         lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
         # Calcular lucro/prejuízo para jogos perdidos
-        lucro_prejuizo_losses = (-1 * (team_df['Resultado'] != 'W')).sum()
+        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
         lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
     else:
         # Calcular lucro/prejuízo para jogos ganhos
         lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
         # Calcular lucro/prejuízo para jogos perdidos
-        lucro_prejuizo_losses = (-1 * (team_df['Resultado'] != 'W')).sum()
+        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
         lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
 
     # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
@@ -209,7 +211,8 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
-
+    st.write("### Análise de vitórias e empates:")
+    st.write(f"Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
 
 if __name__ == "__main__":
     main()
