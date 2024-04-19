@@ -1,8 +1,8 @@
 import pandas as pd
-from datetime import datetime
 import streamlit as st
 import os
 import requests
+
 from bd import file_paths  # Importando file_paths de bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
@@ -22,13 +22,16 @@ def classificar_resultado(row, team_type):
         else:
             return 'D'
 
-def calcular_coeficiente(row):
+# Função para calcular o coeficiente de eficiência de acordo com o tipo de equipe selecionado
+def calcular_coeficiente(row, team_type):
     try:
-        diferenca_gols = row['Gols_Home'] - row['Gols_Away']
+        if team_type == "Home":
+            diferenca_gols = row['Gols_Home'] - row['Gols_Away']
+        else:  # Se for "Away"
+            diferenca_gols = row['Gols_Away'] - row['Gols_Home']
         return diferenca_gols
     except Exception as e:
         print(f"Erro ao calcular o coeficiente: {e}")
-
 
 def agrupar_odd(odd):
     for i in range(1, 120):
@@ -62,9 +65,6 @@ except Exception as e:
 
 # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
 df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
-
-# Calcular coeficiente de eficiência da equipe da casa
-df['Coeficiente_Eficiencia'] = df.apply(calcular_coeficiente, axis=1)
 
 # Adicionar coluna de agrupamento de odds
 if 'Odd_Home' in df:
@@ -148,6 +148,9 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
+    # Adicionar coluna de coeficiente de eficiência
+    team_df['Coeficiente_Eficiencia'] = team_df.apply(calcular_coeficiente, args=(team_type,), axis=1)
+
     # Selecionar apenas as colunas relevantes para exibição
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
 
