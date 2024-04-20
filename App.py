@@ -35,8 +35,8 @@ def calcular_coeficiente(row, team_type):
 
 def agrupar_odd(odd):
     for i in range(1, 120):
-        lower = 1 + (i - 1) * 0.05
-        upper = 1 + i * 0.06
+        lower = 1 + (i - 1) * 0.06
+        upper = 1 + i * 0.05
         if lower <= odd <= upper:
             return f"{lower:.2f} - {upper:.2f}"
     return 'Outros'
