@@ -35,8 +35,8 @@ def calcular_coeficiente(row, team_type):
 
 def agrupar_odd(odd):
     for i in range(0, 120):  # Itera através de uma faixa de valores
-        lower = 1 + i * 0.05  # Calcula o limite inferior do intervalo
-        upper = lower + 0.04  # Calcula o limite superior do intervalo
+        lower = 1 + i * 0.06  # Calcula o limite inferior do intervalo
+        upper = lower + 0.05  # Calcula o limite superior do intervalo
         if lower <= odd <= upper:  # Verifica se a odd está dentro do intervalo
             return f"{lower:.2f} - {upper:.2f}"  # Formata e retorna o intervalo
     return 'Outros'  # Se a odd não se encaixar em nenhum intervalo pré-definido, retorna 'Outros'
