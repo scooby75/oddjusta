@@ -179,6 +179,51 @@ def mostrar_h2h(time_home, time_away):
     # Mostrar DataFrame com os jogos selecionados
     st.write(h2h_df)
 
+    # Calcular estatísticas do head to head
+    num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
+    total_matches = h2h_df.shape[0]
+    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+
+    # Calcular lucro/prejuízo total
+    lucro_prejuizo_total = h2h_df['Lucro_Por_Jogo'].sum()
+
+    # Calcular odd justa para MO
+    odd_justa_wins = h2h_df['Odd_Justa_MO'].mean()
+
+    # Calcular total de partidas sem derrota
+    num_wins_draws = h2h_df[h2h_df['Resultado'] != 'L'].shape[0]
+    num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
+    num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
+
+    # Calcular odd justa para HA +0.25
+    odd_justa_wins_draws = h2h_df['Odd_Justa_HA_025'].mean()
+
+    # Calcular coeficiente de eficiência médio
+    coeficiente_eficiencia_medio = h2h_df['Coeficiente_Eficiencia'].mean()
+
+    # Calcular média de gols marcados e sofridos
+    media_gols = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
+    media_gols_sofridos = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
+
+    # Calcular a frequência dos placares
+    placar_counts = h2h_df['Placar'].value_counts()
+
+    # Adicionar análises destacadas usando Markdown
+    st.write("### Análise:")
+    if not h2h_df.empty:
+        st.markdown(f"- Com as características do jogo de hoje, o {h2h_df['Home'].iloc[0] if team_type == 'Home' else h2h_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    else:
+        st.write("Nenhum jogo encontrado para os filtros selecionados.")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
+    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
+    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
+    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
+    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+    st.write("### Frequência dos Placares:")
+    st.write(placar_counts)
+
 # Chamada para iniciar o aplicativo
 if __name__ == "__main__":
     main()
