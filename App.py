@@ -158,9 +158,6 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     st.write("### Partidas:")
     st.dataframe(team_df)
 
-    # Calcular estatísticas e exibir
-    calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
-
     # Realizar análise personalizada
     if not team_df.empty:
         num_matches = team_df.shape[0]
