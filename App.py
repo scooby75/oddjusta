@@ -155,12 +155,19 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Selecionar apenas as colunas relevantes para exibição
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
 
+    # Calcular os placares mais frequentes
+    placares_mais_frequentes = team_df['Placar'].value_counts().head(3)
+
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
     st.dataframe(team_df)
 
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
+
+    # Exibir os placares mais frequentes
+    st.write("### Placares Mais Frequentes:")
+    st.write(placares_mais_frequentes.index.tolist())
 
     # Realizar análise personalizada
     if not team_df.empty:
@@ -219,14 +226,6 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
 
     st.markdown(f"Média de gols marcados por jogo: {df['Gols_Home'].mean() if team_type == 'Home' else df['Gols_Away'].mean():.2f}")
     st.markdown(f"Média de gols sofridos por jogo: {df['Gols_Away'].mean() if team_type == 'Home' else df['Gols_Home'].mean():.2f}")
-
-# Calcular a frequência dos placares
-placar_counts = df['Placar'].value_counts()
-
-# Exibir os placares e suas frequências
-st.write("### Frequência de Placares:")
-st.dataframe(placar_counts)
-
 
 # Executar o aplicativo principal
 if __name__ == "__main__":
