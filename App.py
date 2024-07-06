@@ -182,7 +182,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     team_df['Coeficiente_Eficiencia'] = team_df.apply(calcular_coeficiente, args=(team_type,), axis=1)
     
     # Selecionar apenas as colunas relevantes para exibição
-    team_df = team_df[['Data', team_name_col, opponent_name_col', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
+    team_df = team_df[['Data', team_name_col, opponent_name_col, 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
     
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
