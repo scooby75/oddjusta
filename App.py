@@ -1,4 +1,4 @@
-a partir do script abaixo crie uma opção de analise head to head (h2) home vs away, eh muito importante que na opção h2h mantenha as analises abaixo
+
 
    # Destacar resultados importantes usando markdown
     st.write("### Analise:")
