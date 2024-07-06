@@ -41,7 +41,6 @@ def agrupar_odd(odd):
             return f"{lower:.2f} - {upper:.2f}"  # Formata e retorna o intervalo
     return 'Outros'  # Se a odd não se encaixar em nenhum intervalo pré-definido, retorna 'Outros'
 
-
 # Função para fazer o download de um arquivo e armazená-lo em cache
 def download_and_cache(url):
     cache_folder = "cache"
@@ -101,25 +100,33 @@ odds_groups = sorted(df['Odd_Group'].unique())
 def main():
     st.title("Odd Justa")
     st.sidebar.header("Filtros")
-    team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
-    if team_type == "Home":
-        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
-    else:
-        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+    analysis_type = st.sidebar.selectbox("Selecione o tipo de análise:", options=["Padrão", "Head to Head (H2H)"])
     
-    # Selectbox para selecionar o intervalo de odds
-    st.sidebar.subheader("Faixa de Odds")
-    selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+    if analysis_type == "Padrão":
+        team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
+        if team_type == "Home":
+            time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+            odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
+        else:
+            time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+            odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+        
+        # Selectbox para selecionar o intervalo de odds
+        st.sidebar.subheader("Faixa de Odds")
+        selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
 
-    # Extrair os limites inferior e superior do intervalo selecionado
-    if selected_odds_range == "Outros":
-        min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
-    else:
-        min_odds, max_odds = map(float, selected_odds_range.split(' - '))
+        # Extrair os limites inferior e superior do intervalo selecionado
+        if selected_odds_range == "Outros":
+            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
+        else:
+            min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
-    mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+        mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+    
+    elif analysis_type == "Head to Head (H2H)":
+        time_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+        time_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+        mostrar_h2h(time_home, time_away)
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
@@ -162,6 +169,19 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
+def mostrar_h2h(time_home, time_away):
+    team_home_df = df[df['Home'] == time_home]
+    team_away_df = df[df['Away'] == time_away]
+
+    st.write(f"### Head to Head: {time_home} vs {time_away}")
+    st.write(f"- Total de partidas em casa: {team_home_df.shape[0]}")
+    st.write(f"- Total de partidas fora: {team_away_df.shape[0]}")
+
+    st.write("#### Estatísticas em Casa:")
+    calcular_estatisticas_e_exibir(team_home_df, "Home", 'Odd_Home')
+
+    st.write("#### Estatísticas Fora de Casa:")
+    calcular_estatisticas_e_exibir(team_away_df, "Away", 'Odd_Away')
 
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular estatísticas
@@ -219,7 +239,6 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
-       
 
 if __name__ == "__main__":
     main()
