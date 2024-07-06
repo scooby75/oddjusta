@@ -55,6 +55,13 @@ def download_and_cache(url):
     
     return cache_file
 
+# Função para calcular o coeficiente de eficiência
+def calcular_coeficiente(row, team_type):
+    if team_type == "Home":
+        return row['Gols_Home'] / row['Gols_Away'] if row['Gols_Away'] != 0 else 0
+    else:
+        return row['Gols_Away'] / row['Gols_Home'] if row['Gols_Home'] != 0 else 0
+
 # Carregar o arquivo CSV
 try:
     cached_file = download_and_cache(file_paths[0])  # Supondo que haja apenas um arquivo
@@ -192,8 +199,6 @@ def mostrar_h2h(time_home, time_away):
         st.markdown(f"- Com as características do jogo de hoje, o {time_home} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
-
-
 
 # Chamada para iniciar o aplicativo
 if __name__ == "__main__":
