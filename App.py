@@ -22,17 +22,16 @@ def classificar_resultado(row, team_type):
         else:
             return 'D'
 
-# Função para calcular o coeficiente de eficiência de acordo com o tipo de equipe selecionado
-def calcular_coeficiente(row, team_type):
-    try:
-        if team_type == "Home":
-            diferenca_gols = row['Gols_Home'] - row['Gols_Away']
-        else:  # Se for "Away"
-            diferenca_gols = row['Gols_Away'] - row['Gols_Home']
-        return diferenca_gols
-    except Exception as e:
-        print(f"Erro ao calcular o coeficiente: {e}")
+# Função para calcular o lucro/prejuízo por jogo com base no resultado e na odd_home
+def calcular_lucro_por_jogo(row):
+    if row['Resultado'] == 'W':
+        return row['Odd_Home'] - 1
+    elif row['Resultado'] == 'D' or row['Resultado'] == 'L':
+        return -1
+    else:
+        return 0
 
+# Função para agrupar a odd em intervalos
 def agrupar_odd(odd):
     for i in range(0, 120):  # Itera através de uma faixa de valores
         lower = 1 + i * 0.06  # Calcula o limite inferior do intervalo
@@ -84,6 +83,9 @@ df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
 
 # Adicionar coluna de placar no formato desejado (por exemplo, "2x0", "1x1", "1x2", etc.)
 df['Placar'] = df['Gols_Home'].astype(str) + 'x' + df['Gols_Away'].astype(str)
+
+# Calcular lucro/prejuízo por jogo
+df['Lucro_Por_Jogo'] = df.apply(calcular_lucro_por_jogo, axis=1)
 
 # Obter todas as equipes envolvidas nos jogos
 all_teams_home = set(df['Home'])
@@ -184,45 +186,12 @@ def mostrar_h2h(time_home, time_away):
     total_matches = h2h_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
-    # Calcular lucro/prejuízo total
-    lucro_prejuizo_total = h2h_df['Lucro_Por_Jogo'].sum()
-
-    # Calcular odd justa para MO
-    odd_justa_wins = h2h_df['Odd_Justa_MO'].mean()
-
-    # Calcular total de partidas sem derrota
-    num_wins_draws = h2h_df[h2h_df['Resultado'] != 'L'].shape[0]
-    num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
-    num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-
-    # Calcular odd justa para HA +0.25
-    odd_justa_wins_draws = h2h_df['Odd_Justa_HA_025'].mean()
-
-    # Calcular coeficiente de eficiência médio
-    coeficiente_eficiencia_medio = h2h_df['Coeficiente_Eficiencia'].mean()
-
-    # Calcular média de gols marcados e sofridos
-    media_gols = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
-    media_gols_sofridos = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
-
-    # Calcular a frequência dos placares
-    placar_counts = h2h_df['Placar'].value_counts()
-
     # Adicionar análises destacadas usando Markdown
     st.write("### Análise:")
     if not h2h_df.empty:
         st.markdown(f"- Com as características do jogo de hoje, o {h2h_df['Home'].iloc[0] if team_type == 'Home' else h2h_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
-    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
-    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
-    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
-    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
-    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
-    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
-    st.write("### Frequência dos Placares:")
-    st.write(placar_counts)
 
 # Chamada para iniciar o aplicativo
 if __name__ == "__main__":
