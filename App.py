@@ -123,11 +123,11 @@ def main():
 
 def mostrar_h2h(time, team_type, min_odds, max_odds):
     if team_type == "Home":
-        team_home_df = df[(df['Home'] == time) & (df['Odd_Home'] >= min_odds) & (df['Odd_Home'] <= max_odds)]
-        team_away_df = df[(df['Away'] == time) & (df['Odd_Away'] >= min_odds) & (df['Odd_Away'] <= max_odds)]
+        team_home_df = df[(df['Home'] == time) & (df['Away'] == time) & (df['Odd_Home'] >= min_odds) & (df['Odd_Home'] <= max_odds)]
+        team_away_df = df[(df['Away'] == time) & (df['Home'] == time) & (df['Odd_Away'] >= min_odds) & (df['Odd_Away'] <= max_odds)]
     else:
-        team_home_df = df[(df['Home'] == time) & (df['Odd_Home'] >= min_odds) & (df['Odd_Home'] <= max_odds)]
-        team_away_df = df[(df['Away'] == time) & (df['Odd_Away'] >= min_odds) & (df['Odd_Away'] <= max_odds)]
+        team_home_df = df[(df['Home'] == time) & (df['Away'] == time) & (df['Odd_Home'] >= min_odds) & (df['Odd_Home'] <= max_odds)]
+        team_away_df = df[(df['Away'] == time) & (df['Home'] == time) & (df['Odd_Away'] >= min_odds) & (df['Odd_Away'] <= max_odds)]
 
     st.write(f"### Head to Head: {time} em Casa")
 
@@ -153,11 +153,10 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     if team_type == "Home":
         lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
         lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
     else:
         lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
         lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
+    lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
 
     lucro_prejuizo_total = lucro_prejuizo_total if isinstance(lucro_prejuizo_total, (int, float)) else 0
 
@@ -174,7 +173,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     placar_counts = team_df['Placar'].value_counts()
 
     # Destacar resultados importantes usando markdown
-    st.write("### Analise:")
+    st.write("### Análise:")
     if not team_df.empty:
         st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
