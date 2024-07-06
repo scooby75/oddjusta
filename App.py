@@ -120,11 +120,6 @@ def main():
 
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
-    # Exibir frequência de placares
-    st.write("### Frequência de Placares:")
-    placar_counts = df['Placar'].value_counts()
-    st.dataframe(placar_counts)
-
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
@@ -166,53 +161,12 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
-    # Realizar análise personalizada
-    if not team_df.empty:
-        num_matches = team_df.shape[0]
-        num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
-        num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-        win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
+    # Calcular a frequência dos placares considerando o filtro pelo time selecionado
+    placar_counts = team_df['Placar'].value_counts()
 
-        lucro_prejuizo_total = calcular_lucro_prejuizo_total(team_df, team_type)
-        
-        odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins)
-        odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws)
-        
-        coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
-        media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
-        media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
-
-        placar_counts = team_df['Placar'].value_counts()
-
-        st.write("### Análise Personalizada:")
-        st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
-        st.markdown(f"O lucro/prejuízo total foi {lucro_prejuizo_total:.2f}, com odd justa para MO de {odd_justa_wins:.2f} e para HA +0.25 de {odd_justa_wins_draws:.2f}.")
-        st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando boa capacidade de marcar gols e sofrer poucos.")
-        st.markdown(f"A frequência de placares mostra que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" venceu com mais frequência por placares como {', '.join(placar_counts.index[:3])}.")
-
-    else:
-        st.write("Nenhuma partida encontrada para os filtros selecionados.")
-
-def calcular_lucro_prejuizo_total(team_df, team_type):
-    if team_type == "Home":
-        lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
-        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
-    else:
-        lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
-        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
-    
-    return lucro_prejuizo_total
-
-def calcular_odd_justa_wins(team_df, num_wins):
-    odd_justa_wins = team_df.shape[0] / num_wins if num_wins > 0 else 0
-    return odd_justa_wins
-
-def calcular_odd_justa_wins_draws(team_df, num_wins, num_draws):
-    total_matches = team_df.shape[0]
-    odd_justa_wins_draws = total_matches / (num_wins + num_draws) if (num_wins + num_draws) > 0 else 0
-    return odd_justa_wins_draws
+    # Exibir os placares e suas frequências
+    st.write("### Frequência de Placares:")
+    st.dataframe(placar_counts)
 
 def calcular_estatisticas_e_exibir(df, team_type, odds_column):
     st.write("### Estatísticas Gerais:")
@@ -223,17 +177,6 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
 
     st.markdown(f"Média de gols marcados por jogo: {df['Gols_Home'].mean() if team_type == 'Home' else df['Gols_Away'].mean():.2f}")
     st.markdown(f"Média de gols sofridos por jogo: {df['Gols_Away'].mean() if team_type == 'Home' else df['Gols_Home'].mean():.2f}")
-
-# Calcular a frequência dos placares considerando o filtro pelo time selecionado
-if team_type == "Home":
-    placar_counts = team_df['Placar'].value_counts()
-else:
-    placar_counts = team_df['Placar'].value_counts()
-
-# Exibir os placares e suas frequências
-st.write("### Frequência de Placares:")
-st.dataframe(placar_counts)
-
 
 # Executar o aplicativo principal
 if __name__ == "__main__":
