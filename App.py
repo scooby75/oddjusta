@@ -234,17 +234,6 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
     media_gols = df['Gols_Home'].mean() if team_type == "Home" else df['Gols_Away'].mean()
     media_gols_sofridos = df['Gols_Away'].mean() if team_type == "Home" else df['Gols_Home'].mean()
 
-    # Exibir estatísticas
-    st.write("### Estatísticas Gerais:")
-    st.markdown(f"- Total de partidas: {num_matches}")
-    st.markdown(f"- Vitórias: {num_wins}")
-    st.markdown(f"- Empates: {num_draws}")
-    st.markdown(f"- Derrotas: {num_losses}")
-    st.markdown(f"- Aproveitamento: {win_percentage:.2f}%")
-    st.markdown(f"- Lucro/Prejuízo Total: {lucro_prejuizo_total:.2f}")
-    st.markdown(f"- Coeficiente de Eficiência Médio: {coeficiente_eficiencia_medio:.2f}")
-    st.markdown(f"- Média de gols marcados por partida: {media_gols:.2f}")
-    st.markdown(f"- Média de gols sofridos por partida: {media_gols_sofridos:.2f}")
 
 # Executar a aplicação principal
 if __name__ == "__main__":
