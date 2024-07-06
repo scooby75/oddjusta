@@ -189,9 +189,10 @@ def mostrar_h2h(time_home, time_away):
     # Adicionar análises destacadas usando Markdown
     st.write("### Análise:")
     if not h2h_df.empty:
-        st.markdown(f"- Com as características do jogo de hoje, o {time_home if team_type == 'Home' else time_away} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+        st.markdown(f"- Com as características do jogo de hoje, o {time_home} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
+
 
 
 # Chamada para iniciar o aplicativo
