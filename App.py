@@ -206,37 +206,51 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     else:
         st.write("Nenhuma partida encontrada para os filtros selecionados.")
 
-def calcular_lucro_prejuizo_total(team_df, team_type):
+def calcular_lucro_prejuizo_total(df, team_type):
     if team_type == "Home":
-        lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
-        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
+        lucro_prejuizo = (df['Odd_Home'] - 1)[df['Resultado'] == 'W'].sum() + (df['Odd_Empate'] - 1)[df['Resultado'] == 'D'].sum()
     else:
-        lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
-        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
-    
-    return lucro_prejuizo_total
+        lucro_prejuizo = (df['Odd_Away'] - 1)[df['Resultado'] == 'W'].sum() + (df['Odd_Empate'] - 1)[df['Resultado'] == 'D'].sum()
+    return lucro_prejuizo
 
-def calcular_odd_justa_wins(team_df, num_wins):
-    odd_justa_wins = team_df.shape[0] / num_wins if num_wins > 0 else 0
+def calcular_odd_justa_wins(df, num_wins):
+    if num_wins > 0:
+        odd_justa_wins = (df[df['Resultado'] == 'W']['Odd_Home'].sum() + df[df['Resultado'] == 'W']['Odd_Away'].sum()) / num_wins
+    else:
+        odd_justa_wins = 0
     return odd_justa_wins
 
-def calcular_odd_justa_wins_draws(team_df, num_wins, num_draws):
-    total_matches = team_df.shape[0]
-    odd_justa_wins_draws = total_matches / (num_wins + num_draws) if (num_wins + num_draws) > 0 else 0
+def calcular_odd_justa_wins_draws(df, num_wins, num_draws):
+    if num_wins + num_draws > 0:
+        odd_justa_wins_draws = (df[(df['Resultado'] == 'W') | (df['Resultado'] == 'D')]['Odd_Home'].sum() + df[(df['Resultado'] == 'W') | (df['Resultado'] == 'D')]['Odd_Away'].sum()) / (num_wins + num_draws)
+    else:
+        odd_justa_wins_draws = 0
     return odd_justa_wins_draws
 
 def calcular_estatisticas_e_exibir(df, team_type, odds_column):
+    # Calcular estatísticas gerais
+    num_matches = df.shape[0]
+    num_wins = df[df['Resultado'] == 'W'].shape[0]
+    num_draws = df[df['Resultado'] == 'D'].shape[0]
+    num_losses = num_matches - num_wins - num_draws
+    win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
+    lucro_prejuizo_total = calcular_lucro_prejuizo_total(df, team_type)
+    coeficiente_eficiencia_medio = df['Coeficiente_Eficiencia'].mean()
+    media_gols = df['Gols_Home'].mean() if team_type == "Home" else df['Gols_Away'].mean()
+    media_gols_sofridos = df['Gols_Away'].mean() if team_type == "Home" else df['Gols_Home'].mean()
+
+    # Exibir estatísticas
     st.write("### Estatísticas Gerais:")
-    if team_type == "Home":
-        st.markdown(f"Total de jogos em casa: {df.shape[0]}")
-    else:
-        st.markdown(f"Total de jogos fora de casa: {df.shape[0]}")
+    st.markdown(f"- Total de partidas: {num_matches}")
+    st.markdown(f"- Vitórias: {num_wins}")
+    st.markdown(f"- Empates: {num_draws}")
+    st.markdown(f"- Derrotas: {num_losses}")
+    st.markdown(f"- Aproveitamento: {win_percentage:.2f}%")
+    st.markdown(f"- Lucro/Prejuízo Total: {lucro_prejuizo_total:.2f}")
+    st.markdown(f"- Coeficiente de Eficiência Médio: {coeficiente_eficiencia_medio:.2f}")
+    st.markdown(f"- Média de gols marcados por partida: {media_gols:.2f}")
+    st.markdown(f"- Média de gols sofridos por partida: {media_gols_sofridos:.2f}")
 
-    st.markdown(f"Média de gols marcados por jogo: {df['Gols_Home'].mean() if team_type == 'Home' else df['Gols_Away'].mean():.2f}")
-    st.markdown(f"Média de gols sofridos por jogo: {df['Gols_Away'].mean() if team_type == 'Home' else df['Gols_Home'].mean():.2f}")
-
-# Executar o aplicativo principal
+# Executar a aplicação principal
 if __name__ == "__main__":
     main()
