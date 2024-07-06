@@ -181,7 +181,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         placar_counts = team_df['Placar'].value_counts()
 
         st.write("### Análise Personalizada:")
-        st.markdown(f"A análise revela que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
+        st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
         st.markdown(f"O lucro/prejuízo total foi {lucro_prejuizo_total:.2f}, com odd justa para MO de {odd_justa_wins:.2f} e para HA +0.25 de {odd_justa_wins_draws:.2f}.")
         st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando boa capacidade de marcar gols e sofrer poucos.")
         st.markdown(f"A frequência de placares mostra que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" venceu com mais frequência por placares como {', '.join(placar_counts.index[:3])}.")
