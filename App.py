@@ -96,6 +96,22 @@ times_away = sorted(str(team) for team in all_teams_away)
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
 
+# Função para calcular e exibir estatísticas
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
+    total_jogos = len(team_df)
+    vitorias = len(team_df[team_df['Resultado'] == 'W'])
+    empates = len(team_df[team_df['Resultado'] == 'D'])
+    derrotas = len(team_df[team_df['Resultado'] == 'L'])
+    
+    st.write(f"### Estatísticas ({team_type})")
+    st.write(f"Total de Jogos: {total_jogos}")
+    st.write(f"Vitórias: {vitorias} ({vitorias / total_jogos:.2%})")
+    st.write(f"Empates: {empates} ({empates / total_jogos:.2%})")
+    st.write(f"Derrotas: {derrotas} ({derrotas / total_jogos:.2%})")
+    
+    media_coeficiente = team_df['Coeficiente_Eficiencia'].mean()
+    st.write(f"Média do Coeficiente de Eficiência: {media_coeficiente:.2f}")
+
 # Interface do Streamlit
 def main():
     st.title("Odd Justa")
@@ -151,34 +167,29 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         opponent_name_col = 'Home'
     
     # Aplicar o filtro de odds
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a faixa de odds for "Outros"
+        team_df = team_df[~team_df[odds_col].between(1, 7.05)]  # Filtra odds fora da faixa de 1 a 7.05
     else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
-
+        team_df = team_df[team_df[odds_col].between(odds_group[0], odds_group[1])]
+    
     # Reindexar o DataFrame para garantir que os índices estejam corretos após o filtro
     team_df.reset_index(drop=True, inplace=True)
 
-    # Remover duplicatas após aplicar o filtro
-    team_df.drop_duplicates(inplace=True)
-
-    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
+    # Adicionar coluna de resultado
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
     # Adicionar coluna de coeficiente de eficiência
     team_df['Coeficiente_Eficiencia'] = team_df.apply(calcular_coeficiente, args=(team_type,), axis=1)
-
+    
     # Selecionar apenas as colunas relevantes para exibição
-    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
-
+    team_df = team_df[['Data', team_name_col, opponent_name_col', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
+    
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
     st.dataframe(team_df)
 
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
-
 
 def mostrar_h2h_resultados(team_home, team_away):
     h2h_df = df[(df['Home'] == team_home) & (df['Away'] == team_away) | (df['Home'] == team_away) & (df['Away'] == team_home)]
