@@ -99,6 +99,12 @@ odds_groups = sorted(df['Odd_Group'].unique())
 # Função para calcular e exibir estatísticas
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     total_jogos = len(team_df)
+    
+    if total_jogos == 0:
+        st.write("### Estatísticas")
+        st.write("Nenhum jogo encontrado para os filtros selecionados.")
+        return
+
     vitorias = len(team_df[team_df['Resultado'] == 'W'])
     empates = len(team_df[team_df['Resultado'] == 'D'])
     derrotas = len(team_df[team_df['Resultado'] == 'L'])
@@ -166,9 +172,9 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         team_name_col = 'Away'
         opponent_name_col = 'Home'
     
-    # Aplicar o filtro de odds
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a faixa de odds for "Outros"
-        team_df = team_df[~team_df[odds_col].between(1, 7.05)]  # Filtra odds fora da faixa de 1 a 7.05
+    # Aplicar filtro de odds selecionado
+    if odds_group[0] == -1 and odds_group[1] == -1:  # Caso para "Outros"
+        team_df = team_df[~team_df[odds_col].between(1, 7.1)]
     else:
         team_df = team_df[team_df[odds_col].between(odds_group[0], odds_group[1])]
     
