@@ -176,20 +176,19 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
         win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
 
+        lucro_prejuizo_total = calcular_lucro_prejuizo_total(team_df, team_type)
+        
+        odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins)
+        odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws)
+        
         coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
+        media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
+        media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
 
         st.write("### Análise Personalizada:")
+        st.markdown(f"A análise revela que o \"{team_df[team_name_col].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.0f}%.")
+        st.markdown(f"O lucro/prejuízo total foi {lucro_prejuizo_total:.2f}, com odd justa para MO de {odd_justa_wins:.2f} e para HA +0.25 de {odd_justa_wins_draws:.2f}.")
         
-        # Aproveitamento
-        if win_percentage < 40.00:
-            desempenho = "baixo desempenho"
-        elif win_percentage > 41.00 and win_percentage < 60.00:
-            desempenho = "médio desempenho"
-        elif win_percentage > 61.00:
-            desempenho = "bom desempenho"
-        else:
-            desempenho = "desempenho não determinado"
-
         # Classificação do coeficiente de eficiência médio
         if coeficiente_eficiencia_medio < 0.50:
             eficiencia = "baixa capacidade de marcar gol e média capacidade de sofrer gols"
@@ -200,15 +199,13 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         else:
             eficiencia = "capacidade de eficiência não determinada"
 
-        st.markdown(f"Desempenho do time: {desempenho}")
-        st.markdown(f"Capacidade de eficiência: {eficiencia}")
-
-        st.markdown(f"Com base nos resultados filtrados, o \"{team_df[team_name_col].iloc[0]}\" apresentou um aproveitamento de {win_percentage:.2f}% nas últimas {num_matches} partidas.")
         st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando {eficiencia}.")
-        st.markdown(f"A frequência de placares mostra que o \"{team_df[team_name_col].iloc[0]}\" venceu com mais frequência por placares como {', '.join(placares_contagem.index)}.")
+        
+        st.markdown(f"A frequência de placares mostra que o \"{team_df[team_name_col].iloc[0]}\" venceu com mais frequência por placares apertados, como {', '.join(placares_contagem.index)}.")
 
     else:
         st.write("Nenhuma partida encontrada para os filtros selecionados.")
+
 
 
 def calcular_lucro_prejuizo_total(team_df, team_type):
