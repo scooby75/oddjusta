@@ -224,8 +224,16 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
     st.markdown(f"Média de gols marcados por jogo: {df['Gols_Home'].mean() if team_type == 'Home' else df['Gols_Away'].mean():.2f}")
     st.markdown(f"Média de gols sofridos por jogo: {df['Gols_Away'].mean() if team_type == 'Home' else df['Gols_Home'].mean():.2f}")
 
-# Calcular a frequência dos placares
-placar_counts = df['Placar'].value_counts()
+# Calcular a frequência dos placares considerando o filtro pelo time selecionado
+if team_type == "Home":
+    placar_counts = team_df['Placar'].value_counts()
+else:
+    placar_counts = team_df['Placar'].value_counts()
+
+# Exibir os placares e suas frequências
+st.write("### Frequência de Placares:")
+st.dataframe(placar_counts)
+
 
 # Executar o aplicativo principal
 if __name__ == "__main__":
