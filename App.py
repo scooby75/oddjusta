@@ -174,15 +174,19 @@ def mostrar_h2h(time_home, time_away):
     # Filtrar jogos onde o time da casa e o time visitante são os selecionados
     h2h_df = df[(df['Home'] == time_home) & (df['Away'] == time_away)]
     
-    st.header(f"H2H {time_home} vs {time_away}")
+    st.header(f"Head to Head entre {time_home} (Casa) vs {time_away} (Visitante)")
 
-    # Mostrar DataFrame com os jogos selecionados
-    st.write(h2h_df)
-
-    # Verificar se a coluna 'Lucro_Por_Jogo' está presente no DataFrame
-    if 'Lucro_Por_Jogo' not in h2h_df.columns:
-        st.error("A coluna 'Lucro_Por_Jogo' não está presente nos dados. Verifique se os dados estão corretamente carregados e processados.")
+    # Verificar se o DataFrame está vazio
+    if h2h_df.empty:
+        st.warning("Nenhum jogo encontrado para os times selecionados.")
         return
+
+    # Calcular lucro/prejuízo por jogo com base nas odds e resultado
+    h2h_df['Lucro_Por_Jogo'] = 0.0  # Inicializar a coluna com 0.0
+    
+    # Exemplo de cálculo: Lucro se ganhar, prejuízo se perder
+    h2h_df.loc[h2h_df['Resultado'] == 'W', 'Lucro_Por_Jogo'] = h2h_df['Odd_Home'] - 1
+    h2h_df.loc[h2h_df['Resultado'] == 'L', 'Lucro_Por_Jogo'] = -1
 
     # Calcular estatísticas do head to head
     num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
@@ -215,10 +219,7 @@ def mostrar_h2h(time_home, time_away):
 
     # Adicionar análises destacadas usando Markdown
     st.write("### Análise:")
-    if not h2h_df.empty:
-        st.markdown(f"- Com as características do jogo de hoje, o {h2h_df['Home'].iloc[0] if team_type == 'Home' else h2h_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
-    else:
-        st.write("Nenhum jogo encontrado para os filtros selecionados.")
+    st.markdown(f"- Com as características do jogo de hoje, o {time_home} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
@@ -228,6 +229,7 @@ def mostrar_h2h(time_home, time_away):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
+
 
 # Chamada para iniciar o aplicativo
 if __name__ == "__main__":
