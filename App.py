@@ -41,7 +41,6 @@ def agrupar_odd(odd):
             return f"{lower:.2f} - {upper:.2f}"  # Formata e retorna o intervalo
     return 'Outros'  # Se a odd não se encaixar em nenhum intervalo pré-definido, retorna 'Outros'
 
-
 # Função para fazer o download de um arquivo e armazená-lo em cache
 def download_and_cache(url):
     cache_folder = "cache"
@@ -120,6 +119,11 @@ def main():
         min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
     mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+
+    # Exibir frequência de placares
+    st.write("### Frequência de Placares:")
+    placar_counts = df['Placar'].value_counts()
+    st.dataframe(placar_counts)
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
@@ -222,11 +226,6 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
 
 # Calcular a frequência dos placares
 placar_counts = df['Placar'].value_counts()
-
-# Exibir os placares e suas frequências
-st.write("### Frequência de Placares:")
-st.dataframe(placar_counts)
-
 
 # Executar o aplicativo principal
 if __name__ == "__main__":
