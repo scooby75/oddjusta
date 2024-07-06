@@ -200,6 +200,9 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     else:
         st.write("Nenhuma partida encontrada para os filtros selecionados.")
 
+     # Exibir o DataFrame resultante
+        st.write("### Partidas:")
+        st.dataframe(team_df)
 
 def calcular_lucro_prejuizo_total(df, team_type):
     if team_type == "Home":
