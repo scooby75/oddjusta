@@ -62,6 +62,64 @@ def calcular_coeficiente(row, team_type):
     else:
         return row['Gols_Away'] / row['Gols_Home'] if row['Gols_Home'] != 0 else 0
 
+# Função para calcular estatísticas e exibir
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
+    # Calcular estatísticas
+    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
+    num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
+    num_wins_draws = num_wins + num_draws  # Total de partidas sem derrota (W + D)
+    total_matches = team_df.shape[0]
+    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+    
+    # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
+    if team_type == "Home":
+        # Calcular lucro/prejuízo para jogos ganhos
+        lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
+        # Calcular lucro/prejuízo para jogos perdidos
+        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
+        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
+    else:
+        # Calcular lucro/prejuízo para jogos ganhos
+        lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
+        # Calcular lucro/prejuízo para jogos perdidos
+        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
+        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
+
+    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
+    if isinstance(lucro_prejuizo_total, (int, float)):
+        lucro_prejuizo_total = lucro_prejuizo_total
+    else:
+        lucro_prejuizo_total = 0
+
+    # Calcular médias
+    media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
+    media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
+    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
+
+    # Calcular odd justa para o total de partidas sem derrota
+    odd_justa_wins_draws = total_matches / num_wins_draws if num_wins_draws > 0 else 0
+    # Calcular odd justa apenas para as vitórias
+    odd_justa_wins = total_matches / num_wins if num_wins > 0 else 0
+    
+    # Contar a ocorrência de cada placar
+    placar_counts = team_df['Placar'].value_counts()
+
+    # Destacar resultados importantes usando markdown
+    st.write("### Análise:")
+    if not team_df.empty:
+        st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    else:
+        st.write("Nenhum jogo encontrado para os filtros selecionados.")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
+    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
+    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
+    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
+    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+    st.write("### Frequência dos Placares:")
+    st.write(placar_counts)
+
 # Carregar o arquivo CSV
 try:
     cached_file = download_and_cache(file_paths[0])  # Supondo que haja apenas um arquivo
@@ -85,99 +143,42 @@ df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
 df['Gols_Home'] = pd.to_numeric(df['Gols_Home'], errors='coerce').astype(pd.Int64Dtype())
 df['Gols_Away'] = pd.to_numeric(df['Gols_Away'], errors='coerce').astype(pd.Int64Dtype())
 
-# Remover linhas com valores nulos após a conversão
-df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
-
-# Adicionar coluna de placar no formato desejado (por exemplo, "2x0", "1x1", "1x2", etc.)
-df['Placar'] = df['Gols_Home'].astype(str) + 'x' + df['Gols_Away'].astype(str)
-
-# Calcular lucro/prejuízo por jogo
-df['Lucro_Por_Jogo'] = df.apply(calcular_lucro_por_jogo, axis=1)
-
-# Obter todas as equipes envolvidas nos jogos
-all_teams_home = set(df['Home'])
-all_teams_away = set(df['Away'])
-
-# Ordenar os times em ordem alfabética
-times_home = sorted(str(team) for team in all_teams_home)
-times_away = sorted(str(team) for team in all_teams_away)
-
-# Ordenar as faixas de odds
-odds_groups = sorted(df['Odd_Group'].unique())
-
-# Interface do Streamlit
+# Função principal para executar o aplicativo
 def main():
-    st.title("Odd Justa")
-    st.sidebar.header("Filtros")
-    analysis_type = st.sidebar.selectbox("Selecione o tipo de análise:", options=["Padrão", "Head to Head (H2H)"])
+    # Título do aplicativo
+    st.title("Análise Estatística de Resultados de Partidas Esportivas")
+
+    # Sidebar para seleção de opções
+    st.sidebar.title("Opções de Análise")
+    team_type = st.sidebar.selectbox("Selecione o tipo de equipe", ["Home", "Away"])
+    min_odds, max_odds = st.sidebar.slider("Selecione o intervalo de odds", float(df['Odd_Home'].min()), float(df['Odd_Home'].max()), (float(df['Odd_Home'].min()), float(df['Odd_Home'].max())))
+
+    # Filtrar os dados com base nas opções selecionadas
+    time = st.sidebar.text_input("Digite o nome do time", "Digite o nome do time")
+    team_df = df[(df['Home'] == time) | (df['Away'] == time)]
+    odds_column = 'Odd_Home' if team_type == 'Home' else 'Odd_Away'
     
-    if analysis_type == "Padrão":
-        team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
-        if team_type == "Home":
-            time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-            odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
-        else:
-            time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-            odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
-        
-        # Selectbox para selecionar o intervalo de odds
-        st.sidebar.subheader("Faixa de Odds")
-        selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+    # Mostrar os resultados com base nas opções selecionadas
+    mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds), team_df)
 
-        # Extrair os limites inferior e superior do intervalo selecionado
-        if selected_odds_range == "Outros":
-            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
-        else:
-            min_odds, max_odds = map(float, selected_odds_range.split(' - '))
-
-        mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
-    
-    elif analysis_type == "Head to Head (H2H)":
-        time_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-        time_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        mostrar_h2h(time_home, time_away)
-
-def mostrar_resultados(team_type, time, odds_column, odds_group):
-    if team_type == "Home":
-        team_df = df[df['Home'] == time]
-        odds_col = 'Odd_Home'
-        team_name_col = 'Home'
-        opponent_name_col = 'Away'
+def mostrar_resultados(team_type, time, odds_column, odds_range, team_df):
+    # Filtrar o DataFrame com base no tipo de equipe selecionada e no intervalo de odds
+    if team_type == 'Home':
+        team_df = team_df[(team_df['Home'] == time) & (team_df[odds_column] >= odds_range[0]) & (team_df[odds_column] <= odds_range[1])]
     else:
-        team_df = df[df['Away'] == time]
-        odds_col = 'Odd_Away'
-        team_name_col = 'Away'
-        opponent_name_col = 'Home'
+        team_df = team_df[(team_df['Away'] == time) & (team_df[odds_column] >= odds_range[0]) & (team_df[odds_column] <= odds_range[1])]
     
-    # Aplicar o filtro de odds
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
-    else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
+    # Verificar se há dados para mostrar
+    if team_df.empty:
+        st.warning("Nenhum dado disponível com as opções selecionadas.")
+        return
 
-    # Reindexar o DataFrame para garantir que os índices estejam corretos após o filtro
-    team_df.reset_index(drop=True, inplace=True)
-
-    # Remover duplicatas após aplicar o filtro
-    team_df.drop_duplicates(inplace=True)
-
-    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
-    team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
-    
-    # Adicionar coluna de coeficiente de eficiência se não existir
-    if 'Gols_Home' in team_df.columns and 'Gols_Away' in team_df.columns:
+    # Calcular o coeficiente de eficiência se a coluna existir no DataFrame
+    if 'Coeficiente_Eficiencia' in team_df.columns:
         team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
-    st.header(f"Estatísticas do {time} - {team_type}")
-
-    # Mostrar DataFrame com os dados filtrados e processados
-    st.write(team_df)
-
-    # Calcular e exibir estatísticas adicionais se a coluna de coeficiente de eficiência existir
-    if 'Coeficiente_Eficiencia' in team_df.columns:
-        coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
-        st.write(f"Coeficiente de Eficiência Médio: {coeficiente_eficiencia_medio:.2f}")
+    # Exibir estatísticas e análises detalhadas
+    calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
 def mostrar_h2h(time_home, time_away):
     # Filtrar jogos onde o time da casa e o time visitante são os selecionados
