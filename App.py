@@ -181,6 +181,13 @@ def mostrar_h2h(time_home, time_away):
     # Mostrar DataFrame com os jogos selecionados
     st.write(h2h_df)
 
+    # Verificar se as colunas necessárias estão presentes
+    required_columns = ['Lucro_Por_Jogo', 'Odd_Justa_MO', 'Odd_Justa_HA_025', 'Coeficiente_Eficiencia']
+    for col in required_columns:
+        if col not in h2h_df.columns:
+            st.error(f"Coluna '{col}' não encontrada no DataFrame.")
+            return
+
     # Calcular estatísticas do head to head
     num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
     num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
@@ -224,7 +231,6 @@ def mostrar_h2h(time_home, time_away):
         st.write(placar_counts)
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
-
 
 
 # Chamada para iniciar o aplicativo
