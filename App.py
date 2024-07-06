@@ -115,13 +115,13 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column, odds_group=N
     st.write(f"Empates: {empates} ({empates / total_jogos:.2%})")
     st.write(f"Derrotas: {derrotas} ({derrotas / total_jogos:.2%})")
     
+    # Verifica se a coluna 'Coeficiente_Eficiencia' existe no DataFrame antes de acessá-la
+    if 'Coeficiente_Eficiencia' in team_df.columns:
+        coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
+        st.write(f"Coeficiente de eficiência médio: {coeficiente_eficiencia_medio:.2f}")
+
     # Outras estatísticas específicas podem ser calculadas aqui
-    # Exemplo: média de gols marcados, coeficiente de eficiência médio, etc.
-    media_gols = team_df['Gols_Home'].mean()
-    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
-    
-    st.write(f"Média de gols marcados: {media_gols:.2f}")
-    st.write(f"Coeficiente de eficiência médio: {coeficiente_eficiencia_medio:.2f}")
+    # Exemplo: média de gols marcados, etc.
 
     # Calcular frequência dos placares
     placar_counts = team_df['Placar'].value_counts()
@@ -148,12 +148,7 @@ def calcular_estatisticas_h2h(team_df, time_home, time_away, odds_column, odds_g
     st.write(f"Empates: {empates}")
     
     # Outras estatísticas específicas podem ser calculadas aqui
-    # Exemplo: média de gols marcados, coeficiente de eficiência médio, etc.
-    media_gols_time_home = team_df[team_df['Home'] == time_home]['Gols_Home'].mean()
-    media_gols_time_away = team_df[team_df['Away'] == time_away]['Gols_Away'].mean()
-    
-    st.write(f"Média de gols marcados {time_home}: {media_gols_time_home:.2f}")
-    st.write(f"Média de gols marcados {time_away}: {media_gols_time_away:.2f}")
+    # Exemplo: média de gols marcados, etc.
 
     # Calcular frequência dos placares
     placar_counts = team_df['Placar'].value_counts()
