@@ -97,7 +97,7 @@ times_away = sorted(str(team) for team in all_teams_away)
 odds_groups = sorted(df['Odd_Group'].unique())
 
 # Função para calcular e exibir estatísticas
-def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column, odds_group=None):
     total_jogos = len(team_df)
     
     if total_jogos == 0:
@@ -129,7 +129,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.write(placar_counts)
 
 # Função para calcular e exibir estatísticas H2H
-def calcular_estatisticas_h2h(team_df, time_home, time_away, odds_column, odds_group):
+def calcular_estatisticas_h2h(team_df, time_home, time_away, odds_column, odds_group=None):
     total_jogos = len(team_df)
     
     if total_jogos == 0:
