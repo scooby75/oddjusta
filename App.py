@@ -192,10 +192,10 @@ def mostrar_h2h(time_home, time_away):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
     # Calcular lucro/prejuízo total
-    lucro_prejuizo_total = h2h_df['Lucro_Por_Jogo'].sum() if 'Lucro_Por_Jogo' in h2h_df.columns else 0.0
-
-    # Calcular odd justa para MO
-    odd_justa_wins = h2h_df['Odd_Justa_MO'].mean()
+    if 'Lucro_Por_Jogo' in h2h_df.columns:
+        lucro_prejuizo_total = h2h_df['Lucro_Por_Jogo'].sum()
+    else:
+        lucro_prejuizo_total = 0.0
 
     # Calcular total de partidas sem derrota
     num_wins_draws = h2h_df[h2h_df['Resultado'] != 'L'].shape[0]
@@ -203,23 +203,36 @@ def mostrar_h2h(time_home, time_away):
     num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
 
     # Calcular odd justa para HA +0.25
-    odd_justa_wins_draws = h2h_df['Odd_Justa_HA_025'].mean()
+    if 'Odd_Justa_HA_025' in h2h_df.columns:
+        odd_justa_wins_draws = h2h_df['Odd_Justa_HA_025'].mean()
+    else:
+        odd_justa_wins_draws = 0.0
 
     # Calcular coeficiente de eficiência médio
-    coeficiente_eficiencia_medio = h2h_df['Coeficiente_Eficiencia'].mean()
+    if 'Coeficiente_Eficiencia' in h2h_df.columns:
+        coeficiente_eficiencia_medio = h2h_df['Coeficiente_Eficiencia'].mean()
+    else:
+        coeficiente_eficiencia_medio = 0.0
 
     # Calcular média de gols marcados e sofridos
-    media_gols = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
-    media_gols_sofridos = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
+    if 'Gols_Home' in h2h_df.columns and 'Gols_Away' in h2h_df.columns:
+        media_gols = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
+        media_gols_sofridos = h2h_df['Gols_Home'].mean() + h2h_df['Gols_Away'].mean()
+    else:
+        media_gols = 0.0
+        media_gols_sofridos = 0.0
 
     # Calcular a frequência dos placares
-    placar_counts = h2h_df['Placar'].value_counts()
+    if 'Placar' in h2h_df.columns:
+        placar_counts = h2h_df['Placar'].value_counts()
+    else:
+        placar_counts = pd.Series()
 
     # Adicionar análises destacadas usando Markdown
     st.write("### Análise:")
     st.markdown(f"- Com as características do jogo de hoje, o {time_home} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
-    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.markdown(f"- Odd justa para MO: Não disponível (coluna não encontrada).")
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
     st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
@@ -227,7 +240,6 @@ def mostrar_h2h(time_home, time_away):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
-
 
 # Chamada para iniciar o aplicativo
 if __name__ == "__main__":
