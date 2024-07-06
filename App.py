@@ -162,16 +162,32 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
-    # Exibir frequência de placares
-    exibir_frequencia_placares(team_df)
+    # Realizar análise personalizada
+    if not team_df.empty:
+        num_matches = team_df.shape[0]
+        num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
+        num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
+        win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
 
-def exibir_frequencia_placares(df):
-    # Calcular a frequência dos placares
-    placar_counts = df['Placar'].value_counts()
+        lucro_prejuizo_total = calcular_lucro_prejuizo_total(team_df, team_type)
+        
+        odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins)
+        odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws)
+        
+        coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
+        media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
+        media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
 
-    # Exibir os placares e suas frequências
-    st.write("### Frequência de Placares:")
-    st.dataframe(placar_counts)
+        placar_counts = team_df['Placar'].value_counts()
+
+        st.write("### Análise Personalizada:")
+        st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
+        st.markdown(f"O lucro/prejuízo total foi {lucro_prejuizo_total:.2f}, com odd justa para MO de {odd_justa_wins:.2f} e para HA +0.25 de {odd_justa_wins_draws:.2f}.")
+        st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando boa capacidade de marcar gols e sofrer poucos.")
+        st.markdown(f"A frequência de placares mostra que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" venceu com mais frequência por placares como {', '.join(placar_counts.index[:3])}.")
+
+    else:
+        st.write("Nenhuma partida encontrada para os filtros selecionados.")
 
 def calcular_lucro_prejuizo_total(team_df, team_type):
     if team_type == "Home":
