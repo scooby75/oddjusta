@@ -155,7 +155,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
 
     # Calcular os placares mais frequentes e suas contagens
-    placares_contagem = team_df['Placar'].value_counts().head(3)
+    placares_contagem = team_df['Placar'].value_counts().head(6)
 
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
