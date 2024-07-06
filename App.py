@@ -198,7 +198,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
 def mostrar_h2h_resultados(team_home, team_away):
-    h2h_df = df[(df['Home'] == team_home) & (df['Away'] == team_away) | (df['Home'] == team_away) & (df['Away'] == team_home)]
+    h2h_df = df[((df['Home'] == team_home) & (df['Away'] == team_away))]
     
     if h2h_df.empty:
         st.write("Nenhuma partida encontrada entre as equipes selecionadas.")
@@ -209,18 +209,19 @@ def mostrar_h2h_resultados(team_home, team_away):
 
     # Adicionar coluna de resultado
     h2h_df['Resultado_Home'] = h2h_df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
-    h2h_df['Resultado_Away'] = h2h_df.apply(lambda row: classificar_resultado(row, "Away"), axis=1)
     
     # Adicionar coluna de coeficiente de eficiência
     h2h_df['Coeficiente_Eficiencia_Home'] = h2h_df.apply(calcular_coeficiente, args=("Home",), axis=1)
-    h2h_df['Coeficiente_Eficiencia_Away'] = h2h_df.apply(calcular_coeficiente, args=("Away",), axis=1)
     
     # Selecionar apenas as colunas relevantes para exibição
-    h2h_df = h2h_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado_Home', 'Resultado_Away', 'Coeficiente_Eficiencia_Home', 'Coeficiente_Eficiencia_Away', 'Placar']]
+    h2h_df = h2h_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado_Home', 'Coeficiente_Eficiencia_Home', 'Placar']]
     
     # Exibir o DataFrame resultante
     st.write("### Partidas Head-to-Head:")
     st.dataframe(h2h_df)
+    
+    # Calcular estatísticas e exibir
+    calcular_estatisticas_e_exibir(h2h_df, "Home", 'Odd_Home')
 
 if __name__ == "__main__":
     main()
