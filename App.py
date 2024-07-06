@@ -174,10 +174,15 @@ def mostrar_h2h(time_home, time_away):
     # Filtrar jogos onde o time da casa e o time visitante são os selecionados
     h2h_df = df[(df['Home'] == time_home) & (df['Away'] == time_away)]
     
-    st.header(f"Head to Head entre {time_home} (Casa) vs {time_away} (Visitante)")
+    st.header(f"H2H {time_home} vs {time_away}")
 
     # Mostrar DataFrame com os jogos selecionados
     st.write(h2h_df)
+
+    # Verificar se a coluna 'Lucro_Por_Jogo' está presente no DataFrame
+    if 'Lucro_Por_Jogo' not in h2h_df.columns:
+        st.error("A coluna 'Lucro_Por_Jogo' não está presente nos dados. Verifique se os dados estão corretamente carregados e processados.")
+        return
 
     # Calcular estatísticas do head to head
     num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
