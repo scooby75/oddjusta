@@ -70,7 +70,7 @@ df['Resultado_Away'] = df.apply(lambda row: classificar_resultado(row, "Away"), 
 # Adicionar coluna de agrupamento de odds
 if 'Odd_Home' in df:
     df['Odd_Group_Home'] = df['Odd_Home'].apply(agrupar_odd)
-elif 'Odd_Away' in df:
+if 'Odd_Away' in df:
     df['Odd_Group_Away'] = df['Odd_Away'].apply(agrupar_odd)
 
 # Remover linhas com valores nulos em 'Gols_Home' e 'Gols_Away'
@@ -96,113 +96,114 @@ times_home = sorted(str(team) for team in all_teams_home)
 times_away = sorted(str(team) for team in all_teams_away)
 
 # Ordenar as faixas de odds
-odds_groups = sorted(df['Odd_Group_Home'].unique())  # Considerando apenas um tipo de odd para simplicidade
+odds_groups_home = sorted(df['Odd_Group_Home'].unique()) if 'Odd_Group_Home' in df else []
+odds_groups_away = sorted(df['Odd_Group_Away'].unique()) if 'Odd_Group_Away' in df else []
 
 # Interface do Streamlit
 def main():
-    st.title("Odd Justa - Análise H2H")
+    st.title("Odd Justa")
     st.sidebar.header("Filtros")
-    team_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-    team_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-    
-    # Selectbox para selecionar o intervalo de odds (considerando apenas um tipo de odd para simplicidade)
-    st.sidebar.subheader("Faixa de Odds")
-    selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+    analysis_type = st.sidebar.selectbox("Selecione o tipo de análise:", options=["Home", "Away", "H2H"])
 
-    # Extrair os limites inferior e superior do intervalo selecionado
-    if selected_odds_range == "Outros":
-        min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
-    else:
-        min_odds, max_odds = map(float, selected_odds_range.split(' - '))
+    if analysis_type == "Home":
+        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
+        df_selected = df[df['Home'] == time]
+        team_type = "Home"
 
-    mostrar_resultados_h2h(team_home, team_away, (min_odds, max_odds))
+    elif analysis_type == "Away":
+        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+        df_selected = df[df['Away'] == time]
+        team_type = "Away"
 
-def mostrar_resultados_h2h(team_home, team_away, odds_group):
-    df_home = df[df['Home'] == team_home]
-    df_away = df[df['Away'] == team_away]
+    elif analysis_type == "H2H":
+        team_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+        team_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+        df_selected = df[(df['Home'] == team_home) & (df['Away'] == team_away)]
+        team_type = "H2H"
 
-    # Aplicar o filtro de odds para ambos os times
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        df_home = df_home[(df_home['Odd_Home'] < odds_group[0]) | (df_home['Odd_Home'] > odds_group[1])]
-        df_away = df_away[(df_away['Odd_Away'] < odds_group[0]) | (df_away['Odd_Away'] > odds_group[1])]
-    else:
-        df_home = df_home[(df_home['Odd_Home'] >= odds_group[0]) & (df_home['Odd_Home'] <= odds_group[1])]
-        df_away = df_away[(df_away['Odd_Away'] >= odds_group[0]) & (df_away['Odd_Away'] <= odds_group[1])]
+    if analysis_type == "Home" or analysis_type == "Away":
+        mostrar_resultados(df_selected, team_type, time, odds_column)
 
-    # Reindexar os DataFrames para garantir que os índices estejam corretos após o filtro
-    df_home.reset_index(drop=True, inplace=True)
-    df_away.reset_index(drop=True, inplace=True)
+    elif analysis_type == "H2H":
+        mostrar_resultados_h2h(df_selected, team_home, team_away)
 
-    # Remover duplicatas após aplicar o filtro
-    df_home.drop_duplicates(inplace=True)
-    df_away.drop_duplicates(inplace=True)
+def mostrar_resultados(df, team_type, time, odds_column):
+    st.write(f"### Resultados ({team_type}):")
+    if not df.empty:
+        st.dataframe(df)
 
-    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
-    df_home['Resultado_Home'] = df_home.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
-    df_away['Resultado_Away'] = df_away.apply(lambda row: classificar_resultado(row, "Away"), axis=1)
-    
-    # Adicionar coluna de coeficiente de eficiência
-    df_home['Coeficiente_Eficiencia_Home'] = df_home.apply(calcular_coeficiente, args=("Home",), axis=1)
-    df_away['Coeficiente_Eficiencia_Away'] = df_away.apply(calcular_coeficiente, args=("Away",), axis=1)
+        # Calcular estatísticas e exibir
+        calcular_estatisticas_e_exibir(df, team_type, odds_column)
 
-    # Selecionar apenas as colunas relevantes para exibição
-    df_home = df_home[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado_Home', 'Placar_Home']]
-    df_away = df_away[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado_Away', 'Placar_Away']]
+        # Realizar análise personalizada
+        num_matches = df.shape[0]
+        if num_matches > 0:
+            num_wins = df[df[f'Resultado_{team_type}'] == 'W'].shape[0]
+            num_draws = df[df[f'Resultado_{team_type}'] == 'D'].shape[0]
 
-    # Unir os DataFrames com base no índice para criar um único DataFrame H2H
-    df_h2h = pd.concat([df_home, df_away], axis=1)
+            lucro_prejuizo_total = calcular_lucro_prejuizo_total(df, team_type)
 
-    # Mostrar estatísticas gerais para cada equipe
-    calcular_estatisticas_e_exibir(df_h2h, 'Home', 'Odd_Home')
-    calcular_estatisticas_e_exibir(df_h2h, 'Away', 'Odd_Away')
+            odd_justa_wins = calcular_odd_justa_wins(df, num_wins)
+            odd_justa_wins_draws = calcular_odd_justa_wins_draws(df, num_wins, num_draws)
 
-    # Mostrar os placares mais frequentes
-    mostrar_placares_mais_frequentes(df_h2h, 'Home', 'Placar_Home')
-    mostrar_placares_mais_frequentes(df_h2h, 'Away', 'Placar_Away')
+            coeficiente_eficiencia_medio = df[f'Coeficiente_Eficiencia_{team_type}'].mean()
+            media_gols = df['Gols_Home'].mean() if team_type == "Home" else df['Gols_Away'].mean()
+            media_gols_sofridos = df['Gols_Away'].mean() if team_type == "Home" else df['Gols_Home'].mean()
 
-    # Mostrar análise personalizada para cada equipe
-    mostrar_analise_personalizada(df_h2h, team_home, 'Home')
-    mostrar_analise_personalizada(df_h2h, team_away, 'Away')
+            placar_counts = df[f'Placar_{team_type}'].value_counts().head(6)
 
-def mostrar_placares_mais_frequentes(df, team_type, placar_column):
-    st.write(f"### Placares Mais Frequentes ({team_type}):")
-    placares_contagem = df[placar_column].value_counts().head(6)
-    st.write(placares_contagem)
+            st.write(f"### Análise Personalizada ({team_type}):")
+            st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{time}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s).")
+            st.markdown(f"O lucro/prejuízo total foi {lucro_prejuizo_total:.2f}, com odd justa para MO de {odd_justa_wins:.2f} e para HA +0.25 de {odd_justa_wins_draws:.2f}.")
+            st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando boa capacidade de marcar gols e sofrer poucos.")
+            st.markdown(f"A frequência de placares mostra que o \"{time}\" venceu com mais frequência por placares como {', '.join(placar_counts.index)}.")
 
-def mostrar_analise_personalizada(df, team_name, team_type):
-    team_df = df[df['Home'] == team_name] if team_type == 'Home' else df[df['Away'] == team_name]
-    team_name_col = 'Home' if team_type == 'Home' else 'Away'
+        else:
+            st.write("Nenhuma partida encontrada para os filtros selecionados.")
 
-    st.write(f"### Análise Personalizada ({team_name}):")
-    if not team_df.empty:
-        num_matches = team_df.shape[0]
-        num_wins = team_df[team_df[f'Resultado_{team_type}'] == 'W'].shape[0]
-        num_draws = team_df[team_df[f'Resultado_{team_type}'] == 'D'].shape[0]
-        win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
+def mostrar_resultados_h2h(df, team_home, team_away):
+    st.write(f"### Resultados (H2H entre {team_home} x {team_away}):")
+    if not df.empty:
+        st.dataframe(df)
 
-        odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins)
-        odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws)
+        # Calcular estatísticas para H2H
+        st.write("### Estatísticas Gerais (H2H):")
+        st.markdown(f"Total de confrontos entre {team_home} e {team_away}: {df.shape[0]}")
 
-        coeficiente_eficiencia_medio = team_df[f'Coeficiente_Eficiencia_{team_type}'].mean()
-        media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
-        media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
+        st.write("### Placares Mais Frequentes (H2H):")
+        placar_counts_home = df['Placar_Home'].value_counts().head(6)
+        placar_counts_away = df['Placar_Away'].value_counts().head(6)
 
-        st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{team_df[team_name_col].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
-        st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando boa capacidade de marcar gols e sofrer poucos.")
-        st.markdown(f"A frequência de placares mostra que o \"{team_df[team_name_col].iloc[0]}\" venceu com mais frequência por placares como {', '.join(team_df[placar_column].value_counts().head(6).index)}.")
+        st.markdown(f"Placares mais frequentes como mandante ({team_home} vs {team_away}):")
+        st.dataframe(placar_counts_home)
+
+        st.markdown(f"Placares mais frequentes como visitante ({team_away} vs {team_home}):")
+        st.dataframe(placar_counts_away)
+
+        # Realizar análise personalizada para H2H
+        st.write(f"### Análise Personalizada (H2H entre {team_home} x {team_away}):")
+        # Adicione aqui a análise personalizada para H2H, se necessário
 
     else:
-        st.write(f"Nenhuma partida encontrada para os filtros selecionados: {team_name}.")
+        st.write(f"Nenhum confronto entre {team_home} e {team_away} encontrado.")
 
 def calcular_lucro_prejuizo_total(team_df, team_type):
     if team_type == "Home":
         lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado_Home'] == 'W'] - 1)).sum()
         lucro_prejuizo_losses = (-1 * ((team_df['Resultado_Home'] == 'L') | (team_df['Resultado_Home'] == 'L'))).sum()
         lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
-    else:
+    elif team_type == "Away":
         lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado_Away'] == 'W'] - 1)).sum()
         lucro_prejuizo_losses = (-1 * ((team_df['Resultado_Away'] == 'L') | (team_df['Resultado_Away'] == 'L'))).sum()
         lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
+    elif team_type == "H2H":
+        lucro_prejuizo_wins_home = ((team_df['Odd_Home'][team_df['Resultado_Home'] == 'W'] - 1)).sum()
+        lucro_prejuizo_wins_away = ((team_df['Odd_Away'][team_df['Resultado_Away'] == 'W'] - 1)).sum()
+        lucro_prejuizo_losses_home = (-1 * ((team_df['Resultado_Home'] == 'L') | (team_df['Resultado_Home'] == 'L'))).sum()
+        lucro_prejuizo_losses_away = (-1 * ((team_df['Resultado_Away'] == 'L') | (team_df['Resultado_Away'] == 'L'))).sum()
+        lucro_prejuizo_total = lucro_prejuizo_wins_home + lucro_prejuizo_wins_away + lucro_prejuizo_losses_home + lucro_prejuizo_losses_away
     
     return lucro_prejuizo_total
 
@@ -219,8 +220,10 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
     st.write(f"### Estatísticas Gerais ({team_type}):")
     if team_type == "Home":
         st.markdown(f"Total de jogos em casa: {df.shape[0]}")
-    else:
+    elif team_type == "Away":
         st.markdown(f"Total de jogos fora de casa: {df.shape[0]}")
+    elif team_type == "H2H":
+        st.markdown(f"Total de confrontos entre as equipes: {df.shape[0]}")
 
     st.markdown(f"Média de gols marcados por jogo: {df['Gols_Home'].mean() if team_type == 'Home' else df['Gols_Away'].mean():.2f}")
     st.markdown(f"Média de gols sofridos por jogo: {df['Gols_Away'].mean() if team_type == 'Home' else df['Gols_Home'].mean():.2f}")
