@@ -153,7 +153,10 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
 
     # Selecionar apenas as colunas relevantes para exibição
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
-
+    # Exibir o DataFrame resultante
+    st.write("### Partidas:")
+    st.dataframe(team_df)
+    
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
@@ -200,9 +203,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     else:
         st.write("Nenhuma partida encontrada para os filtros selecionados.")
 
-     # Exibir o DataFrame resultante
-        st.write("### Partidas:")
-        st.dataframe(team_df)
+     
 
 def calcular_lucro_prejuizo_total(df, team_type):
     if team_type == "Home":
