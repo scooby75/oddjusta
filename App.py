@@ -246,6 +246,6 @@ def calcular_estatisticas_e_exibir(df, team_type, odds_column):
     st.markdown(f"- Média de gols marcados por partida: {media_gols:.2f}")
     st.markdown(f"- Média de gols sofridos por partida: {media_gols_sofridos:.2f}")
 
-# Mostrar o aplicativo
+# Executar a aplicação principal
 if __name__ == "__main__":
     main()
