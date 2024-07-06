@@ -183,7 +183,7 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
             desempenho = "desempenho não determinado"
 
         if coeficiente_eficiencia_medio < 0.50:
-            eficiencia = "baixa capacidade de marcar gol e média capacidade de sofrer gols"
+            eficiencia = "baixa capacidade de marcar gol e alta capacidade de sofrer gols"
         elif coeficiente_eficiencia_medio > 0.51 and coeficiente_eficiencia_medio < 1.0:
             eficiencia = "média capacidade de marcar gol e média capacidade de sofrer gols"
         elif coeficiente_eficiencia_medio > 1.01:
