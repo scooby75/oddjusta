@@ -181,12 +181,10 @@ def mostrar_h2h(time_home, time_away):
         st.warning("Nenhum jogo encontrado para os times selecionados.")
         return
 
-    # Calcular lucro/prejuízo por jogo com base nas odds e resultado
-    h2h_df['Lucro_Por_Jogo'] = 0.0  # Inicializar a coluna com 0.0
-    
-    # Exemplo de cálculo: Lucro se ganhar, prejuízo se perder
-    h2h_df.loc[h2h_df['Resultado'] == 'W', 'Lucro_Por_Jogo'] = h2h_df['Odd_Home'] - 1
-    h2h_df.loc[h2h_df['Resultado'] == 'L', 'Lucro_Por_Jogo'] = -1
+    # Verificar se a coluna 'Odd_Justa_MO' está presente
+    if 'Odd_Justa_MO' not in h2h_df.columns:
+        st.error("A coluna 'Odd_Justa_MO' não está presente nos dados.")
+        return
 
     # Calcular estatísticas do head to head
     num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
@@ -194,7 +192,7 @@ def mostrar_h2h(time_home, time_away):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
 
     # Calcular lucro/prejuízo total
-    lucro_prejuizo_total = h2h_df['Lucro_Por_Jogo'].sum()
+    lucro_prejuizo_total = h2h_df['Lucro_Por_Jogo'].sum() if 'Lucro_Por_Jogo' in h2h_df.columns else 0.0
 
     # Calcular odd justa para MO
     odd_justa_wins = h2h_df['Odd_Justa_MO'].mean()
