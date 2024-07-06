@@ -41,7 +41,6 @@ def agrupar_odd(odd):
             return f"{lower:.2f} - {upper:.2f}"  # Formata e retorna o intervalo
     return 'Outros'  # Se a odd não se encaixar em nenhum intervalo pré-definido, retorna 'Outros'
 
-
 # Função para fazer o download de um arquivo e armazená-lo em cache
 def download_and_cache(url):
     cache_folder = "cache"
@@ -155,8 +154,8 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Selecionar apenas as colunas relevantes para exibição
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
 
-    # Calcular os placares mais frequentes
-    placares_mais_frequentes = team_df['Placar'].value_counts().head(3)
+    # Calcular os placares mais frequentes e suas contagens
+    placares_contagem = team_df['Placar'].value_counts().head(3)
 
     # Exibir o DataFrame resultante
     st.write("### Partidas:")
@@ -165,11 +164,12 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
-    # Exibir os placares mais frequentes
+    # Exibir os placares mais frequentes e suas contagens
     st.write("### Placares Mais Frequentes:")
-    st.write(placares_mais_frequentes.index.tolist())
+    for placar, contagem in placares_contagem.items():
+        st.write(f"{placar}: {contagem} vezes")
 
-    # Realizar análise personalizada
+    # Exibir análise personalizada
     if not team_df.empty:
         num_matches = team_df.shape[0]
         num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
@@ -185,13 +185,11 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
         media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
 
-        placar_counts = team_df['Placar'].value_counts()
-
         st.write("### Análise Personalizada:")
-        st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
+        st.markdown(f"Com as características do jogo de hoje, a análise revela que o \"{team_df[team_name_col].iloc[0]}\" teve um bom desempenho como {'mandante' if team_type == 'Home' else 'visitante'} nas últimas {num_matches} partidas, com {num_wins} vitória(s), {num_draws} empate(s) e {num_matches - num_wins - num_draws} derrota(s), aproveitamento de {win_percentage:.2f}%.")
         st.markdown(f"O lucro/prejuízo total foi {lucro_prejuizo_total:.2f}, com odd justa para MO de {odd_justa_wins:.2f} e para HA +0.25 de {odd_justa_wins_draws:.2f}.")
         st.markdown(f"O coeficiente de eficiência médio foi de {coeficiente_eficiencia_medio:.2f}, indicando boa capacidade de marcar gols e sofrer poucos.")
-        st.markdown(f"A frequência de placares mostra que o \"{team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]}\" venceu com mais frequência por placares como {', '.join(placar_counts.index[:3])}.")
+        st.markdown(f"A frequência de placares mostra que o \"{team_df[team_name_col].iloc[0]}\" venceu com mais frequência por placares como {', '.join(placares_contagem.index)}.")
 
     else:
         st.write("Nenhuma partida encontrada para os filtros selecionados.")
