@@ -128,50 +128,61 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
 
-# Interface do Streamlit
-def main():
-    st.title("Odd Justa")
-    st.sidebar.header("Filtros")
-    team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away", "Head-to-Head (H2H)"])
+# Função para calcular e exibir estatísticas H2H
+def calcular_estatisticas_h2h(team_df, time_home, time_away, odds_column, odds_group):
+    total_jogos = len(team_df)
     
-    if team_type == "Home":
-        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
-        # Selectbox para selecionar o intervalo de odds
-        st.sidebar.subheader("Faixa de Odds")
-        selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+    if total_jogos == 0:
+        st.write("### Estatísticas H2H")
+        st.write(f"Nenhum jogo encontrado entre {time_home} e {time_away} para os filtros selecionados.")
+        return
 
-        # Extrair os limites inferior e superior do intervalo selecionado
-        if selected_odds_range == "Outros":
-            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
-        else:
-            min_odds, max_odds = map(float, selected_odds_range.split(' - '))
-        
-        mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+    vitorias_time_home = len(team_df[(team_df['Home'] == time_home) & (team_df['Resultado'] == 'W')])
+    vitorias_time_away = len(team_df[(team_df['Away'] == time_away) & (team_df['Resultado'] == 'W')])
+    empates = len(team_df[team_df['Resultado'] == 'D'])
+    
+    st.write(f"### Estatísticas H2H ({time_home} vs {time_away})")
+    st.write(f"Total de Jogos: {total_jogos}")
+    st.write(f"Vitórias {time_home}: {vitorias_time_home}")
+    st.write(f"Vitórias {time_away}: {vitorias_time_away}")
+    st.write(f"Empates: {empates}")
+    
+    # Outras estatísticas específicas podem ser calculadas aqui
+    # Exemplo: média de gols marcados, coeficiente de eficiência médio, etc.
+    media_gols_time_home = team_df[team_df['Home'] == time_home]['Gols_Home'].mean()
+    media_gols_time_away = team_df[team_df['Away'] == time_away]['Gols_Away'].mean()
+    
+    st.write(f"Média de gols marcados {time_home}: {media_gols_time_home:.2f}")
+    st.write(f"Média de gols marcados {time_away}: {media_gols_time_away:.2f}")
+
+    # Calcular frequência dos placares
+    placar_counts = team_df['Placar'].value_counts()
+    st.write("### Frequência dos Placares:")
+    st.write(placar_counts)
+
+# Função principal para exibir resultados com base no tipo de equipe selecionada
+def main():
+    st.sidebar.title("Filtros")
+    team_type = st.sidebar.radio("Selecione o Tipo de Equipe:", ["Home", "Away", "Head-to-Head (H2H)"])
+
+    if team_type == "Home":
+        time = st.sidebar.selectbox("Selecione o Time:", options=times_home)
+        odds_group = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+        team_df = df[(df['Home'] == time) & (df['Odd_Group'] == odds_group)]
+        calcular_estatisticas_e_exibir(team_df, team_type, 'Odd_Home', odds_group)
 
     elif team_type == "Away":
-        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
-        # Selectbox para selecionar o intervalo de odds
-        st.sidebar.subheader("Faixa de Odds")
-        selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
-
-        # Extrair os limites inferior e superior do intervalo selecionado
-        if selected_odds_range == "Outros":
-            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
-        else:
-            min_odds, max_odds = map(float, selected_odds_range.split(' - '))
-        
-        mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+        time = st.sidebar.selectbox("Selecione o Time:", options=times_away)
+        odds_group = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+        team_df = df[(df['Away'] == time) & (df['Odd_Group'] == odds_group)]
+        calcular_estatisticas_e_exibir(team_df, team_type, 'Odd_Away', odds_group)
 
     elif team_type == "Head-to-Head (H2H)":
         time_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
         time_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        mostrar_h2h_resultados(time_home, time_away)
+        odds_group = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+        team_df = df[(df['Home'] == time_home) & (df['Away'] == time_away) & (df['Odd_Group'] == odds_group)]
+        calcular_estatisticas_h2h(team_df, time_home, time_away, 'Odd_Home', odds_group)
 
-def mostrar_resultados(team_type, time, odds_col, odds_group):
-    team_name_col = 'Home' if team_type == 'Home' else 'Away'
-    opponent_name_col = 'Away' if team_type == 'Home' else 'Home'
-
-    team_df = df[(df[team_name_col] == time) & (df['Odd_Group'] == 'Odd_Empate')]
-    [0] == -1 and odds_group[1] team_df = team_df[['Data', team_name_col, opponent_name_col', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']
+if __name__ == "__main__":
+    main()
