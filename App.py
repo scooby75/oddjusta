@@ -165,9 +165,8 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
 
         lucro_prejuizo_total = calcular_lucro_prejuizo_total(team_df, team_type)
-        odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins)
-        odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws)
-        
+        odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins, team_type)
+        odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws, team_type)
         coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
         media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
 
@@ -211,16 +210,16 @@ def calcular_lucro_prejuizo_total(team_df, team_type):
                 lucro_prejuizo_total -= 1  # Perde a aposta inicial
     return lucro_prejuizo_total
 
-def calcular_odd_justa_wins(team_df, num_wins):
+def calcular_odd_justa_wins(team_df, num_wins, team_type):
     if num_wins > 0:
-        return sum(team_df[team_df['Resultado'] == 'W']['Odd_Home' if team_type == "Home" else 'Odd_Away']) / num_wins
+        return sum(team_df[team_df['Resultado'] == 'W'][f'Odd_{team_type}']) / num_wins
     else:
         return 0
 
-def calcular_odd_justa_wins_draws(team_df, num_wins, num_draws):
+def calcular_odd_justa_wins_draws(team_df, num_wins, num_draws, team_type):
     total_results = num_wins + num_draws
     if total_results > 0:
-        return sum(team_df[(team_df['Resultado'] == 'W') | (team_df['Resultado'] == 'D')]['Odd_Home' if team_type == "Home" else 'Odd_Away']) / total_results
+        return sum(team_df[(team_df['Resultado'] == 'W') | (team_df['Resultado'] == 'D')][f'Odd_{team_type}']) / total_results
     else:
         return 0
 
