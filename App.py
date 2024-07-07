@@ -165,7 +165,6 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
         num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
         num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
         win_percentage = (num_wins / num_matches) * 100 if num_matches > 0 else 0
-
         lucro_prejuizo_total = calcular_lucro_prejuizo_total(team_df, team_type)
         odd_justa_wins = calcular_odd_justa_wins(team_df, num_wins, team_type)
         odd_justa_wins_draws = calcular_odd_justa_wins_draws(team_df, num_wins, num_draws, team_type)
@@ -226,9 +225,6 @@ def calcular_odd_justa_wins_draws(team_df, num_wins, num_draws, team_type):
         return 0
 
 def grafico_barras_resultados(team_df):
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-
     # Contar a quantidade de cada resultado (W, D, L)
     resultados_contagem = team_df['Resultado'].value_counts()
 
