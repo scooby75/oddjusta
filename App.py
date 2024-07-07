@@ -2,6 +2,8 @@ import pandas as pd
 import streamlit as st
 import os
 import requests
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from bd import file_paths  # Importando file_paths de bd.py
 
