@@ -2,9 +2,7 @@ import pandas as pd
 import streamlit as st
 import os
 import requests
-
-# Importando file_paths de bd.py
-from bd import file_paths
+from bd import file_paths  # Importando file_paths de bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -34,7 +32,7 @@ def calcular_coeficiente(row, team_type):
     except Exception as e:
         print(f"Erro ao calcular o coeficiente: {e}")
 
-# Função para agrupar odds
+# Função para agrupar odds em intervalos
 def agrupar_odd(odd):
     for i in range(0, 120):  # Itera através de uma faixa de valores
         lower = 1 + i * 0.06  # Calcula o limite inferior do intervalo
@@ -107,7 +105,7 @@ def main():
     if team_type == "H2H":
         time_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
         time_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        mostrar_resultados_h2h(time_home, time_away)
+        mostrar_resultados_h2h(df, time_home, time_away)
     else:
         if team_type == "Home":
             time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
@@ -126,9 +124,9 @@ def main():
         else:
             min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
-        mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+        mostrar_resultados(df, team_type, time, odds_column, (min_odds, max_odds))
 
-def mostrar_resultados(team_type, time, odds_column, odds_group):
+def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
         odds_col = 'Odd_Home'
@@ -162,21 +160,18 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Selecionar apenas as colunas relevantes para exibição
     team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
 
-    # Exibir o DataFrame resultante
-    st.write("### Partidas:")
+    # Exibir resultados
+    st.subheader(f"Resultados para o time {time}:")
     st.dataframe(team_df)
 
-    # Calcular estatísticas e exibir
-    calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
-
-def mostrar_resultados_h2h(time_home, time_away):
+def mostrar_resultados_h2h(df, time_home, time_away):
     h2h_df = df[(df['Home'] == time_home) & (df['Away'] == time_away)]
 
     if h2h_df.empty:
         st.write("Não existem partidas entre as equipes.")
     else:
-        # Selecionar apenas as colunas presentes em team_df
-        columns_to_display = team_df.columns
+        # Selecionar apenas as colunas presentes no DataFrame df
+        columns_to_display = df.columns
 
         # Verificar se todas as colunas estão presentes no DataFrame h2h_df antes de acessá-las
         if all(col in h2h_df.columns for col in columns_to_display):
@@ -186,13 +181,9 @@ def mostrar_resultados_h2h(time_home, time_away):
         else:
             st.write("Algumas colunas não estão presentes no DataFrame h2h_df.")
 
-
-
 def calcular_estatisticas_e_exibir(df, team_type, odds_column):
-    # Aqui você pode calcular e exibir estatísticas adicionais, se necessário
-    st.write("### Estatísticas:")
-    st.write(f"Total de partidas: {len(df)}")
-    st.write(f"Média de {odds_column}: {df[odds_column].mean()}")
+    # Implemente a lógica para calcular as estatísticas desejadas
+    pass
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
