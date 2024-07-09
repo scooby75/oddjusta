@@ -175,7 +175,8 @@ def mostrar_resultados_h2h(time_home, time_away):
     if h2h_df.empty:
         st.write("Não existem partidas entre as equipes.")
     else:
-        columns_to_display = ['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']
+        # Selecionar apenas as colunas presentes em team_df
+        columns_to_display = team_df.columns
 
         # Verificar se todas as colunas estão presentes no DataFrame h2h_df antes de acessá-las
         if all(col in h2h_df.columns for col in columns_to_display):
@@ -184,6 +185,7 @@ def mostrar_resultados_h2h(time_home, time_away):
             calcular_estatisticas_e_exibir(h2h_df, "Home", 'Odd_Home')
         else:
             st.write("Algumas colunas não estão presentes no DataFrame h2h_df.")
+
 
 
 def calcular_estatisticas_e_exibir(df, team_type, odds_column):
