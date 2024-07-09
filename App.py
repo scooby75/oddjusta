@@ -155,16 +155,16 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
     
     # Adicionar coluna de coeficiente de eficiência
-    team_df['Coeficiente_Eficiencia'] = team_df.apply(calcular_coeficiente, args=(team_type,), axis=1)
+    team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
-    # Selecionar apenas as colunas relevantes para exibição
-    team_df = team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
-
-    # Exibir resultados
-    st.subheader(f"Resultados para o time {time}:")
-    st.dataframe(team_df)
+    # Mostrar os resultados na interface do Streamlit
+    st.write(f"### Resultados para o time {time} como {team_type}:")
+    st.dataframe(team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']])
+    
+    calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
 def mostrar_resultados_h2h(df, time_home, time_away):
+    # Filtrar DataFrame para exibir apenas confrontos diretos entre as equipes selecionadas
     h2h_df = df[(df['Home'] == time_home) & (df['Away'] == time_away)]
 
     if h2h_df.empty:
