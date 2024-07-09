@@ -63,7 +63,7 @@ try:
 except Exception as e:
     st.error(f"Erro ao processar o arquivo {file_paths[0]}: {e}")
 
-# Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
+# Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionado
 df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
 
 # Adicionar coluna de agrupamento de odds
@@ -145,16 +145,10 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     else:
         team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
 
-    # Reindexar o DataFrame para garantir que os índices estejam corretos após o filtro
+    # Reindexar o DataFrame resultante após a filtragem
     team_df.reset_index(drop=True, inplace=True)
 
-    # Remover duplicatas após aplicar o filtro
-    team_df.drop_duplicates(inplace=True)
-
-    # Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionada
-    team_df['Resultado'] = team_df.apply(lambda row: classificar_resultado(row, team_type), axis=1)
-    
-    # Adicionar coluna de coeficiente de eficiência
+    # Calcular o coeficiente de eficiência para cada jogo
     team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
     # Mostrar os resultados na interface do Streamlit
@@ -170,16 +164,17 @@ def mostrar_resultados_h2h(df, time_home, time_away):
     if h2h_df.empty:
         st.write("Não existem partidas entre as equipes.")
     else:
-        # Selecionar apenas as colunas presentes no DataFrame df
+        # Verificar se todas as colunas estão presentes no DataFrame h2h_df antes de acessá-las
         columns_to_display = df.columns
 
-        # Verificar se todas as colunas estão presentes no DataFrame h2h_df antes de acessá-las
-        if all(col in h2h_df.columns for col in columns_to_display):
-            st.write("### Partidas H2H:")
-            st.dataframe(h2h_df[columns_to_display])
-            calcular_estatisticas_e_exibir(h2h_df, "Home", 'Odd_Home')
-        else:
-            st.write("Algumas colunas não estão presentes no DataFrame h2h_df.")
+        # Mostrar os resultados na interface do Streamlit
+        st.write("### Partidas H2H:")
+        st.dataframe(h2h_df[columns_to_display])
+        
+        # Calcular o coeficiente de eficiência para cada jogo em H2H
+        h2h_df['Coeficiente_Eficiencia'] = h2h_df.apply(lambda row: calcular_coeficiente(row, "Home"), axis=1)
+        
+        calcular_estatisticas_e_exibir(h2h_df, "Home", 'Odd_Home')
 
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular estatísticas
