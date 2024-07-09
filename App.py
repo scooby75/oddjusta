@@ -185,6 +185,7 @@ def mostrar_resultados_h2h(time_home, time_away):
         else:
             st.write("Algumas colunas não estão presentes no DataFrame h2h_df.")
 
+
 def calcular_estatisticas_e_exibir(df, team_type, odds_column):
     # Aqui você pode calcular e exibir estatísticas adicionais, se necessário
     st.write("### Estatísticas:")
