@@ -3,7 +3,8 @@ import streamlit as st
 import os
 import requests
 
-from bd import file_paths  # Importando file_paths de bd.py
+# Importando file_paths de bd.py
+from bd import file_paths
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -32,6 +33,7 @@ def calcular_coeficiente(row, team_type):
         return diferenca_gols
     except Exception as e:
         print(f"Erro ao calcular o coeficiente: {e}")
+        return 0
 
 def agrupar_odd(odd):
     for i in range(0, 120):  # Itera através de uma faixa de valores
@@ -40,7 +42,6 @@ def agrupar_odd(odd):
         if lower <= odd <= upper:  # Verifica se a odd está dentro do intervalo
             return f"{lower:.2f} - {upper:.2f}"  # Formata e retorna o intervalo
     return 'Outros'  # Se a odd não se encaixar em nenhum intervalo pré-definido, retorna 'Outros'
-
 
 # Função para fazer o download de um arquivo e armazená-lo em cache
 def download_and_cache(url):
@@ -162,7 +163,6 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
-
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
@@ -172,24 +172,9 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
     
     # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
-    if team_type == "Home":
-        # Calcular lucro/prejuízo para jogos ganhos
-        lucro_prejuizo_wins = ((team_df['Odd_Home'][team_df['Resultado'] == 'W'] - 1)).sum()
-        # Calcular lucro/prejuízo para jogos perdidos
-        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
-    else:
-        # Calcular lucro/prejuízo para jogos ganhos
-        lucro_prejuizo_wins = ((team_df['Odd_Away'][team_df['Resultado'] == 'W'] - 1)).sum()
-        # Calcular lucro/prejuízo para jogos perdidos
-        lucro_prejuizo_losses = (-1 * ((team_df['Resultado'] == 'L') | (team_df['Resultado'] == 'L'))).sum()
-        lucro_prejuizo_total = lucro_prejuizo_wins + lucro_prejuizo_losses
-
-    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
-    if isinstance(lucro_prejuizo_total, (int, float)):
-        lucro_prejuizo_total = lucro_prejuizo_total
-    else:
-        lucro_prejuizo_total = 0
+    lucro_prejuizo_wins = team_df[odds_column][team_df['Resultado'] == 'W'] - 1
+    lucro_prejuizo_losses = -1 * (team_df['Resultado'] == 'L').sum()
+    lucro_prejuizo_total = lucro_prejuizo_wins.sum() + lucro_prejuizo_losses
 
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
@@ -219,7 +204,6 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
-       
 
 if __name__ == "__main__":
     main()
