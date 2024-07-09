@@ -3,8 +3,7 @@ import streamlit as st
 import os
 import requests
 
-# Importando file_paths de bd.py
-from bd import file_paths
+from bd import file_paths  # Importando file_paths de bd.py
 
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
@@ -33,7 +32,6 @@ def calcular_coeficiente(row, team_type):
         return diferenca_gols
     except Exception as e:
         print(f"Erro ao calcular o coeficiente: {e}")
-        return 0
 
 def agrupar_odd(odd):
     for i in range(0, 120):  # Itera através de uma faixa de valores
@@ -102,25 +100,34 @@ odds_groups = sorted(df['Odd_Group'].unique())
 def main():
     st.title("Odd Justa")
     st.sidebar.header("Filtros")
-    team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away"])
-    if team_type == "Home":
-        time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-        odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
-    else:
-        time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-        odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+    team_type = st.sidebar.selectbox("Selecione qual deseja analisar:", options=["Home", "Away", "H2H"])
     
-    # Selectbox para selecionar o intervalo de odds
-    st.sidebar.subheader("Faixa de Odds")
-    selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
-
-    # Extrair os limites inferior e superior do intervalo selecionado
-    if selected_odds_range == "Outros":
-        min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
+    if team_type == "H2H":
+        time_home = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+        time_away = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+        odds_column = 'Odd_Home'  # Padrão para H2H, mas pode ser ajustado conforme necessário
     else:
-        min_odds, max_odds = map(float, selected_odds_range.split(' - '))
+        if team_type == "Home":
+            time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
+            odds_column = 'Odd_Home'
+        else:
+            time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
+            odds_column = 'Odd_Away'
+        
+        # Selectbox para selecionar o intervalo de odds
+        st.sidebar.subheader("Faixa de Odds")
+        selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+        
+        # Extrair os limites inferior e superior do intervalo selecionado
+        if selected_odds_range == "Outros":
+            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
+        else:
+            min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
-    mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
+    if team_type == "H2H":
+        mostrar_resultados_h2h(time_home, time_away)
+    else:
+        mostrar_resultados(team_type, time, odds_column, (min_odds, max_odds))
 
 def mostrar_resultados(team_type, time, odds_column, odds_group):
     if team_type == "Home":
@@ -163,17 +170,41 @@ def mostrar_resultados(team_type, time, odds_column, odds_group):
     # Calcular estatísticas e exibir
     calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
+def mostrar_resultados_h2h(time_home, time_away):
+    h2h_df = df[(df['Home'] == time_home) & (df['Away'] == time_away) | (df['Home'] == time_away) & (df['Away'] == time_home)]
+
+    if h2h_df.empty:
+        st.write("Não existe partidas entre as equipes.")
+        return
+
+    h2h_df.reset_index(drop=True, inplace=True)
+
+    h2h_df['Resultado'] = h2h_df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
+    h2h_df['Coeficiente_Eficiencia'] = h2h_df.apply(calcular_coeficiente, args=("Home",), axis=1)
+
+    h2h_df = h2h_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Empate', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']]
+
+    st.write("### Partidas:")
+    st.dataframe(h2h_df)
+
+    calcular_estatisticas_e_exibir(h2h_df, "H2H", "Odd_Home")
+
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
     num_wins_draws = num_wins + num_draws  # Total de partidas sem derrota (W + D)
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
     
     # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
-    lucro_prejuizo = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1).sum()
+    lucro_prejuizo_total = team_df.apply(lambda row: (row[odds_column] - 1) if row['Resultado'] == 'W' else -1, axis=1).sum()
+
+    # Verificar se lucro_prejuizo_total é um valor numérico antes de formatá-lo
+    if isinstance(lucro_prejuizo_total, (int, float)):
+        lucro_prejuizo_total = lucro_prejuizo_total
+    else:
+        lucro_prejuizo_total = 0
 
     # Calcular médias
     media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
@@ -194,13 +225,13 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
         st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
-    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo_total:.2f}.")
     st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
     st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
-    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+    st.markdown(f("- Média de gols sofridos: {media_gols_sofridos:.2f}."))
     st.write("### Frequência dos Placares:")
     st.write(placar_counts)
 
