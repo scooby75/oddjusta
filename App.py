@@ -96,6 +96,26 @@ times_away = sorted(str(team) for team in all_teams_away)
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
 
+# Função para calcular estatísticas e exibir resultados
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
+    # Contar a ocorrência de cada placar
+    placar_counts = team_df['Placar'].value_counts()
+
+    # Calcular o total de eventos
+    total_eventos = placar_counts.sum()
+
+    # Criar DataFrame para a frequência dos placares
+    placar_df = pd.DataFrame({
+        'Placar': placar_counts.index,
+        'Frequencia': placar_counts.values
+    })
+
+    # Calcular a Probabilidade (%) e a Odd Lay
+    placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
+    placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
+
+    return placar_df
+
 # Interface do Streamlit
 def main():
     st.title("Odd Justa")
@@ -154,15 +174,19 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Cálculo das estatísticas adicionais
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-    num_wins_draws = num_wins + num_draws
-    total_matches = team_df.shape[0]
+    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
+    total_matches = num_wins + num_draws + num_losses
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-    lucro_prejuizo = num_wins - (total_matches - num_wins)  # Lucro/Prejuízo simplificado
-    odd_justa_wins = 1 / (num_wins / total_matches) if total_matches > 0 else 0
-    odd_justa_wins_draws = 1 / (num_wins_draws / total_matches) if total_matches > 0 else 0
+    lucro_prejuizo = (num_wins * team_df[odds_col].mean() - total_matches) if total_matches > 0 else 0
+    odd_justa_wins = (num_wins / total_matches) if total_matches > 0 else 0
+    num_wins_draws = num_wins + num_draws
+    odd_justa_wins_draws = (num_wins_draws / total_matches) if total_matches > 0 else 0
     coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
     media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
     media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
+
+    # Calcular a frequência dos placares e exibir as estatísticas
+    placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
@@ -179,8 +203,6 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
-    placar_df = team_df['Placar'].value_counts().reset_index()
-    placar_df.columns = ['Placar', 'Frequência']
     st.dataframe(placar_df)
 
 def mostrar_resultados_h2h(df, time_home, time_away):
