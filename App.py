@@ -13,33 +13,36 @@ def classificar_resultado(row, team_type):
             return 'L'
         else:
             return 'D'
-    else:  # Caso seja "Away"
+    elif team_type == "Away":
         if row['Gols_Away'] > row['Gols_Home']:
             return 'W'
         elif row['Gols_Away'] < row['Gols_Home']:
             return 'L'
         else:
             return 'D'
+    else:
+        return 'N/A'  # Para H2H, logic can be added here if needed
 
 # Função para calcular o coeficiente de eficiência de acordo com o tipo de equipe selecionado
 def calcular_coeficiente(row, team_type):
     try:
         if team_type == "Home":
-            diferenca_gols = row['Gols_Home'] - row['Gols_Away']
-        else:  # Se for "Away"
-            diferenca_gols = row['Gols_Away'] - row['Gols_Home']
-        return diferenca_gols
+            return row['Gols_Home'] - row['Gols_Away']
+        elif team_type == "Away":
+            return row['Gols_Away'] - row['Gols_Home']
     except Exception as e:
-        print(f"Erro ao calcular o coeficiente: {e}")
+        st.error(f"Erro ao calcular o coeficiente: {e}")
 
 # Função para agrupar odds em intervalos
 def agrupar_odd(odd):
-    for i in range(0, 120):  # Itera através de uma faixa de valores
-        lower = 1 + i * 0.06  # Calcula o limite inferior do intervalo
-        upper = lower + 0.05  # Calcula o limite superior do intervalo
-        if lower <= odd <= upper:  # Verifica se a odd está dentro do intervalo
-            return f"{lower:.2f} - {upper:.2f}"  # Formata e retorna o intervalo
-    return 'Outros'  # Se a odd não se encaixar em nenhum intervalo pré-definido, retorna 'Outros'
+    lower = 1
+    step = 0.06
+    while lower <= 120:
+        upper = lower + 0.05
+        if lower <= odd < upper:
+            return f"{lower:.2f} - {upper:.2f}"
+        lower += step
+    return 'Outros'
 
 # Função para fazer o download de um arquivo e armazená-lo em cache
 def download_and_cache(url):
@@ -51,6 +54,7 @@ def download_and_cache(url):
     
     if not os.path.exists(cache_file):
         response = requests.get(url)
+        response.raise_for_status()  # Garante que erros na requisição sejam tratados
         with open(cache_file, 'wb') as f:
             f.write(response.content)
     
@@ -60,6 +64,9 @@ def download_and_cache(url):
 try:
     cached_file = download_and_cache(file_paths[0])  # Supondo que haja apenas um arquivo
     df = pd.read_csv(cached_file, encoding='utf-8')  # Especificar a codificação UTF-8
+    # Definir tipos de dados
+    df['Gols_Home'] = pd.to_numeric(df['Gols_Home'], errors='coerce')
+    df['Gols_Away'] = pd.to_numeric(df['Gols_Away'], errors='coerce')
 except Exception as e:
     st.error(f"Erro ao processar o arquivo {file_paths[0]}: {e}")
 
@@ -76,8 +83,8 @@ elif 'Odd_Away' in df:
 df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
 
 # Converter valores para inteiros, tratando valores não numéricos como nulos
-df['Gols_Home'] = pd.to_numeric(df['Gols_Home'], errors='coerce').astype(pd.Int64Dtype())
-df['Gols_Away'] = pd.to_numeric(df['Gols_Away'], errors='coerce').astype(pd.Int64Dtype())
+df['Gols_Home'] = df['Gols_Home'].astype(pd.Int64Dtype())
+df['Gols_Away'] = df['Gols_Away'].astype(pd.Int64Dtype())
 
 # Remover linhas com valores nulos após a conversão
 df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
@@ -98,23 +105,17 @@ odds_groups = sorted(df['Odd_Group'].unique())
 
 # Função para calcular estatísticas e exibir resultados
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
-    # Contar a ocorrência de cada placar
     placar_counts = team_df['Placar'].value_counts()
-
-    # Calcular o total de eventos
     total_eventos = placar_counts.sum()
 
-    # Criar DataFrame para a frequência dos placares
     placar_df = pd.DataFrame({
         'Placar': placar_counts.index,
         'Frequencia': placar_counts.values
     })
 
-    # Calcular a Probabilidade (%) e a Odd Lay
     placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
     placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
 
-    # Formatar para duas casas decimais
     placar_df['Probabilidade (%)'] = placar_df['Probabilidade (%)'].round(2)
     placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
 
@@ -133,10 +134,10 @@ def main():
     else:
         if team_type == "Home":
             time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-            odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
+            odds_column = 'Odd_Home'
         else:
             time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-            odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
+            odds_column = 'Odd_Away'
         
         # Selectbox para selecionar o intervalo de odds
         st.sidebar.subheader("Faixa de Odds")
@@ -144,7 +145,7 @@ def main():
 
         # Extrair os limites inferior e superior do intervalo selecionado
         if selected_odds_range == "Outros":
-            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
+            min_odds, max_odds = -1, -1
         else:
             min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
@@ -153,75 +154,31 @@ def main():
 def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
-        odds_col = 'Odd_Home'
-        team_name_col = 'Home'
-        opponent_name_col = 'Away'
     else:
         team_df = df[df['Away'] == time]
-        odds_col = 'Odd_Away'
-        team_name_col = 'Away'
-        opponent_name_col = 'Home'
     
     # Aplicar o filtro de odds
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+    if odds_group[0] == -1 and odds_group[1] == -1:
+        team_df = team_df[(team_df[odds_column] < odds_group[0]) | (team_df[odds_column] > odds_group[1])]
     else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
+        team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]
 
-    # Reindexar o DataFrame resultante após a filtragem
-    team_df.reset_index(drop=True, inplace=True)
-
-    # Calcular o coeficiente de eficiência para cada jogo
-    team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
-
-    # Exibir a tabela das partidas filtradas
-    st.subheader(f"Resultados de {time_home} vs {time_away} (H2H):")
-    st.dataframe(team_df)
-
-    # Calcular estatísticas
-    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
-    num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
-    total_matches = num_wins + num_draws + num_losses
-    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-    lucro_prejuizo = (num_wins * team_df[odds_col].mean() - total_matches) if total_matches > 0 else 0
-    odd_justa_wins = (num_wins / total_matches) if total_matches > 0 else 0
-    num_wins_draws = num_wins + num_draws
-    odd_justa_wins_draws = (num_wins_draws / total_matches) if total_matches > 0 else 0
-    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
-    media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
-    media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
-
-    # Calcular a frequência dos placares e exibir as estatísticas
+    if team_df.empty:
+        st.write(f"Nenhum dado disponível para o time {time} com as odds selecionadas.")
+        return
+    
     placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
-
-    # Destacar resultados importantes usando markdown
-    st.write("### Análise:")
-    if not team_df.empty:
-        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
-    else:
-        st.write("Nenhum jogo encontrado para os filtros selecionados.")
-    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
-    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
-    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
-    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
-    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
-    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
-    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
-
-    st.write("### Frequência dos Placares:")
     st.dataframe(placar_df)
 
-def mostrar_resultados_h2h(df, time_home, time_away):
-    h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
-                ((df['Home'] == time_away) & (df['Away'] == time_home))]
-    
+def mostrar_resultados_h2h(df, home_team, away_team):
+    h2h_df = df[((df['Home'] == home_team) & (df['Away'] == away_team)) | ((df['Home'] == away_team) & (df['Away'] == home_team))]
     if h2h_df.empty:
-        st.write(f"Não existe partidas entre {time_home} e {time_away}.")
-    else:
-        st.write(f"### Resultados H2H entre {time_home} e {time_away}")
-        st.dataframe(h2h_df)
+        st.write(f"Não existem partidas entre {home_team} e {away_team}.")
+        return
+
+    # Calcular e exibir as estatísticas de H2H
+    placar_df = calcular_estatisticas_e_exibir(h2h_df, 'H2H', 'Odd_Home')  # 'Odd_Home' usado como placeholder
+    st.dataframe(placar_df)
 
 if __name__ == "__main__":
     main()
