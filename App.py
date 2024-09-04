@@ -198,7 +198,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular odd justa apenas para as vitórias
     odd_justa_wins = total_matches / num_wins if num_wins > 0 else 0
     
-   def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Contar a ocorrência de cada placar
     placar_counts = team_df['Placar'].value_counts()
 
