@@ -181,20 +181,32 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
     total_matches = num_wins + num_draws + num_losses
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+    lucro_prejuizo = (num_wins * team_df[odds_col].mean() - total_matches) if total_matches > 0 else 0
+    odd_justa_wins = (num_wins / total_matches) if total_matches > 0 else 0
+    num_wins_draws = num_wins + num_draws
+    odd_justa_wins_draws = (num_wins_draws / total_matches) if total_matches > 0 else 0
+    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
+    media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
+    media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
 
-    # Exibir resultados
-    st.write(f"### Estatísticas de Jogos do {team_type} {time}:")
-    st.write(f"Total de jogos: {total_matches}")
-    st.write(f"Vitórias: {num_wins} ({win_percentage:.2f}%)")
-    st.write(f"Empates: {num_draws}")
-    st.write(f"Derrotas: {num_losses}")
-    
-    st.dataframe(team_df)  # Exibe os dados filtrados
-
-    # Analisar placares mais comuns
+    # Calcular a frequência dos placares e exibir as estatísticas
     placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
-    
-    st.write(f"### Análise de Placar Mais Comum para {team_type} {time}:")
+
+    # Destacar resultados importantes usando markdown
+    st.write("### Análise:")
+    if not team_df.empty:
+        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    else:
+        st.write("Nenhum jogo encontrado para os filtros selecionados.")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
+    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
+    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
+    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
+    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+
+    st.write("### Frequência dos Placares:")
     st.dataframe(placar_df)
 
 def mostrar_resultados_h2h(df, time_home, time_away):
@@ -206,16 +218,6 @@ def mostrar_resultados_h2h(df, time_home, time_away):
     else:
         st.write(f"### Resultados H2H entre {time_home} e {time_away}")
         st.dataframe(h2h_df)
-        
-        # Destacar resultados importantes usando markdown para H2H
-        num_wins = h2h_df[h2h_df['Resultado'] == 'W'].shape[0]
-        num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-        num_losses = h2h_df[h2h_df['Resultado'] == 'L'].shape[0]
-        total_matches = num_wins + num_draws + num_losses
-        win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-
-        st.write("### Análise H2H:")
-        st.markdown(f"- Nos confrontos diretos entre **{time_home}** e **{time_away}**, o **{time_home}** venceu **{num_wins}** vez(es) em **{total_matches}** jogo(s), com um aproveitamento de **{win_percentage:.2f}%**.")
 
 if __name__ == "__main__":
     main()
