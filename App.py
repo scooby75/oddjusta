@@ -217,36 +217,40 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
 def mostrar_resultados_h2h(df, time_home, time_away):
     h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
                 ((df['Home'] == time_away) & (df['Away'] == time_home))]
-    
+
     if h2h_df.empty:
         st.write(f"Não existe partidas entre {time_home} e {time_away}.")
     else:
         st.write(f"### Resultados H2H entre {time_home} e {time_away}")
         st.table(h2h_df)
 
-        # Calcular estatísticas
-        num_wins_home = h2h_df[h2h_df['Home'] == time_home][h2h_df['Resultado'] == 'W'].shape[0]
+        # Calcular estatísticas para o time da casa
+        num_wins_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'W')].shape[0]
         num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-        num_losses_home = h2h_df[h2h_df['Home'] == time_home][h2h_df['Resultado'] == 'L'].shape[0]
+        num_losses_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'L')].shape[0]
         total_matches = num_wins_home + num_draws + num_losses_home
 
         win_percentage_home = (num_wins_home / total_matches) * 100 if total_matches > 0 else 0
-        num_wins_away = h2h_df[h2h_df['Home'] == time_away][h2h_df['Resultado'] == 'W'].shape[0]
-        num_losses_away = h2h_df[h2h_df['Home'] == time_away][h2h_df['Resultado'] == 'L'].shape[0]
-        
-        win_percentage_away = (num_wins_away / (num_wins_away + num_draws + num_losses_away)) * 100 if (num_wins_away + num_draws + num_losses_away) > 0 else 0
+
+        # Calcular estatísticas para o time visitante
+        num_wins_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'W')].shape[0]
+        num_losses_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'L')].shape[0]
+        total_matches_away = num_wins_away + num_draws + num_losses_away
+
+        win_percentage_away = (num_wins_away / total_matches_away) * 100 if total_matches_away > 0 else 0
         
         # Destacar resultados importantes usando markdown
         st.write("### Análise:")
         st.markdown(f"- Total de partidas entre {time_home} e {time_away}: {total_matches}.")
         st.markdown(f"- {time_home} ganhou {num_wins_home} vez(es) ({win_percentage_home:.2f}%) e perdeu {num_losses_home} vez(es).")
-        st.markdown(f"- {time_away} ganhou {num_wins_away} vez(es) e perdeu {num_losses_away} vez(es).")
+        st.markdown(f"- {time_away} ganhou {num_wins_away} vez(es) ({win_percentage_away:.2f}%) e perdeu {num_losses_away} vez(es).")
         st.markdown(f"- Empates: {num_draws}.")
-        st.markdown(f"- Percentual de vitórias do {time_home}: {win_percentage_home:.2f}%.")
-        st.markdown(f"- Percentual de vitórias do {time_away}: {win_percentage_away:.2f}%.")
-
+        
+        # Frequência dos placares
+        placar_df = h2h_df[['Gols_Home', 'Gols_Away']].value_counts().reset_index(name='Frequência')
         st.write("### Frequência dos Placares:")
         st.table(placar_df)
+
 
 if __name__ == "__main__":
     main()
