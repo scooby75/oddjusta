@@ -198,8 +198,22 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Calcular odd justa apenas para as vitórias
     odd_justa_wins = total_matches / num_wins if num_wins > 0 else 0
     
+   def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     # Contar a ocorrência de cada placar
     placar_counts = team_df['Placar'].value_counts()
+
+    # Calcular o total de eventos
+    total_eventos = placar_counts.sum()
+
+    # Criar DataFrame para a frequência dos placares
+    placar_df = pd.DataFrame({
+        'Placar': placar_counts.index,
+        'Frequencia': placar_counts.values
+    })
+
+    # Calcular a Probabilidade (%) e a Odd Lay
+    placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
+    placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
 
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
@@ -214,8 +228,9 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+
     st.write("### Frequência dos Placares:")
-    st.write(placar_counts)
+    st.dataframe(placar_df)
 
 if __name__ == "__main__":
     main()
