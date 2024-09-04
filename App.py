@@ -67,9 +67,9 @@ except Exception as e:
 df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
 
 # Adicionar coluna de agrupamento de odds
-if 'Odd_Home' in df:
+if 'Odd_Home' in df.columns:
     df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
-elif 'Odd_Away' in df:
+elif 'Odd_Away' in df.columns:
     df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
 
 # Verifique se as colunas 'Gols_Home' e 'Gols_Away' existem
