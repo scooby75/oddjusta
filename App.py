@@ -114,6 +114,10 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
     placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
 
+    # Formatar para duas casas decimais
+    placar_df['Probabilidade (%)'] = placar_df['Probabilidade (%)'].round(2)
+    placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
+
     return placar_df
 
 # Interface do Streamlit
@@ -171,7 +175,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Calcular o coeficiente de eficiência para cada jogo
     team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
-    # Cálculo das estatísticas adicionais
+    # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
     num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
