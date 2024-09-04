@@ -245,6 +245,8 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         st.markdown(f"- Percentual de vitórias do {time_home}: {win_percentage_home:.2f}%.")
         st.markdown(f"- Percentual de vitórias do {time_away}: {win_percentage_away:.2f}%.")
 
+        st.write("### Frequência dos Placares:")
+        st.table(placar_df)
 
 if __name__ == "__main__":
     main()
