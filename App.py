@@ -151,74 +151,23 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Calcular o coeficiente de eficiência para cada jogo
     team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
-    # Mostrar os resultados na interface do Streamlit
-    st.write(f"### Resultados para o time {time} como {team_type}:")
-    st.dataframe(team_df[['Data', 'Home', 'Away', 'Odd_Home', 'Odd_Away', 'Gols_Home', 'Gols_Away', 'Resultado', 'Coeficiente_Eficiencia', 'Placar']])
-    
-    calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
-
-def mostrar_resultados_h2h(df, time_home, time_away):
-    # Filtrar DataFrame para exibir apenas confrontos diretos entre as equipes selecionadas
-    h2h_df = df[(df['Home'] == time_home) & (df['Away'] == time_away)]
-
-    if h2h_df.empty:
-        st.write("Não existem partidas entre as equipes.")
-    else:
-        # Verificar se todas as colunas estão presentes no DataFrame h2h_df antes de acessá-las
-        columns_to_display = df.columns
-
-        # Mostrar os resultados na interface do Streamlit
-        st.write("### Partidas H2H:")
-        st.dataframe(h2h_df[columns_to_display])
-        
-        # Calcular o coeficiente de eficiência para cada jogo em H2H
-        h2h_df['Coeficiente_Eficiencia'] = h2h_df.apply(lambda row: calcular_coeficiente(row, "Home"), axis=1)
-        
-        calcular_estatisticas_e_exibir(h2h_df, "Home", 'Odd_Home')
-
-def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
-    # Calcular estatísticas
+    # Cálculo das estatísticas adicionais
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
-    num_wins_draws = num_wins + num_draws  # Total de partidas sem derrota (W + D)
+    num_wins_draws = num_wins + num_draws
     total_matches = team_df.shape[0]
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-    
-    # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
-    lucro_prejuizo = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1).sum()
-
-    # Calcular médias
-    media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
-    media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
-    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
-
-    # Calcular odd justa para o total de partidas sem derrota
-    odd_justa_wins_draws = total_matches / num_wins_draws if num_wins_draws > 0 else 0
-    # Calcular odd justa apenas para as vitórias
-    odd_justa_wins = total_matches / num_wins if num_wins > 0 else 0
-    
-def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
-    # Contar a ocorrência de cada placar
-    placar_counts = team_df['Placar'].value_counts()
-
-    # Calcular o total de eventos
-    total_eventos = placar_counts.sum()
-
-    # Criar DataFrame para a frequência dos placares
-    placar_df = pd.DataFrame({
-        'Placar': placar_counts.index,
-        'Frequencia': placar_counts.values
-    })
-
-    # Calcular a Probabilidade (%) e a Odd Lay
-    placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
-    placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
+    lucro_prejuizo = num_wins - (total_matches - num_wins)  # Lucro/Prejuízo simplificado
+    odd_justa_wins = 1 / (num_wins / total_matches) if total_matches > 0 else 0
+    odd_justa_wins_draws = 1 / (num_wins_draws / total_matches) if total_matches > 0 else 0
+    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
+    media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
+    media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
 
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
     if not team_df.empty:
-        st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
@@ -230,7 +179,19 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
+    placar_df = team_df['Placar'].value_counts().reset_index()
+    placar_df.columns = ['Placar', 'Frequência']
     st.dataframe(placar_df)
+
+def mostrar_resultados_h2h(df, time_home, time_away):
+    h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
+                ((df['Home'] == time_away) & (df['Away'] == time_home))]
+    
+    if h2h_df.empty:
+        st.write(f"Não existe partidas entre {time_home} e {time_away}.")
+    else:
+        st.write(f"### Resultados H2H entre {time_home} e {time_away}")
+        st.dataframe(h2h_df)
 
 if __name__ == "__main__":
     main()
