@@ -175,6 +175,10 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Calcular o coeficiente de eficiência para cada jogo
     team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
+    # Exibir a tabela das partidas filtradas
+    st.subheader(f"Resultados de {time} ({team_type}):")
+    st.table(team_df)
+
     # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
@@ -207,7 +211,8 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
-    st.dataframe(placar_df)
+    st.table(placar_df)
+
 
 def mostrar_resultados_h2h(df, time_home, time_away):
     h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
