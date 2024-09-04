@@ -67,9 +67,9 @@ except Exception as e:
 df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
 
 # Adicionar coluna de agrupamento de odds
-if 'Odd_Home' in df.columns:
+if 'Odd_Home' in df:
     df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
-elif 'Odd_Away' in df.columns:
+elif 'Odd_Away' in df:
     df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
 
 # Remover linhas com valores nulos em 'Gols_Home' e 'Gols_Away'
@@ -173,23 +173,49 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         
         # Calcular o coeficiente de eficiência para cada jogo em H2H
         h2h_df['Coeficiente_Eficiencia'] = h2h_df.apply(lambda row: calcular_coeficiente(row, "Home"), axis=1)
+        
+        calcular_estatisticas_e_exibir(h2h_df, "Home", 'Odd_Home')
 
-        calcular_estatisticas_e_exibir(h2h_df, "H2H", None)
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
+    # Calcular estatísticas
+    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
+    num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
+    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
+    num_wins_draws = num_wins + num_draws  # Total de partidas sem derrota (W + D)
+    total_matches = team_df.shape[0]
+    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+    
+    # Calcular lucro/prejuízo com base no tipo de equipe selecionada e no resultado de cada jogo
+    lucro_prejuizo = team_df.apply(lambda row: row[odds_column] - 1 if row['Resultado'] == 'W' else -1, axis=1).sum()
 
-def calcular_estatisticas_e_exibir(df, team_type, odds_column):
-    # Cálculo da média de gols marcados e sofridos
-    media_gols_marcados = df['Gols_Home'].mean() if team_type == "Home" else df['Gols_Away'].mean()
-    media_gols_sofridos = df['Gols_Away'].mean() if team_type == "Home" else df['Gols_Home'].mean()
+    # Calcular médias
+    media_gols = team_df['Gols_Home'].mean() if team_type == "Home" else team_df['Gols_Away'].mean()
+    media_gols_sofridos = team_df['Gols_Away'].mean() if team_type == "Home" else team_df['Gols_Home'].mean()
+    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean()
 
-    st.write(f"#### Estatísticas para o time como {team_type}:")
-    st.write(f"Média de gols marcados: {media_gols_marcados:.2f}")
-    st.write(f"Média de gols sofridos: {media_gols_sofridos:.2f}")
+    # Calcular odd justa para o total de partidas sem derrota
+    odd_justa_wins_draws = total_matches / num_wins_draws if num_wins_draws > 0 else 0
+    # Calcular odd justa apenas para as vitórias
+    odd_justa_wins = total_matches / num_wins if num_wins > 0 else 0
+    
+    # Contar a ocorrência de cada placar
+    placar_counts = team_df['Placar'].value_counts()
 
-    # Cálculo de outras estatísticas e exibição
-    if odds_column:
-        st.write(f"Odds média: {df[odds_column].mean():.2f}")
-        st.write(f"Coeficiente de eficiência médio: {df['Coeficiente_Eficiencia'].mean():.2f}")
+    # Destacar resultados importantes usando markdown
+    st.write("### Análise:")
+    if not team_df.empty:
+        st.markdown(f"- Com as características do jogo de hoje, o {team_df['Home'].iloc[0] if team_type == 'Home' else team_df['Away'].iloc[0]} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+    else:
+        st.write("Nenhum jogo encontrado para os filtros selecionados.")
+    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
+    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
+    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
+    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
+    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+    st.write("### Frequência dos Placares:")
+    st.write(placar_counts)
 
-# Executar a função principal
 if __name__ == "__main__":
     main()
