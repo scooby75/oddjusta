@@ -215,6 +215,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
 
 
 def mostrar_resultados_h2h(df, time_home, time_away):
+    # Filtrar DataFrame para confrontos diretos
     h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
                 ((df['Home'] == time_away) & (df['Away'] == time_home))]
 
@@ -224,6 +225,9 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         st.write(f"### Resultados H2H entre {time_home} e {time_away}")
         st.table(h2h_df)
 
+        # Adicionar coluna de placar no formato desejado
+        h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
+        
         # Calcular estatísticas para o time da casa
         num_wins_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'W')].shape[0]
         num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
@@ -247,7 +251,8 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         st.markdown(f"- Empates: {num_draws}.")
         
         # Frequência dos placares
-        placar_df = h2h_df[['Gols_Home', 'Gols_Away']].value_counts().reset_index(name='Frequência')
+        placar_df = h2h_df['Placar'].value_counts().reset_index(name='Frequência')
+        placar_df.columns = ['Placar', 'Frequência']
         st.write("### Frequência dos Placares:")
         st.table(placar_df)
 
