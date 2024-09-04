@@ -253,8 +253,19 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         # Frequência dos placares
         placar_df = h2h_df['Placar'].value_counts().reset_index(name='Frequência')
         placar_df.columns = ['Placar', 'Frequência']
+
+        # Calcular a Probabilidade (%) e a Odd Lay
+        total_eventos = placar_df['Frequência'].sum()
+        placar_df['Probabilidade (%)'] = (placar_df['Frequência'] / total_eventos) * 100
+        placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
+        
+        # Formatar para duas casas decimais
+        placar_df['Probabilidade (%)'] = placar_df['Probabilidade (%)'].round(2)
+        placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
+
         st.write("### Frequência dos Placares:")
         st.table(placar_df)
+
 
 
 if __name__ == "__main__":
