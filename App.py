@@ -207,8 +207,8 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
     st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
-    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
-    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
+    st.markdown(f"- Xg Home: {media_gols:.2f}.")
+    st.markdown(f"- Xg Away: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
     st.table(placar_df)
