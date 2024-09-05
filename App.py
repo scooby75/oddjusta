@@ -179,22 +179,37 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.subheader(f"Resultados de {time} ({team_type}):")
     st.dataframe(team_df)
 
-    # Calcular estatísticas
+      # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
     num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
     total_matches = num_wins + num_draws + num_losses
+    
+    # Porcentagem de vitórias
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-    lucro_prejuizo = (num_wins * team_df[odds_col].mean() - total_matches) if total_matches > 0 else 0
-    odd_justa_wins = (num_wins / total_matches) if total_matches > 0 else 0
+    
+    # Cálculo de lucro/prejuízo
+    lucro_prejuizo = (num_wins * team_df[odds_col].mean()) - total_matches if total_matches > 0 else 0
+    
+    # Cálculo da odd justa para vitórias (baseada na probabilidade)
+    odd_justa_wins = 100 / win_percentage if win_percentage > 0 else 0
+    
+    # Cálculo da odd justa para vitórias + empates
     num_wins_draws = num_wins + num_draws
-    odd_justa_wins_draws = (num_wins_draws / total_matches) if total_matches > 0 else 0
+    win_draw_percentage = (num_wins_draws / total_matches) * 100 if total_matches > 0 else 0
+    odd_justa_wins_draws = 100 / win_draw_percentage if win_draw_percentage > 0 else 0
+    
+    # Coeficiente de eficiência médio
     coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
+    
+    # Média de gols marcados
     media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
+    
+    # Média de gols sofridos
     media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
-
-    # Calcular a frequência dos placares e exibir as estatísticas
-    placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
+    
+        # Calcular a frequência dos placares e exibir as estatísticas
+        placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
