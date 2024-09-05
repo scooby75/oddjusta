@@ -208,8 +208,8 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Média de gols sofridos
     media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
     
-        # Calcular a frequência dos placares e exibir as estatísticas
-        placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
+    # Calcular a frequência dos placares e exibir as estatísticas
+    placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
