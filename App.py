@@ -228,6 +228,16 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.write("### Frequência dos Placares:")
     st.table(placar_df)
 
+def mostrar_frequencia_placares_liga(df):
+    # Agrupar por Liga e calcular a frequência dos placares
+    frequencia_liga_df = df.groupby(['Liga', 'Gols_Home', 'Gols_Away']).size().reset_index(name='Frequência')
+    frequencia_liga_df['Placar'] = frequencia_liga_df['Gols_Home'].astype(str) + 'x' + frequencia_liga_df['Gols_Away'].astype(str)
+    frequencia_liga_df = frequencia_liga_df[['Liga', 'Placar', 'Frequência']]
+
+    # Exibir a tabela de frequência dos placares por liga
+    st.subheader("Frequência dos Placares na Liga:")
+    st.dataframe(frequencia_liga_df)
+
 
 def mostrar_resultados_h2h(df, time_home, time_away):
     # Filtrar DataFrame para confrontos diretos
