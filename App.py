@@ -96,28 +96,31 @@ times_away = sorted(str(team) for team in all_teams_away)
 # Ordenar as faixas de odds
 odds_groups = sorted(df['Odd_Group'].unique())
 
-# Função para calcular estatísticas e exibir resultados
-def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
-    # Contar a ocorrência de cada placar
-    placar_counts = team_df['Placar'].value_counts()
+# Função para calcular estatísticas e exibir resultados, agrupando por Liga
+def calcular_estatisticas_e_exibir(team_df, team_type, odds_column, league_column):
+    # Contar a ocorrência de cada placar por Liga
+    placar_counts = team_df.groupby(league_column)['Placar'].value_counts().unstack(fill_value=0)
 
-    # Calcular o total de eventos
-    total_eventos = placar_counts.sum()
+    # Calcular o total de eventos por Liga
+    total_eventos_por_liga = placar_counts.sum(axis=1)
 
-    # Criar DataFrame para a frequência dos placares
-    placar_df = pd.DataFrame({
-        'Placar': placar_counts.index,
-        'Frequencia': placar_counts.values
-    })
-
+    # Criar DataFrame para a frequência dos placares por Liga
+    placar_df = placar_counts.copy()
+    placar_df['Total'] = total_eventos_por_liga
+    placar_df = placar_df.reset_index()
+    
     # Calcular a Probabilidade (%) e a Odd Lay
-    placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
-    placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
-
-    # Formatar para duas casas decimais
-    placar_df['Probabilidade (%)'] = placar_df['Probabilidade (%)'].round(2)
-    placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
-
+    for liga in placar_df[league_column].unique():
+        liga_df = placar_df[placar_df[league_column] == liga]
+        liga_df.set_index(league_column, inplace=True)
+        for placar in liga_df.columns[1:-1]:
+            freq = liga_df.loc[liga, placar]
+            total_eventos = liga_df.loc[liga, 'Total']
+            probabilidade = (freq / total_eventos) * 100
+            odd_lay = 100 / probabilidade if probabilidade > 0 else 0
+            placar_df.loc[placar_df[league_column] == liga, f'{placar}_Probabilidade (%)'] = probabilidade.round(2)
+            placar_df.loc[placar_df[league_column] == liga, f'{placar}_Odd_Lay'] = odd_lay.round(2)
+    
     return placar_df
 
 # Interface do Streamlit
@@ -162,126 +165,21 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
         team_name_col = 'Away'
         opponent_name_col = 'Home'
     
-    # Aplicar o filtro de odds
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+    # Filtrar os dados com base no intervalo de odds selecionado
+    if odds_group[0] == -1:  # Caso "Outros"
+        filtered_df = team_df
     else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
-
-    # Reindexar o DataFrame resultante após a filtragem
-    team_df.reset_index(drop=True, inplace=True)
-
-    # Calcular o coeficiente de eficiência para cada jogo
-    team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
-
-    # Exibir a tabela das partidas filtradas
-    st.subheader(f"Resultados de {time} ({team_type}):")
-    st.dataframe(team_df)
-
-      # Calcular estatísticas
-    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
-    num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
-    total_matches = num_wins + num_draws + num_losses
+        filtered_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
     
-    # Porcentagem de vitórias
-    win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
+    # Exibir estatísticas detalhadas por Liga
+    estatisticas = calcular_estatisticas_e_exibir(filtered_df, team_type, odds_col, 'Liga')
+    st.write(estatisticas)
     
-    # Cálculo de lucro/prejuízo
-    lucro_prejuizo = (num_wins * team_df[odds_col].mean()) - total_matches if total_matches > 0 else 0
-    
-    # Cálculo da odd justa para vitórias (baseada na probabilidade)
-    odd_justa_wins = 100 / win_percentage if win_percentage > 0 else 0
-    
-    # Cálculo da odd justa para vitórias + empates
-    num_wins_draws = num_wins + num_draws
-    win_draw_percentage = (num_wins_draws / total_matches) * 100 if total_matches > 0 else 0
-    odd_justa_wins_draws = 100 / win_draw_percentage if win_draw_percentage > 0 else 0
-    
-    # Coeficiente de eficiência médio
-    coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
-    
-    # Média de gols marcados
-    media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
-    
-    # Média de gols sofridos
-    media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
-    
-    # Calcular a frequência dos placares e exibir as estatísticas
-    placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
+    # Exibir tabela com os placares
+    st.subheader(f"Placar dos jogos do {time} com odds no intervalo selecionado")
+    placar_df = filtered_df[['Liga', 'Placar']].groupby(['Liga', 'Placar']).size().unstack(fill_value=0)
+    st.write(placar_df)
 
-    # Destacar resultados importantes usando markdown
-    st.write("### Análise:")
-    if not team_df.empty:
-        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
-    else:
-        st.write("Nenhum jogo encontrado para os filtros selecionados.")
-    st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
-    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
-    st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
-    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
-    st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
-    st.markdown(f"- Xg Home: {media_gols:.2f}.")
-    st.markdown(f"- Xg Away: {media_gols_sofridos:.2f}.")
-
-    st.write("### Frequência dos Placares:")
-    st.table(placar_df)
-
-
-def mostrar_resultados_h2h(df, time_home, time_away):
-    # Filtrar DataFrame para confrontos diretos
-    h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
-                ((df['Home'] == time_away) & (df['Away'] == time_home))]
-
-    if h2h_df.empty:
-        st.write(f"Não existe partidas entre {time_home} e {time_away}.")
-    else:
-        st.write(f"### Resultados H2H entre {time_home} e {time_away}")
-        st.table(h2h_df)
-
-        # Adicionar coluna de placar no formato desejado
-        h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
-        
-        # Calcular estatísticas para o time da casa
-        num_wins_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'W')].shape[0]
-        num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-        num_losses_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'L')].shape[0]
-        total_matches = num_wins_home + num_draws + num_losses_home
-
-        win_percentage_home = (num_wins_home / total_matches) * 100 if total_matches > 0 else 0
-
-        # Calcular estatísticas para o time visitante
-        num_wins_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'W')].shape[0]
-        num_losses_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'L')].shape[0]
-        total_matches_away = num_wins_away + num_draws + num_losses_away
-
-        win_percentage_away = (num_wins_away / total_matches_away) * 100 if total_matches_away > 0 else 0
-        
-        # Destacar resultados importantes usando markdown
-        st.write("### Análise:")
-        st.markdown(f"- Total de partidas entre {time_home} e {time_away}: {total_matches}.")
-        st.markdown(f"- {time_home} ganhou {num_wins_home} vez(es) ({win_percentage_home:.2f}%) e perdeu {num_losses_home} vez(es).")
-        st.markdown(f"- {time_away} ganhou {num_wins_away} vez(es) ({win_percentage_away:.2f}%) e perdeu {num_losses_away} vez(es).")
-        st.markdown(f"- Empates: {num_draws}.")
-        
-        # Frequência dos placares
-        placar_df = h2h_df['Placar'].value_counts().reset_index(name='Frequência')
-        placar_df.columns = ['Placar', 'Frequência']
-
-        # Calcular a Probabilidade (%) e a Odd Lay
-        total_eventos = placar_df['Frequência'].sum()
-        placar_df['Probabilidade (%)'] = (placar_df['Frequência'] / total_eventos) * 100
-        placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
-        
-        # Formatar para duas casas decimais
-        placar_df['Probabilidade (%)'] = placar_df['Probabilidade (%)'].round(2)
-        placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
-
-        st.write("### Frequência dos Placares:")
-        st.table(placar_df)
-
-
-
+# Executa a função principal do Streamlit
 if __name__ == "__main__":
     main()
