@@ -233,7 +233,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
-    st.table(placar_df)
+    st.dataframe(placar_df)
 
 
 def mostrar_resultados_h2h(df, time_home, time_away):
@@ -245,7 +245,7 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         st.write(f"Não existe partidas entre {time_home} e {time_away}.")
     else:
         st.write(f"### Resultados H2H entre {time_home} e {time_away}")
-        st.table(h2h_df)
+        st.dataframe(h2h_df)
 
         # Adicionar coluna de placar no formato desejado
         h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
@@ -286,7 +286,7 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
 
         st.write("### Frequência dos Placares:")
-        st.table(placar_df)
+        st.dataframe(placar_df)
 
 
 
