@@ -4,6 +4,8 @@ import os
 import requests
 from bd import file_paths  # Importando file_paths de bd.py
 
+def main():
+
 # Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
     if team_type == "Home":
@@ -116,7 +118,7 @@ def mostrar_resultados_h2h(df, time_home, time_away):
                 ((df['Home'] == time_away) & (df['Away'] == time_home))]
 
     # Verificar se há confrontos diretos entre as equipes
-def main():
+
     if h2h_df.empty:
         st.write(f"Não existem partidas entre **{time_home}** e **{time_away}**.")
     else:
