@@ -241,6 +241,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
 
     st.write("### Frequência dos Placares:")
     st.table(placar_df)
+    st.table(resultados)
 
 
 def mostrar_resultados_h2h(df, time_home, time_away):
