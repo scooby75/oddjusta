@@ -124,7 +124,7 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
 def calcular_estatisticas_por_liga(df, odds_column):
     # Agrupar por Liga
     grouped = df.groupby('Liga')
-
+    
     # Armazenar resultados
     resultados = {}
 
@@ -167,21 +167,14 @@ def main():
 def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
-        odds_col = 'Odd_Home'
-        team_name_col = 'Home'
-        opponent_name_col = 'Away'
     else:
         team_df = df[df['Away'] == time]
-        odds_col = 'Odd_Away'
-        team_name_col = 'Away'
-        opponent_name_col = 'Home'
-    
+
     # Aplicar o filtro de odds
     if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
-        team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
+        team_df = team_df[(team_df[odds_column] < odds_group[0]) | (team_df[odds_column] > odds_group[1])]
     else:
-        team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
+        team_df = team_df[(team_df[odds_column] >= odds_group[0]) & (team_df[odds_column] <= odds_group[1])]
 
     # Reindexar o DataFrame resultante após a filtragem
     team_df.reset_index(drop=True, inplace=True)
@@ -193,7 +186,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.subheader(f"Resultados de {time} ({team_type}):")
     st.dataframe(team_df)
 
-      # Calcular estatísticas
+    # Calcular estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
     num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
@@ -203,7 +196,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
     
     # Cálculo de lucro/prejuízo
-    lucro_prejuizo = (num_wins * team_df[odds_col].mean()) - total_matches if total_matches > 0 else 0
+    lucro_prejuizo = (num_wins * team_df[odds_column].mean()) - total_matches if total_matches > 0 else 0
     
     # Cálculo da odd justa para vitórias (baseada na probabilidade)
     odd_justa_wins = 100 / win_percentage if win_percentage > 0 else 0
@@ -232,16 +225,15 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
-    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.markdown(f"- Odd justa para vitórias: {odd_justa_wins:.2f}.")
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
-    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Odd justa para vitórias + empates: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
-    st.markdown(f"- Xg Home: {media_gols:.2f}.")
-    st.markdown(f"- Xg Away: {media_gols_sofridos:.2f}.")
+    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
+    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
     st.table(placar_df)
-    st.table(resultados)
 
 
 def mostrar_resultados_h2h(df, time_home, time_away):
