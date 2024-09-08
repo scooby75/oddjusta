@@ -67,7 +67,8 @@ def main():
     if 'Odd_Home' in df:
         df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
     elif 'Odd_Away' in df:
-        df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd')
+       df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
+
 
     df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
     df['Gols_Home'] = pd.to_numeric(df['Gols_Home'], errors='coerce').astype(pd.Int64Dtype())
