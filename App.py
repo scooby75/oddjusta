@@ -120,6 +120,20 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
 
     return placar_df
 
+# Função para calcular estatísticas agrupadas por Liga
+def calcular_estatisticas_por_liga(df, odds_column):
+    # Agrupar por Liga
+    grouped = df.groupby('Liga')
+
+    # Armazenar resultados
+    resultados = {}
+
+    for liga, group_df in grouped:
+        print(f"Calculando estatísticas para a Liga: {liga}")
+        resultados[liga] = calcular_estatisticas_e_exibir(group_df, team_type=None, odds_column=odds_column)
+
+    return resultados
+
 # Interface do Streamlit
 def main():
     st.title("Odd Justa")
