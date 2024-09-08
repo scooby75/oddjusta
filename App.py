@@ -116,6 +116,7 @@ def mostrar_resultados_h2h(df, time_home, time_away):
                 ((df['Home'] == time_away) & (df['Away'] == time_home))]
 
     # Verificar se há confrontos diretos entre as equipes
+def main():
     if h2h_df.empty:
         st.write(f"Não existem partidas entre **{time_home}** e **{time_away}**.")
     else:
