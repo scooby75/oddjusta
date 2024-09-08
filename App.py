@@ -150,6 +150,20 @@ def main():
 
         mostrar_resultados(df, team_type, time, odds_column, (min_odds, max_odds))
 
+import pandas as pd
+import streamlit as st
+
+def calcular_coeficiente(row, team_type):
+    # Implementar a lógica para calcular o coeficiente de eficiência
+    return row['Odd_Home'] if team_type == 'Home' else row['Odd_Away']
+
+def calcular_estatisticas_e_exibir(df, team_type, odds_column):
+    # Implementar a lógica para calcular estatísticas dos placares e exibir
+    frequencia_placar_df = df.groupby(['Gols_Home', 'Gols_Away']).size().reset_index(name='Frequência')
+    frequencia_placar_df['Placar'] = frequencia_placar_df['Gols_Home'].astype(str) + 'x' + frequencia_placar_df['Gols_Away'].astype(str)
+    frequencia_placar_df = frequencia_placar_df[['Placar', 'Frequência']]
+    return frequencia_placar_df
+
 def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
@@ -163,55 +177,38 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
         opponent_name_col = 'Home'
     
     # Aplicar o filtro de odds
-    if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
+    if odds_group[0] == -1 and odds_group[1] == -1:
         team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
     else:
         team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
 
-    # Reindexar o DataFrame resultante após a filtragem
     team_df.reset_index(drop=True, inplace=True)
 
     # Calcular o coeficiente de eficiência para cada jogo
     team_df['Coeficiente_Eficiencia'] = team_df.apply(lambda row: calcular_coeficiente(row, team_type), axis=1)
 
-    # Exibir a tabela das partidas filtradas
-    st.subheader(f"Resultados de {time} ({team_type}):")
-    st.dataframe(team_df)
-
-      # Calcular estatísticas
+    # Estatísticas
     num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
     num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
     num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
     total_matches = num_wins + num_draws + num_losses
     
-    # Porcentagem de vitórias
     win_percentage = (num_wins / total_matches) * 100 if total_matches > 0 else 0
-    
-    # Cálculo de lucro/prejuízo
     lucro_prejuizo = (num_wins * team_df[odds_col].mean()) - total_matches if total_matches > 0 else 0
-    
-    # Cálculo da odd justa para vitórias (baseada na probabilidade)
     odd_justa_wins = 100 / win_percentage if win_percentage > 0 else 0
-    
-    # Cálculo da odd justa para vitórias + empates
     num_wins_draws = num_wins + num_draws
     win_draw_percentage = (num_wins_draws / total_matches) * 100 if total_matches > 0 else 0
     odd_justa_wins_draws = 100 / win_draw_percentage if win_draw_percentage > 0 else 0
-    
-    # Coeficiente de eficiência médio
     coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
-    
-    # Média de gols marcados
     media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
-    
-    # Média de gols sofridos
     media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
     
-    # Calcular a frequência dos placares e exibir as estatísticas
     placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
 
-    # Destacar resultados importantes usando markdown
+    # Exibição dos resultados
+    st.subheader(f"Resultados de {time} ({team_type}):")
+    st.dataframe(team_df)
+
     st.write("### Análise:")
     if not team_df.empty:
         st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
@@ -229,15 +226,12 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.table(placar_df)
 
 def mostrar_frequencia_placares_liga(df):
-    # Agrupar por Liga e calcular a frequência dos placares
     frequencia_liga_df = df.groupby(['Liga', 'Gols_Home', 'Gols_Away']).size().reset_index(name='Frequência')
     frequencia_liga_df['Placar'] = frequencia_liga_df['Gols_Home'].astype(str) + 'x' + frequencia_liga_df['Gols_Away'].astype(str)
     frequencia_liga_df = frequencia_liga_df[['Liga', 'Placar', 'Frequência']]
 
-    # Exibir a tabela de frequência dos placares por liga
     st.subheader("Frequência dos Placares na Liga:")
     st.dataframe(frequencia_liga_df)
-
 
 def mostrar_resultados_h2h(df, time_home, time_away):
     # Filtrar DataFrame para confrontos diretos
