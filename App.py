@@ -4,9 +4,6 @@ import os
 import requests
 from bd import file_paths  # Importando file_paths de bd.py
 
-def main():
-
-# Função para classificar o resultado com base nos gols das equipes da casa e visitantes
 def classificar_resultado(row, team_type):
     if team_type == "Home":
         if row['Gols_Home'] > row['Gols_Away']:
@@ -23,7 +20,6 @@ def classificar_resultado(row, team_type):
         else:
             return 'D'
 
-# Função para calcular o coeficiente de eficiência (ajuste conforme necessário)
 def calcular_coeficiente(row, team_type):
     # Exemplo de cálculo simples de coeficiente de eficiência
     if team_type == "Home":
@@ -35,17 +31,12 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
         odds_col = 'Odd_Home'
-        team_name_col = 'Home'
-        opponent_name_col = 'Away'
     else:
         team_df = df[df['Away'] == time]
         odds_col = 'Odd_Away'
-        team_name_col = 'Away'
-        opponent_name_col = 'Home'
     
     # Aplicar o filtro de odds
     if odds_group[0] == -1 and odds_group[1] == -1:  # Se a opção for "Outros"
-        # Selecionar jogos em que as odds não estejam dentro do range selecionado
         team_df = team_df[(team_df[odds_col] < odds_group[0]) | (team_df[odds_col] > odds_group[1])]
     else:
         team_df = team_df[(team_df[odds_col] >= odds_group[0]) & (team_df[odds_col] <= odds_group[1])]
@@ -101,24 +92,22 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
-    st.markdown(f"- Odd justa para MO: {odd_justa_wins:.2f}.")
+    st.markdown(f"- Odd justa para vitórias: {odd_justa_wins:.2f}.")
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
-    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Odd justa para vitórias + empates: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
-    st.markdown(f"- Xg Home: {media_gols:.2f}.")
-    st.markdown(f"- Xg Away: {media_gols_sofridos:.2f}.")
+    st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
+    st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
 
     st.write("### Frequência dos Placares:")
     st.table(placar_df)
 
-# Função para exibir resultados de confrontos diretos (H2H)
 def mostrar_resultados_h2h(df, time_home, time_away):
     # Filtrar DataFrame para confrontos diretos (H2H)
     h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
                 ((df['Home'] == time_away) & (df['Away'] == time_home))]
 
     # Verificar se há confrontos diretos entre as equipes
-
     if h2h_df.empty:
         st.write(f"Não existem partidas entre **{time_home}** e **{time_away}**.")
     else:
@@ -142,11 +131,28 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         st.markdown(f"**Vitórias do {time_away}**: {num_vitorias_away}")
         st.markdown(f"**Empates**: {num_empates}")
 
-        # Mostrar frequências dos placares H2H
-        placar_df_h2h = calcular_estatisticas_e_exibir(h2h_df, "H2H", 'Odd_Home')
-        st.write("### Frequência dos Placares nos Confrontos Diretos:")
-        st.table(placar_df_h2h)
+def main():
+    # Inicializar a interface Streamlit
+    st.title("Análise de Resultados de Futebol")
+    
+    # Carregar o DataFrame
+    df = pd.read_csv("resultados.csv")
+    
+    # Interface do usuário
+    st.sidebar.header("Configurações")
 
+    # Escolha entre Mandante, Visitante ou H2H
+    escolha = st.sidebar.selectbox("Escolha uma opção:", ["Mandante", "Visitante", "H2H"])
+
+    if escolha == "Mandante" or escolha == "Visitante":
+        time = st.sidebar.text_input("Digite o nome do time:")
+        odds_group = st.sidebar.slider("Filtrar Odds", min_value=-1, max_value=10, value=(-1, -1))
+        mostrar_resultados(df, escolha, time, 'Odd_Home' if escolha == "Mandante" else 'Odd_Away', odds_group)
+
+    elif escolha == "H2H":
+        time_home = st.sidebar.text_input("Digite o nome do time da casa:")
+        time_away = st.sidebar.text_input("Digite o nome do time visitante:")
+        mostrar_resultados_h2h(df, time_home, time_away)
 
 if __name__ == "__main__":
     main()
