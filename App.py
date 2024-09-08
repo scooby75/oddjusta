@@ -111,47 +111,39 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
 
 # Função para exibir resultados de confrontos diretos (H2H)
 def mostrar_resultados_h2h(df, time_home, time_away):
-    # Filtrar DataFrame para confrontos diretos
+    # Filtrar DataFrame para confrontos diretos (H2H)
     h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
                 ((df['Home'] == time_away) & (df['Away'] == time_home))]
 
+    # Verificar se há confrontos diretos entre as equipes
     if h2h_df.empty:
-        st.write(f"Não existe partidas entre {time_home} e {time_away}.")
+        st.write(f"Não existem partidas entre **{time_home}** e **{time_away}**.")
     else:
-        st.write(f"### Resultados H2H entre {time_home} e {time_away}")
-        st.table(h2h_df)
+        # Classificar resultados de acordo com a equipe jogando em casa ou fora
+        h2h_df['Resultado_Home'] = h2h_df.apply(lambda row: classificar_resultado(row, 'Home'), axis=1)
+        h2h_df['Resultado_Away'] = h2h_df.apply(lambda row: classificar_resultado(row, 'Away'), axis=1)
 
-        # Adicionar coluna de placar no formato desejado
-        h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
-        
-        # Calcular estatísticas para o time da casa
-        num_wins_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'W')].shape[0]
-        num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-        num_losses_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'L')].shape[0]
-        total_matches = num_wins_home + num_draws + num_losses_home
+        # Exibir os resultados H2H
+        st.subheader(f"Resultados H2H entre **{time_home}** e **{time_away}**:")
+        st.dataframe(h2h_df)
 
-        win_percentage_home = (num_wins_home / total_matches) * 100 if total_matches > 0 else 0
+        # Calcular estatísticas dos confrontos diretos
+        num_jogos = h2h_df.shape[0]
+        num_vitorias_home = h2h_df[h2h_df['Home'] == time_home]['Resultado_Home'].value_counts().get('W', 0)
+        num_vitorias_away = h2h_df[h2h_df['Away'] == time_away]['Resultado_Away'].value_counts().get('W', 0)
+        num_empates = h2h_df[(h2h_df['Resultado_Home'] == 'D') & (h2h_df['Resultado_Away'] == 'D')].shape[0]
 
-        # Calcular estatísticas para o time visitante
-        num_wins_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'W')].shape[0]
-        num_losses_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'L')].shape[0]
-        total_matches_away = num_wins_away + num_draws + num_losses_away
+        # Exibir estatísticas dos confrontos diretos
+        st.markdown(f"**Total de confrontos**: {num_jogos}")
+        st.markdown(f"**Vitórias do {time_home}**: {num_vitorias_home}")
+        st.markdown(f"**Vitórias do {time_away}**: {num_vitorias_away}")
+        st.markdown(f"**Empates**: {num_empates}")
 
-        win_percentage_away = (num_wins_away / total_matches_away) * 100 if total_matches_away > 0 else 0
-        
-        # Destacar resultados importantes usando markdown
-        st.write("### Análise:")
-        st.markdown(f"- Total de partidas entre {time_home} e {time_away}: {total_matches}.")
-        st.markdown(f"- {time_home} ganhou {num_wins_home} vez(es) ({win_percentage_home:.2f}%) e perdeu {num_losses_home} vez(es).")
-        st.markdown(f"- {time_away} ganhou {num_wins_away} vez(es) ({win_percentage_away:.2f}%) e perdeu {num_losses_away} vez(es).")
-        st.markdown(f"- Empates: {num_draws}.")
-        
-        # Frequência dos placares
-        placar_df = h2h_df['Placar'].value_counts().reset_index(name='Frequência')
-        placar_df.columns = ['Placar', 'Frequência']
+        # Mostrar frequências dos placares H2H
+        placar_df_h2h = calcular_estatisticas_e_exibir(h2h_df, "H2H", 'Odd_Home')
+        st.write("### Frequência dos Placares nos Confrontos Diretos:")
+        st.table(placar_df_h2h)
 
-        st.write("### Frequência dos Placares H2H:")
-        st.table(placar_df)
 
 if __name__ == "__main__":
     main()
