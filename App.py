@@ -260,7 +260,11 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.write("### Frequência dos Placares:")
     st.dataframe(placar_df)
     
-    st.write("### Frequência Na Liga:")
+     # Adicionar um st.write para inspecionar a variável antes de exibi-la
+    st.write("Inspecionando resultado_final antes da renderização:")
+    st.write(resultado_final)
+    
+    # Exibir o DataFrame
     st.dataframe(resultado_final)
 
 def mostrar_resultados_h2h(df, time_home, time_away):
