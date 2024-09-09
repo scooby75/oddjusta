@@ -158,7 +158,7 @@ def calcular_estatistica_liga(liga_df, odds_column):
     resultado_final = pd.concat(liga_estatisticas, ignore_index=True)
 
     return resultado_final
-
+    
 # Interface do Streamlit
 def main():
     st.title("Odd Justa")
