@@ -120,19 +120,44 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
 
     return placar_df
 
-# Função para calcular estatísticas agrupadas por Liga
-def calcular_estatisticas_por_liga(df, odds_column):
-    # Agrupar por Liga
-    grouped = df.groupby('Liga')
-    
-    # Armazenar resultados
-    resultados = {}
+# Função para calcular estatísticas por liga
+def calcular_estatistica_liga(liga_df, odds_column):
+    # Agrupar os resultados por 'Liga'
+    grouped = liga_df.groupby('Liga')
 
-    for liga, group_df in grouped:
-        print(f"Calculando estatísticas para a Liga: {liga}")
-        resultados[liga] = calcular_estatisticas_e_exibir(group_df, team_type=None, odds_column=odds_column)
+    # Criar uma lista para armazenar os DataFrames de cada liga
+    liga_estatisticas = []
 
-    return resultados
+    # Iterar por cada grupo (liga) e calcular as estatísticas
+    for liga, grupo in grouped:
+        # Contar a ocorrência de cada placar na liga
+        placar_counts = grupo['Placar'].value_counts()
+
+        # Calcular o total de eventos para a liga
+        total_eventos = placar_counts.sum()
+
+        # Criar DataFrame para a frequência dos placares da liga
+        placar_df = pd.DataFrame({
+            'Liga': liga,
+            'Placar': placar_counts.index,
+            'Frequencia': placar_counts.values
+        })
+
+        # Calcular a Probabilidade (%) e a Odd Lay
+        placar_df['Probabilidade (%)'] = (placar_df['Frequencia'] / total_eventos) * 100
+        placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
+
+        # Formatar para duas casas decimais
+        placar_df['Probabilidade (%)'] = placar_df['Probabilidade (%)'].round(2)
+        placar_df['Odd_Lay'] = placar_df['Odd_Lay'].round(2)
+
+        # Adicionar os resultados da liga à lista
+        liga_estatisticas.append(placar_df)
+
+    # Concatenar todas as estatísticas de ligas em um único DataFrame
+    resultado_final = pd.concat(liga_estatisticas, ignore_index=True)
+
+    return resultado_final
 
 # Interface do Streamlit
 def main():
@@ -234,7 +259,9 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
 
     st.write("### Frequência dos Placares:")
     st.dataframe(placar_df)
-
+    
+    st.write("### Frequência Na Liga:")
+    st.dataframe(resultado_final)
 
 def mostrar_resultados_h2h(df, time_home, time_away):
     # Filtrar DataFrame para confrontos diretos
