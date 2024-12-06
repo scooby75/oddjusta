@@ -73,7 +73,7 @@ elif 'Odd_Away' in df:
     df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
 
 # Remover linhas com valores nulos em 'Gols_Home' e 'Gols_Away'
-df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
+#df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
 
 # Converter valores para inteiros, tratando valores não numéricos como nulos
 df['Gols_Home'] = pd.to_numeric(df['Gols_Home'], errors='coerce').astype(pd.Int64Dtype())
