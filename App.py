@@ -221,13 +221,13 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
     if not team_df.empty:
-        st.markdown(f"- Com as características do jogo de hoje, o {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+        st.markdown(f"- O {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
-    st.markdown(f"- Odd justa para vitórias: {odd_justa_wins:.2f}.")
+    st.markdown(f"- Odd justa para 1x2: {odd_justa_wins:.2f}.")
     st.write(f"- Total de partidas sem derrota: {num_wins_draws} ({num_wins} vitórias, {num_draws} empates)")
-    st.markdown(f"- Odd justa para vitórias + empates: {odd_justa_wins_draws:.2f}.")
+    st.markdown(f"- Odd justa para HA +0.25: {odd_justa_wins_draws:.2f}.")
     st.markdown(f"- Coeficiente de eficiência: {coeficiente_eficiencia_medio:.2f}.")
     st.markdown(f"- Média de gols marcados: {media_gols:.2f}.")
     st.markdown(f"- Média de gols sofridos: {media_gols_sofridos:.2f}.")
