@@ -221,7 +221,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     # Destacar resultados importantes usando markdown
     st.write("### Análise:")
     if not team_df.empty:
-        st.markdown(f"- O {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
+        st.markdown(f"- {time} ganhou {num_wins} vez(es) em {total_matches} jogo(s), aproveitamento de ({win_percentage:.2f}%).")
     else:
         st.write("Nenhum jogo encontrado para os filtros selecionados.")
     st.markdown(f"- Lucro/prejuízo total: {lucro_prejuizo:.2f}.")
