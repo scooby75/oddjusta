@@ -68,9 +68,9 @@ df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=
 
 # Adicionar coluna de agrupamento de odds
 if 'Odd_Home' in df:
-    df['Odd_Group'] = df['Odd_Home'].apply(agrupar_odd)
-elif 'Odd_Away' in df:
-    df['Odd_Group'] = df['Odd_Away'].apply(agrupar_odd)
+    df['Odd_Group_Home'] = df['Odd_Home'].apply(agrupar_odd)
+if 'Odd_Away' in df:
+    df['Odd_Group_Away'] = df['Odd_Away'].apply(agrupar_odd)
 
 # Remover linhas com valores nulos em 'Gols_Home' e 'Gols_Away'
 df.dropna(subset=['Gols_Home', 'Gols_Away'], inplace=True)
@@ -93,8 +93,9 @@ all_teams_away = set(df['Away'])
 times_home = sorted(str(team) for team in all_teams_home)
 times_away = sorted(str(team) for team in all_teams_away)
 
-# Ordenar as faixas de odds
-odds_groups = sorted(df['Odd_Group'].unique())
+# Obter faixas de odds únicas para Home e Away
+odds_groups_home = sorted(df['Odd_Group_Home'].unique()) if 'Odd_Group_Home' in df else []
+odds_groups_away = sorted(df['Odd_Group_Away'].unique()) if 'Odd_Group_Away' in df else []
 
 # Função para calcular estatísticas e exibir resultados
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
@@ -120,20 +121,6 @@ def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
 
     return placar_df
 
-# Função para calcular estatísticas agrupadas por Liga
-def calcular_estatisticas_por_liga(df, odds_column):
-    # Agrupar por Liga
-    grouped = df.groupby('Liga')
-    
-    # Armazenar resultados
-    resultados = {}
-
-    for liga, group_df in grouped:
-        print(f"Calculando estatísticas para a Liga: {liga}")
-        resultados[liga] = calcular_estatisticas_e_exibir(group_df, team_type=None, odds_column=odds_column)
-
-    return resultados
-
 # Interface do Streamlit
 def main():
     st.title("Odd Justa")
@@ -147,18 +134,16 @@ def main():
     else:
         if team_type == "Home":
             time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
-            odds_column = 'Odd_Home'  # Selecionar a coluna de odds correspondente
+            odds_column = 'Odd_Home'
+            selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups_home)
         else:
             time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
-            odds_column = 'Odd_Away'  # Selecionar a coluna de odds correspondente
-        
-        # Selectbox para selecionar o intervalo de odds
-        st.sidebar.subheader("Faixa de Odds")
-        selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups)
+            odds_column = 'Odd_Away'
+            selected_odds_range = st.sidebar.selectbox("Selecione um intervalo de odds:", options=odds_groups_away)
 
         # Extrair os limites inferior e superior do intervalo selecionado
         if selected_odds_range == "Outros":
-            min_odds, max_odds = -1, -1  # Para o caso "Outros", significa que não há intervalo específico
+            min_odds, max_odds = -1, -1
         else:
             min_odds, max_odds = map(float, selected_odds_range.split(' - '))
 
@@ -247,8 +232,8 @@ def mostrar_resultados_h2h(df, time_home, time_away):
     # Adicionar coluna de placar no formato desejado
     h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
     
-    # Adicionar filtro de odds para H2H
-    st.sidebar.subheader("Filtro de Odds para H2H")
+    # Adicionar filtros de odds para H2H
+    st.sidebar.subheader("Filtros de Odds para H2H")
     
     # Verificar se as colunas de odds existem
     if 'Odd_Home' in h2h_df and 'Odd_Away' in h2h_df:
@@ -257,29 +242,43 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         h2h_df['Odd_Group_Away'] = h2h_df['Odd_Away'].apply(agrupar_odd)
         
         # Obter faixas de odds únicas para o H2H
-        h2h_odds_groups = sorted(set(h2h_df['Odd_Group_Home'].unique()) | set(h2h_df['Odd_Group_Away'].unique()))
+        h2h_odds_groups_home = sorted(h2h_df['Odd_Group_Home'].unique())
+        h2h_odds_groups_away = sorted(h2h_df['Odd_Group_Away'].unique())
         
         # Adicionar opção "Todos" para mostrar todos os resultados sem filtro de odds
-        h2h_odds_groups = ["Todos"] + h2h_odds_groups
+        h2h_odds_groups_home = ["Todos"] + h2h_odds_groups_home
+        h2h_odds_groups_away = ["Todos"] + h2h_odds_groups_away
         
-        # Selectbox para selecionar o intervalo de odds
-        selected_odds_range = st.sidebar.selectbox(
-            "Selecione um intervalo de odds para H2H:", 
-            options=h2h_odds_groups
+        # Selectbox para selecionar o intervalo de odds para Home e Away
+        selected_odds_range_home = st.sidebar.selectbox(
+            f"Selecione intervalo de odds para {time_home} (Home):", 
+            options=h2h_odds_groups_home
         )
         
-        # Aplicar filtro de odds ao DataFrame H2H
-        if selected_odds_range != "Todos":
-            # Extrair os limites inferior e superior do intervalo selecionado
-            if selected_odds_range == "Outros":
-                min_odds, max_odds = -1, -1
+        selected_odds_range_away = st.sidebar.selectbox(
+            f"Selecione intervalo de odds para {time_away} (Away):", 
+            options=h2h_odds_groups_away
+        )
+        
+        # Aplicar filtros de odds ao DataFrame H2H
+        if selected_odds_range_home != "Todos":
+            if selected_odds_range_home == "Outros":
+                min_odds_home, max_odds_home = -1, -1
             else:
-                min_odds, max_odds = map(float, selected_odds_range.split(' - '))
+                min_odds_home, max_odds_home = map(float, selected_odds_range_home.split(' - '))
             
-            # Filtrar o DataFrame
             h2h_df = h2h_df[
-                ((h2h_df['Odd_Home'] >= min_odds) & (h2h_df['Odd_Home'] <= max_odds)) |
-                ((h2h_df['Odd_Away'] >= min_odds) & (h2h_df['Odd_Away'] <= max_odds))
+                ((h2h_df['Odd_Home'] >= min_odds_home) & (h2h_df['Odd_Home'] <= max_odds_home))
+            ]
+
+        if selected_odds_range_away != "Todos":
+            if selected_odds_range_away == "Outros":
+                min_odds_away, max_odds_away = -1, -1
+            else:
+                min_odds_away, max_odds_away = map(float, selected_odds_range_away.split(' - '))
+            
+            h2h_df = h2h_df[
+                ((h2h_df['Odd_Away'] >= min_odds_away) & (h2h_df['Odd_Away'] <= max_odds_away))
             ]
 
     st.write(f"### Resultados H2H entre {time_home} e {time_away}")
