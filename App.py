@@ -135,24 +135,26 @@ def main():
         if team_type == "Home":
             time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
             odds_column = 'Odd_Home'
-            selected_odds_range = st.sidebar.multiselect(
-                "Selecione intervalos de odds:", 
+            st.sidebar.subheader(f"Filtros de Odds para {time} (Home)")
+            selected_odds_ranges = st.sidebar.multiselect(
+                "Selecione os intervalos de odds:", 
                 options=odds_groups_home,
                 default=["Todos"]
             )
         else:
             time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
             odds_column = 'Odd_Away'
-            selected_odds_range = st.sidebar.multiselect(
-                "Selecione intervalos de odds:", 
+            st.sidebar.subheader(f"Filtros de Odds para {time} (Away)")
+            selected_odds_ranges = st.sidebar.multiselect(
+                "Selecione os intervalos de odds:", 
                 options=odds_groups_away,
                 default=["Todos"]
             )
 
-        # Extrair os limites inferior e superior dos intervalos selecionados
+        # Processar os intervalos selecionados
         odds_ranges = []
-        if "Todos" not in selected_odds_range and selected_odds_range:
-            for odds_range in selected_odds_range:
+        if "Todos" not in selected_odds_ranges and selected_odds_ranges:
+            for odds_range in selected_odds_ranges:
                 if odds_range == "Outros":
                     odds_ranges.append((-1, -1))
                 else:
@@ -167,7 +169,7 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_ranges):
     else:
         team_df = df[df['Away'] == time]
 
-    # Aplicar o filtro de odds
+    # Aplicar o filtro de odds se houver ranges selecionados
     if odds_ranges:
         conditions = []
         for min_odds, max_odds in odds_ranges:
