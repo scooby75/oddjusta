@@ -93,9 +93,9 @@ all_teams_away = set(df['Away'])
 times_home = sorted(str(team) for team in all_teams_home)
 times_away = sorted(str(team) for team in all_teams_away)
 
-# Obter faixas de odds únicas para Home e Away
-odds_groups_home = sorted(df['Odd_Group_Home'].unique()) if 'Odd_Group_Home' in df else []
-odds_groups_away = sorted(df['Odd_Group_Away'].unique()) if 'Odd_Group_Away' in df else []
+# Obter faixas de odds únicas para Home e Away (removendo "Todos" da lista de opções)
+odds_groups_home = sorted([x for x in df['Odd_Group_Home'].unique() if x != "Todos"]) if 'Odd_Group_Home' in df else []
+odds_groups_away = sorted([x for x in df['Odd_Group_Away'].unique() if x != "Todos"]) if 'Odd_Group_Away' in df else []
 
 # Função para calcular estatísticas e exibir resultados
 def calcular_estatisticas_e_exibir(team_df, team_type, odds_column):
@@ -139,7 +139,7 @@ def main():
             selected_odds_ranges = st.sidebar.multiselect(
                 "Selecione os intervalos de odds:", 
                 options=odds_groups_home,
-                default=["Todos"]
+                default=odds_groups_home  # Seleciona todos por padrão
             )
         else:
             time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
@@ -148,18 +148,17 @@ def main():
             selected_odds_ranges = st.sidebar.multiselect(
                 "Selecione os intervalos de odds:", 
                 options=odds_groups_away,
-                default=["Todos"]
+                default=odds_groups_away  # Seleciona todos por padrão
             )
 
         # Processar os intervalos selecionados
         odds_ranges = []
-        if "Todos" not in selected_odds_ranges and selected_odds_ranges:
-            for odds_range in selected_odds_ranges:
-                if odds_range == "Outros":
-                    odds_ranges.append((-1, -1))
-                else:
-                    min_odds, max_odds = map(float, odds_range.split(' - '))
-                    odds_ranges.append((min_odds, max_odds))
+        for odds_range in selected_odds_ranges:
+            if odds_range == "Outros":
+                odds_ranges.append((-1, -1))
+            else:
+                min_odds, max_odds = map(float, odds_range.split(' - '))
+                odds_ranges.append((min_odds, max_odds))
 
         mostrar_resultados(df, team_type, time, odds_column, odds_ranges)
 
@@ -179,8 +178,9 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_ranges):
                 conditions.append((team_df[odds_column] >= min_odds) & (team_df[odds_column] <= max_odds))
         
         # Combinar todas as condições com OR
-        combined_condition = pd.concat(conditions, axis=1).any(axis=1)
-        team_df = team_df[combined_condition]
+        if conditions:  # Verifica se há condições para aplicar
+            combined_condition = pd.concat(conditions, axis=1).any(axis=1)
+            team_df = team_df[combined_condition]
 
     # Reindexar o DataFrame resultante após a filtragem
     team_df.reset_index(drop=True, inplace=True)
@@ -262,29 +262,25 @@ def mostrar_resultados_h2h(df, time_home, time_away):
         h2h_df['Odd_Group_Home'] = h2h_df['Odd_Home'].apply(agrupar_odd)
         h2h_df['Odd_Group_Away'] = h2h_df['Odd_Away'].apply(agrupar_odd)
         
-        # Obter faixas de odds únicas para o H2H
-        h2h_odds_groups_home = sorted(h2h_df['Odd_Group_Home'].unique())
-        h2h_odds_groups_away = sorted(h2h_df['Odd_Group_Away'].unique())
-        
-        # Adicionar opção "Todos" para mostrar todos os resultados sem filtro de odds
-        h2h_odds_groups_home = ["Todos"] + h2h_odds_groups_home
-        h2h_odds_groups_away = ["Todos"] + h2h_odds_groups_away
+        # Obter faixas de odds únicas para o H2H (removendo "Todos" da lista de opções)
+        h2h_odds_groups_home = sorted([x for x in h2h_df['Odd_Group_Home'].unique() if x != "Todos"])
+        h2h_odds_groups_away = sorted([x for x in h2h_df['Odd_Group_Away'].unique() if x != "Todos"])
         
         # Multiselect para selecionar múltiplos intervalos de odds
         selected_odds_ranges_home = st.sidebar.multiselect(
             f"Selecione intervalos de odds para {time_home} (Home):", 
             options=h2h_odds_groups_home,
-            default=["Todos"]
+            default=h2h_odds_groups_home  # Seleciona todos por padrão
         )
         
         selected_odds_ranges_away = st.sidebar.multiselect(
             f"Selecione intervalos de odds para {time_away} (Away):", 
             options=h2h_odds_groups_away,
-            default=["Todos"]
+            default=h2h_odds_groups_away  # Seleciona todos por padrão
         )
         
         # Aplicar filtros de odds ao DataFrame H2H
-        if "Todos" not in selected_odds_ranges_home and selected_odds_ranges_home:
+        if selected_odds_ranges_home:
             conditions_home = []
             for odds_range in selected_odds_ranges_home:
                 if odds_range == "Outros":
@@ -294,10 +290,11 @@ def mostrar_resultados_h2h(df, time_home, time_away):
                     conditions_home.append((h2h_df['Odd_Home'] >= min_odds) & (h2h_df['Odd_Home'] <= max_odds))
             
             # Combinar todas as condições com OR
-            combined_condition_home = pd.concat(conditions_home, axis=1).any(axis=1)
-            h2h_df = h2h_df[combined_condition_home]
+            if conditions_home:
+                combined_condition_home = pd.concat(conditions_home, axis=1).any(axis=1)
+                h2h_df = h2h_df[combined_condition_home]
 
-        if "Todos" not in selected_odds_ranges_away and selected_odds_ranges_away:
+        if selected_odds_ranges_away:
             conditions_away = []
             for odds_range in selected_odds_ranges_away:
                 if odds_range == "Outros":
@@ -307,8 +304,9 @@ def mostrar_resultados_h2h(df, time_home, time_away):
                     conditions_away.append((h2h_df['Odd_Away'] >= min_odds) & (h2h_df['Odd_Away'] <= max_odds))
             
             # Combinar todas as condições com OR
-            combined_condition_away = pd.concat(conditions_away, axis=1).any(axis=1)
-            h2h_df = h2h_df[combined_condition_away]
+            if conditions_away:
+                combined_condition_away = pd.concat(conditions_away, axis=1).any(axis=1)
+                h2h_df = h2h_df[combined_condition_away]
 
     st.write(f"### Resultados H2H entre {time_home} e {time_away}")
     st.dataframe(h2h_df)
