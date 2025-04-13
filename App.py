@@ -235,7 +235,6 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_group):
     st.write("### Frequência dos Placares:")
     st.dataframe(placar_df)
 
-
 def mostrar_resultados_h2h(df, time_home, time_away):
     # Filtrar DataFrame para confrontos diretos
     h2h_df = df[((df['Home'] == time_home) & (df['Away'] == time_away)) |
@@ -243,41 +242,80 @@ def mostrar_resultados_h2h(df, time_home, time_away):
 
     if h2h_df.empty:
         st.write(f"Não existe partidas entre {time_home} e {time_away}.")
-    else:
-        st.write(f"### Resultados H2H entre {time_home} e {time_away}")
-        st.dataframe(h2h_df)
+        return
 
-        # Adicionar coluna de placar no formato desejado
-        h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
+    # Adicionar coluna de placar no formato desejado
+    h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
+    
+    # Adicionar filtro de odds para H2H
+    st.sidebar.subheader("Filtro de Odds para H2H")
+    
+    # Verificar se as colunas de odds existem
+    if 'Odd_Home' in h2h_df and 'Odd_Away' in h2h_df:
+        # Criar grupos de odds para o H2H
+        h2h_df['Odd_Group_Home'] = h2h_df['Odd_Home'].apply(agrupar_odd)
+        h2h_df['Odd_Group_Away'] = h2h_df['Odd_Away'].apply(agrupar_odd)
         
-        # Calcular estatísticas para o time da casa
-        num_wins_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'W')].shape[0]
-        num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-        num_losses_home = h2h_df[(h2h_df['Home'] == time_home) & (h2h_df['Resultado'] == 'L')].shape[0]
-        total_matches = num_wins_home + num_draws + num_losses_home
-
-        win_percentage_home = (num_wins_home / total_matches) * 100 if total_matches > 0 else 0
-
-        # Calcular estatísticas para o time visitante
-        num_wins_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'W')].shape[0]
-        num_losses_away = h2h_df[(h2h_df['Home'] == time_away) & (h2h_df['Resultado'] == 'L')].shape[0]
-        total_matches_away = num_wins_away + num_draws + num_losses_away
-
-        win_percentage_away = (num_wins_away / total_matches_away) * 100 if total_matches_away > 0 else 0
+        # Obter faixas de odds únicas para o H2H
+        h2h_odds_groups = sorted(set(h2h_df['Odd_Group_Home'].unique()) | set(h2h_df['Odd_Group_Away'].unique()))
         
-        # Destacar resultados importantes usando markdown
-        st.write("### Análise:")
-        st.markdown(f"- Total de partidas entre {time_home} e {time_away}: {total_matches}.")
-        st.markdown(f"- {time_home} ganhou {num_wins_home} vez(es) ({win_percentage_home:.2f}%) e perdeu {num_losses_home} vez(es).")
-        st.markdown(f"- {time_away} ganhou {num_wins_away} vez(es) ({win_percentage_away:.2f}%) e perdeu {num_losses_away} vez(es).")
-        st.markdown(f"- Empates: {num_draws}.")
+        # Adicionar opção "Todos" para mostrar todos os resultados sem filtro de odds
+        h2h_odds_groups = ["Todos"] + h2h_odds_groups
         
-        # Frequência dos placares
-        placar_df = h2h_df['Placar'].value_counts().reset_index(name='Frequência')
-        placar_df.columns = ['Placar', 'Frequência']
+        # Selectbox para selecionar o intervalo de odds
+        selected_odds_range = st.sidebar.selectbox(
+            "Selecione um intervalo de odds para H2H:", 
+            options=h2h_odds_groups
+        )
+        
+        # Aplicar filtro de odds ao DataFrame H2H
+        if selected_odds_range != "Todos":
+            # Extrair os limites inferior e superior do intervalo selecionado
+            if selected_odds_range == "Outros":
+                min_odds, max_odds = -1, -1
+            else:
+                min_odds, max_odds = map(float, selected_odds_range.split(' - '))
+            
+            # Filtrar o DataFrame
+            h2h_df = h2h_df[
+                ((h2h_df['Odd_Home'] >= min_odds) & (h2h_df['Odd_Home'] <= max_odds)) |
+                ((h2h_df['Odd_Away'] >= min_odds) & (h2h_df['Odd_Away'] <= max_odds))
+            ]
 
-        # Calcular a Probabilidade (%) e a Odd Lay
-        total_eventos = placar_df['Frequência'].sum()
+    st.write(f"### Resultados H2H entre {time_home} e {time_away}")
+    st.dataframe(h2h_df)
+
+    # Calcular estatísticas para o time da casa
+    home_matches = h2h_df[h2h_df['Home'] == time_home]
+    num_wins_home = home_matches[home_matches['Resultado'] == 'W'].shape[0]
+    num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
+    num_losses_home = home_matches[home_matches['Resultado'] == 'L'].shape[0]
+    total_matches_home = num_wins_home + num_draws + num_losses_home
+
+    # Calcular estatísticas para o time visitante
+    away_matches = h2h_df[h2h_df['Home'] == time_away]
+    num_wins_away = away_matches[away_matches['Resultado'] == 'W'].shape[0]
+    num_losses_away = away_matches[away_matches['Resultado'] == 'L'].shape[0]
+    total_matches_away = num_wins_away + num_draws + num_losses_away
+
+    # Porcentagens de vitória
+    win_percentage_home = (num_wins_home / total_matches_home) * 100 if total_matches_home > 0 else 0
+    win_percentage_away = (num_wins_away / total_matches_away) * 100 if total_matches_away > 0 else 0
+    
+    # Destacar resultados importantes
+    st.write("### Análise:")
+    st.markdown(f"- Total de partidas entre {time_home} e {time_away}: {len(h2h_df)}")
+    st.markdown(f"- Como mandante, {time_home} ganhou {num_wins_home} vez(es) ({win_percentage_home:.2f}%) e perdeu {num_losses_home} vez(es)")
+    st.markdown(f"- Como mandante, {time_away} ganhou {num_wins_away} vez(es) ({win_percentage_away:.2f}%) e perdeu {num_losses_away} vez(es)")
+    st.markdown(f"- Empates: {num_draws}")
+    
+    # Frequência dos placares
+    placar_df = h2h_df['Placar'].value_counts().reset_index(name='Frequência')
+    placar_df.columns = ['Placar', 'Frequência']
+
+    # Calcular a Probabilidade (%) e a Odd Lay
+    total_eventos = placar_df['Frequência'].sum()
+    if total_eventos > 0:
         placar_df['Probabilidade (%)'] = (placar_df['Frequência'] / total_eventos) * 100
         placar_df['Odd_Lay'] = 100 / placar_df['Probabilidade (%)']
         
@@ -287,8 +325,8 @@ def mostrar_resultados_h2h(df, time_home, time_away):
 
         st.write("### Frequência dos Placares:")
         st.dataframe(placar_df)
-
-
+    else:
+        st.write("Nenhum dado disponível após a aplicação dos filtros.")
 
 if __name__ == "__main__":
     main()
