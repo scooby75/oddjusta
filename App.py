@@ -60,11 +60,13 @@ def download_and_cache(url):
 try:
     cached_file = download_and_cache(file_paths[0])  # Supondo que haja apenas um arquivo
     df = pd.read_csv(cached_file, encoding='utf-8')  # Especificar a codificação UTF-8
+    
+    # Adicionar colunas de resultado para Home e Away
+    df['Resultado_Home'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
+    df['Resultado_Away'] = df.apply(lambda row: classificar_resultado(row, "Away"), axis=1)
+    
 except Exception as e:
     st.error(f"Erro ao processar o arquivo {file_paths[0]}: {e}")
-
-# Adicionar coluna de resultado com a lógica correta para o tipo de equipe selecionado
-df['Resultado'] = df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
 
 # Adicionar coluna de agrupamento de odds
 if 'Odd_Home' in df:
@@ -171,8 +173,10 @@ def main():
 def mostrar_resultados(df, team_type, time, odds_column, odds_ranges):
     if team_type == "Home":
         team_df = df[df['Home'] == time]
+        resultado_col = 'Resultado_Home'  # Usar a coluna de resultado para Home
     else:
         team_df = df[df['Away'] == time]
+        resultado_col = 'Resultado_Away'  # Usar a coluna de resultado para Away
 
     # Aplicar o filtro de odds se houver ranges selecionados
     if odds_ranges:
@@ -198,10 +202,10 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_ranges):
     st.subheader(f"Resultados de {time} ({team_type}):")
     st.dataframe(team_df)
 
-    # Calcular estatísticas
-    num_wins = team_df[team_df['Resultado'] == 'W'].shape[0]
-    num_draws = team_df[team_df['Resultado'] == 'D'].shape[0]
-    num_losses = team_df[team_df['Resultado'] == 'L'].shape[0]
+    # Calcular estatísticas usando a coluna de resultado correta
+    num_wins = team_df[team_df[resultado_col] == 'W'].shape[0]
+    num_draws = team_df[team_df[resultado_col] == 'D'].shape[0]
+    num_losses = team_df[team_df[resultado_col] == 'L'].shape[0]
     total_matches = num_wins + num_draws + num_losses
     
     # Porcentagem de vitórias
@@ -222,10 +226,12 @@ def mostrar_resultados(df, team_type, time, odds_column, odds_ranges):
     coeficiente_eficiencia_medio = team_df['Coeficiente_Eficiencia'].mean() if not team_df['Coeficiente_Eficiencia'].empty else 0
     
     # Média de gols marcados
-    media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
-    
-    # Média de gols sofridos
-    media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
+    if team_type == "Home":
+        media_gols = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
+        media_gols_sofridos = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
+    else:
+        media_gols = team_df['Gols_Away'].mean() if not team_df['Gols_Away'].empty else 0
+        media_gols_sofridos = team_df['Gols_Home'].mean() if not team_df['Gols_Home'].empty else 0
     
     # Calcular a frequência dos placares e exibir as estatísticas
     placar_df = calcular_estatisticas_e_exibir(team_df, team_type, odds_column)
@@ -258,6 +264,10 @@ def mostrar_resultados_h2h(df, time_home, time_away):
 
     # Adicionar coluna de placar no formato desejado
     h2h_df['Placar'] = h2h_df['Gols_Home'].astype(str) + 'x' + h2h_df['Gols_Away'].astype(str)
+    
+    # Adicionar colunas de resultado para H2H
+    h2h_df['Resultado_Home'] = h2h_df.apply(lambda row: classificar_resultado(row, "Home"), axis=1)
+    h2h_df['Resultado_Away'] = h2h_df.apply(lambda row: classificar_resultado(row, "Away"), axis=1)
     
     # Adicionar filtros de odds para H2H
     st.sidebar.subheader("Filtros de Odds para H2H")
@@ -319,15 +329,15 @@ def mostrar_resultados_h2h(df, time_home, time_away):
 
     # Calcular estatísticas para o time da casa
     home_matches = h2h_df[h2h_df['Home'] == time_home]
-    num_wins_home = home_matches[home_matches['Resultado'] == 'W'].shape[0]
-    num_draws = h2h_df[h2h_df['Resultado'] == 'D'].shape[0]
-    num_losses_home = home_matches[home_matches['Resultado'] == 'L'].shape[0]
+    num_wins_home = home_matches[home_matches['Resultado_Home'] == 'W'].shape[0]
+    num_draws = h2h_df[h2h_df['Resultado_Home'] == 'D'].shape[0]
+    num_losses_home = home_matches[home_matches['Resultado_Home'] == 'L'].shape[0]
     total_matches_home = num_wins_home + num_draws + num_losses_home
 
     # Calcular estatísticas para o time visitante
     away_matches = h2h_df[h2h_df['Home'] == time_away]
-    num_wins_away = away_matches[away_matches['Resultado'] == 'W'].shape[0]
-    num_losses_away = away_matches[away_matches['Resultado'] == 'L'].shape[0]
+    num_wins_away = away_matches[away_matches['Resultado_Away'] == 'W'].shape[0]
+    num_losses_away = away_matches[away_matches['Resultado_Away'] == 'L'].shape[0]
     total_matches_away = num_wins_away + num_draws + num_losses_away
 
     # Porcentagens de vitória
