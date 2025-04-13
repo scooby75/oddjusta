@@ -136,19 +136,25 @@ def main():
             time = st.sidebar.selectbox("Selecione o Time da Casa:", options=times_home)
             odds_column = 'Odd_Home'
             st.sidebar.subheader(f"Filtros de Odds para {time} (Home)")
+            
+            # Verifica se "Outros" existe nas opções
+            default_home = ["Outros"] if "Outros" in odds_groups_home else []
             selected_odds_ranges = st.sidebar.multiselect(
                 "Selecione os intervalos de odds:", 
                 options=odds_groups_home,
-                default=odds_groups_home  # Seleciona todos por padrão
+                default=default_home
             )
         else:
             time = st.sidebar.selectbox("Selecione o Time Visitante:", options=times_away)
             odds_column = 'Odd_Away'
             st.sidebar.subheader(f"Filtros de Odds para {time} (Away)")
+            
+            # Verifica se "Outros" existe nas opções
+            default_away = ["Outros"] if "Outros" in odds_groups_away else []
             selected_odds_ranges = st.sidebar.multiselect(
                 "Selecione os intervalos de odds:", 
                 options=odds_groups_away,
-                default=odds_groups_away  # Seleciona todos por padrão
+                default=default_away
             )
 
         # Processar os intervalos selecionados
